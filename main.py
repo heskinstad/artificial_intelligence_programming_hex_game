@@ -55,8 +55,13 @@ plt.xlim(-2, grid_size*1.5*1.15+1)
 plt.ylim(-2, grid_size+1)
 
 
+def CheckIfPlayerWon():
+
+
+
 i = 0
-while i < grid_size*grid_size:
+player_won = 0
+while i < grid_size*grid_size and not player_won:
     random1 = int(random.uniform(0, grid_size))
     random2 = int(random.uniform(0, grid_size))
     if hexArray[random1][random2].GetOccupationStatus() != None:
@@ -70,5 +75,12 @@ while i < grid_size*grid_size:
     i += 1
     plt.plot()
     plt.pause(0.1)
+
+    if :
+        player_won = 1
+        print('Game ended: A player won!')
+    elif i == grid_size * grid_size:
+        print('Game ended: No free spaces left.')
+
 
 plt.show()
