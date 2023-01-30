@@ -1,8 +1,9 @@
 class Position:
-    def __init__(self, row, column, hex, board_size):
+    def __init__(self, row, column, hex, occupiedBy, board_size):
         self.row = row
         self.column = column
         self.hex = hex
+        self.occupiedBy = occupiedBy
         self.board_size = board_size
 
     def GetRow(self):
@@ -13,6 +14,12 @@ class Position:
 
     def GetHex(self):
         return self.hex
+
+    def SetOccupationStatus(self, occupiedBy):
+        self.occupiedBy = occupiedBy
+
+    def GetOccupationStatus(self):
+        return self.occupiedBy
 
     def GetNeighbors(self):
         neighbors = [[self.row, self.column-1,],
