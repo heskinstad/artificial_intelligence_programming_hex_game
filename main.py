@@ -7,7 +7,7 @@ import numpy as np
 
 from Position import Position
 
-grid_size = 3
+grid_size = 5
 
 fig, ax = plt.subplots(figsize=(7,7))
 
@@ -85,9 +85,9 @@ def CheckIfRedPlayerWon():
 
     while len(uncheckedHexes) > 0:
         current = uncheckedHexes.pop()
-        checkedHexes.append(current)
 
-        if current.column == grid_size:
+
+        if current.column == grid_size-1:
             return 1
 
         for neighbor in current.GetNeighbors():
@@ -97,6 +97,8 @@ def CheckIfRedPlayerWon():
                     uncheckedHexes.append(hex)
             except:
                 continue
+
+        checkedHexes.append(current)
 
 
 
