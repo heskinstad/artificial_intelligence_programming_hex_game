@@ -1,11 +1,9 @@
 import random
-
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 mpl.use('TkAgg')
 import matplotlib.patches as mpatches
 import numpy as np
-import time
 
 from Position import Position
 
@@ -36,6 +34,10 @@ ax.add_patch(blueBorderTop)
 
 
 hexArray = []
+redHexes = []
+blueHexes = []
+
+player_won = None
 
 # Draw the hexagons
 for i in range(grid_size):
@@ -55,12 +57,79 @@ plt.xlim(-2, grid_size*1.5*1.15+1)
 plt.ylim(-2, grid_size+1)
 
 
-def CheckIfPlayerWon():
+#def CheckIfPlayerWon():
+
+def loopNeighbors(neighbor):
+    print()
+def CheckIfRedPlayerWon():
+    startHexes = []
+    uncheckedHexes = []
+    checkedHexes = []
+    completedPath = []
+
+    for i in range(grid_size):
+        if hexArray[i][0].GetOccupationStatus() == 'red':
+            if hexArray[i][0] not in checkedHexes:
+                startHexes.append(hexArray[i][0])
+
+    while len(startHexes) > 0:
+        current = startHexes.pop()
+
+        uncheckedHexes.append(current)
+
+        neighbors = []
+        for neighbor in current.GetNeighbors():
+            neighbors.append(hexArray[neighbor[0]][neighbor[1]])
+
+
+
+
+    '''while len(startHexes) > 0:
+        for hex in startHexes:
+            completedPath = [hex]
+            uncheckedHexes.append(hex)
+            neighbors = hex.GetNeighbors()
+            while len(uncheckedHexes) > 0:
+
+                for neighbor in neighbors:
+                    uncheckedHexes.append(hexArray[neighbor[0]][neighbor[1]])
+
+                #uncheckedHexes.sort(key=lambda hex: hex.h, reverse=True)
+
+                current = uncheckedHexes.pop()
+                checkedHexes.append(current)
+
+                if current.GetColumn == grid_size:
+                    return 1
+
+                for child in neighbors:
+                    if child.GetOccupationStatus != 'red':
+                        continue
+
+                    in_OPEN = False
+                    in_CLOSED = False
+
+                    for element in uncheckedHexes:
+                        if child == element:
+                            in_OPEN = True
+                            break
+                    for element in checkedHexes:
+                        if child == element:
+                            in_CLOSED = True
+                            break
+
+                    if not in_OPEN and not in_CLOSED:
+                        uncheckedHexes.append(child)
+
+                    completedPath.append(child)'''
+
+
+
+
 
 
 
 i = 0
-player_won = 0
 while i < grid_size*grid_size and not player_won:
     random1 = int(random.uniform(0, grid_size))
     random2 = int(random.uniform(0, grid_size))
@@ -68,17 +137,19 @@ while i < grid_size*grid_size and not player_won:
         continue
     if i % 2 == 0:
         hexArray[random1][random2].GetHex().set_facecolor('red')
-        hexArray[random1][random2].SetOccupationStatus(0)
+        hexArray[random1][random2].SetOccupationStatus('red')
+        redHexes.append(hexArray[random1][random2])
     else:
         hexArray[random1][random2].GetHex().set_facecolor('blue')
-        hexArray[random1][random2].SetOccupationStatus(1)
+        hexArray[random1][random2].SetOccupationStatus('blue')
+        blueHexes.append(hexArray[random1][random2])
+
     i += 1
     plt.plot()
     plt.pause(0.1)
 
-    if :
-        player_won = 1
-        print('Game ended: A player won!')
+    if CheckIfRedPlayerWon():
+        print('Game ended: " + player_won + " player won!')
     elif i == grid_size * grid_size:
         print('Game ended: No free spaces left.')
 
