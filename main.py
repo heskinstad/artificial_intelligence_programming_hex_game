@@ -7,7 +7,7 @@ import numpy as np
 
 from Position import Position
 
-grid_size = 11
+grid_size = 3
 
 fig, ax = plt.subplots(figsize=(7,7))
 
@@ -59,8 +59,19 @@ plt.ylim(-2, grid_size+1)
 
 #def CheckIfPlayerWon():
 
-def loopNeighbors(neighbor):
-    print()
+'''def loopNeighbors(current, checkedHexes, player):
+    neighbors = []
+    for neighbor in current.GetNeighbors():
+        hex = hexArray[neighbor[0]][neighbor[1]]
+        if hex not in checkedHexes and hex.GetOccupationStatus() == player:
+            neighbors.append(hex)
+            if 
+
+    for neighbor in neighbors:
+        loopNeighbors(neighbor, checkedHexes, player)
+        checkedHexes.append(neighbor)'''
+
+
 def CheckIfRedPlayerWon():
     startHexes = []
     uncheckedHexes = []
@@ -70,16 +81,22 @@ def CheckIfRedPlayerWon():
     for i in range(grid_size):
         if hexArray[i][0].GetOccupationStatus() == 'red':
             if hexArray[i][0] not in checkedHexes:
-                startHexes.append(hexArray[i][0])
+                uncheckedHexes.append(hexArray[i][0])
 
-    while len(startHexes) > 0:
-        current = startHexes.pop()
+    while len(uncheckedHexes) > 0:
+        current = uncheckedHexes.pop()
+        checkedHexes.append(current)
 
-        uncheckedHexes.append(current)
+        if current.column == grid_size:
+            return 1
 
-        neighbors = []
         for neighbor in current.GetNeighbors():
-            neighbors.append(hexArray[neighbor[0]][neighbor[1]])
+            try:
+                hex = hexArray[neighbor[0]][neighbor[1]]
+                if hex not in checkedHexes and hex.GetOccupationStatus() == 'red':
+                    uncheckedHexes.append(hex)
+            except:
+                continue
 
 
 
@@ -130,7 +147,7 @@ def CheckIfRedPlayerWon():
 
 
 i = 0
-while i < grid_size*grid_size and not player_won:
+while i < grid_size*grid_size:
     random1 = int(random.uniform(0, grid_size))
     random2 = int(random.uniform(0, grid_size))
     if hexArray[random1][random2].GetOccupationStatus() != None:
@@ -146,10 +163,11 @@ while i < grid_size*grid_size and not player_won:
 
     i += 1
     plt.plot()
-    plt.pause(0.1)
+    plt.pause(0.02)
 
     if CheckIfRedPlayerWon():
-        print('Game ended: " + player_won + " player won!')
+        print('Game ended: ' + str(player_won) + ' player won!')
+        break
     elif i == grid_size * grid_size:
         print('Game ended: No free spaces left.')
 
