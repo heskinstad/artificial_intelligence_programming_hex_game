@@ -50,27 +50,8 @@ for i in range(grid_size):
 
         hexArray[i].append(Position(i, j, hex, None, grid_size))
 
-'''for position in hexArray[0][0].GetNeighbors():
-    hexArray[position[0]][position[1]].GetHex().set_facecolor('blue')
-hexArray[1][1].set_facecolor('blue')'''
-
 plt.xlim(-2, grid_size*1.5*1.15+1)
 plt.ylim(-2, grid_size+1)
-
-
-#def CheckIfPlayerWon():
-
-'''def loopNeighbors(current, checkedHexes, player):
-    neighbors = []
-    for neighbor in current.GetNeighbors():
-        hex = hexArray[neighbor[0]][neighbor[1]]
-        if hex not in checkedHexes and hex.GetOccupationStatus() == player:
-            neighbors.append(hex)
-            if 
-
-    for neighbor in neighbors:
-        loopNeighbors(neighbor, checkedHexes, player)
-        checkedHexes.append(neighbor)'''
 
 
 def CheckIfPlayerWon(player):
@@ -106,55 +87,6 @@ def CheckIfPlayerWon(player):
                     uncheckedHexes.append(hex)
             except:
                 continue
-
-
-
-
-
-    '''while len(startHexes) > 0:
-        for hex in startHexes:
-            completedPath = [hex]
-            uncheckedHexes.append(hex)
-            neighbors = hex.GetNeighbors()
-            while len(uncheckedHexes) > 0:
-
-                for neighbor in neighbors:
-                    uncheckedHexes.append(hexArray[neighbor[0]][neighbor[1]])
-
-                #uncheckedHexes.sort(key=lambda hex: hex.h, reverse=True)
-
-                current = uncheckedHexes.pop()
-                checkedHexes.append(current)
-
-                if current.GetColumn == grid_size:
-                    return 1
-
-                for child in neighbors:
-                    if child.GetOccupationStatus != 'red':
-                        continue
-
-                    in_OPEN = False
-                    in_CLOSED = False
-
-                    for element in uncheckedHexes:
-                        if child == element:
-                            in_OPEN = True
-                            break
-                    for element in checkedHexes:
-                        if child == element:
-                            in_CLOSED = True
-                            break
-
-                    if not in_OPEN and not in_CLOSED:
-                        uncheckedHexes.append(child)
-
-                    completedPath.append(child)'''
-
-
-
-
-
-
 
 i = 0
 while i < grid_size*grid_size:
