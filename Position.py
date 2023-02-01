@@ -1,5 +1,5 @@
 class Position:
-    def __init__(self, row, column, hex, occupiedBy, board_size):
+    def __init__(self, column, row, hex, occupiedBy, board_size):
         self.row = row
         self.column = column
         self.hex = hex
@@ -12,6 +12,9 @@ class Position:
 
     def GetColumn(self):
         return self.column
+
+    def GetCoordinates(self):
+        return str([self.column, self.row])
 
     def GetHex(self):
         return self.hex
@@ -38,7 +41,7 @@ class Position:
                      [self.row, self.column+1]]
 
         for position in neighbors:
-            if position[0] < 0 or position[1] < 0 or position[0] > self.board_size or position[1] > self.board_size:
+            if position[0] < 0 or position[1] < 0 or position[0] >= self.board_size or position[1] >= self.board_size:
                 position.clear()
 
         neighbors = [empty for empty in neighbors if empty]

@@ -7,7 +7,7 @@ import numpy as np
 
 from Position import Position
 
-grid_size = 5
+grid_size = 11
 
 fig, ax = plt.subplots(figsize=(7,7))
 
@@ -31,7 +31,8 @@ ax.add_patch(blueBorderBottom)
 blueBorderTop = mpatches.Rectangle((-0.3+grid_size/2, grid_size),width=1,height=grid_size*1.2-0.6,angle=-90,rotation_point='xy', color='blue')
 ax.add_patch(blueBorderTop)
 
-
+def GetHexByColumnRow(array, column, row):
+    return array[column][row]
 
 hexArray = []
 redHexes = []
@@ -72,33 +73,40 @@ plt.ylim(-2, grid_size+1)
         checkedHexes.append(neighbor)'''
 
 
-def CheckIfRedPlayerWon():
-    startHexes = []
+def CheckIfPlayerWon(player):
     uncheckedHexes = []
     checkedHexes = []
-    completedPath = []
 
     for i in range(grid_size):
-        if hexArray[i][0].GetOccupationStatus() == 'red':
-            if hexArray[i][0] not in checkedHexes:
-                uncheckedHexes.append(hexArray[i][0])
+        if player == 'red':
+            if GetHexByColumnRow(hexArray, 0, i).occupiedBy == player:
+                if GetHexByColumnRow(hexArray, 0, i) not in checkedHexes:
+                    uncheckedHexes.append(GetHexByColumnRow(hexArray, 0, i))
+        elif player == 'blue':
+            if GetHexByColumnRow(hexArray, i, 0).occupiedBy == player:
+                if GetHexByColumnRow(hexArray, i, 0) not in checkedHexes:
+                    uncheckedHexes.append(GetHexByColumnRow(hexArray, i, 0))
 
     while len(uncheckedHexes) > 0:
+
         current = uncheckedHexes.pop()
+        checkedHexes.append(current)
 
-
-        if current.column == grid_size-1:
-            return 1
+        if player == 'red':
+            if current.column == grid_size-1:
+                return 1
+        elif player == 'blue':
+            if current.row == grid_size-1:
+                return 1
 
         for neighbor in current.GetNeighbors():
             try:
-                hex = hexArray[neighbor[0]][neighbor[1]]
-                if hex not in checkedHexes and hex.GetOccupationStatus() == 'red':
+                hex = GetHexByColumnRow(hexArray, neighbor[1], neighbor[0])
+                if hex not in checkedHexes and hex.occupiedBy == player:
                     uncheckedHexes.append(hex)
             except:
                 continue
 
-        checkedHexes.append(current)
 
 
 
@@ -154,24 +162,27 @@ while i < grid_size*grid_size:
     random2 = int(random.uniform(0, grid_size))
     if hexArray[random1][random2].GetOccupationStatus() != None:
         continue
-    if i % 2 == 0:
-        hexArray[random1][random2].GetHex().set_facecolor('red')
-        hexArray[random1][random2].SetOccupationStatus('red')
-        redHexes.append(hexArray[random1][random2])
-    else:
+    if i % 2:
         hexArray[random1][random2].GetHex().set_facecolor('blue')
         hexArray[random1][random2].SetOccupationStatus('blue')
         blueHexes.append(hexArray[random1][random2])
+    else:
+        hexArray[random1][random2].GetHex().set_facecolor('red')
+        hexArray[random1][random2].SetOccupationStatus('red')
+        redHexes.append(hexArray[random1][random2])
 
-    i += 1
     plt.plot()
-    plt.pause(0.02)
 
-    if CheckIfRedPlayerWon():
-        print('Game ended: ' + str(player_won) + ' player won!')
+    if CheckIfPlayerWon('red'):
+        print('Game ended: red won!')
+        break
+    elif CheckIfPlayerWon('blue'):
+        print('Game ended: blue won!')
         break
     elif i == grid_size * grid_size:
         print('Game ended: No free spaces left.')
 
+    i += 1
+    plt.pause(0.01)
 
 plt.show()
