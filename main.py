@@ -87,7 +87,7 @@ def CheckIfPlayerWon(player):
         for neighbor in current.GetNeighbors():
             try:
                 hex = GetHexByColumnRow(hexArray, neighbor[1], neighbor[0])
-                if hex not in checkedHexes and hex.occupiedBy == player:
+                if hex not in checkedHexes and hex.GetOccupationStatus() == player:
                     uncheckedHexes.append(hex)
             except:
                 continue
@@ -116,7 +116,7 @@ while i < grid_size*grid_size:
             break
 
     i += 1
-    plt.pause(0.01)
+    plt.pause(0.001)
 
 
 

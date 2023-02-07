@@ -5,7 +5,6 @@ class Position:
         self.hex = hex
         self.occupiedBy = occupiedBy
         self.board_size = board_size
-        self.h = None
 
     def GetRow(self):
         return self.row
@@ -19,15 +18,8 @@ class Position:
     def GetHex(self):
         return self.hex
 
-    def GetH(self):
-        return self.h
-
     def SetOccupationStatus(self, occupiedBy):
         self.occupiedBy = occupiedBy
-        if occupiedBy == 'red':
-            self.h = self.board_size - self.column
-        elif occupiedBy == 'blue':
-            self.h = self.board_size - self.row
 
     def GetOccupationStatus(self):
         return self.occupiedBy
