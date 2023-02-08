@@ -14,26 +14,7 @@ from Position import Position
 grid_size = 11
 gameBoard = Board(grid_size)
 
-fig, ax = plt.subplots(figsize=(7,7))
-
-# Set the aspect ratio to match the hexagons
-ax.set_aspect('equal', adjustable='box')
-
-# Remove axis labels and ticks
-ax.axis('off')
-
-# Draw red/blue edges
-redBorderLeft = mpatches.Rectangle((-1.25, 0),width=1,height=grid_size*1.15,angle=-30,rotation_point='xy', color='red')
-ax.add_patch(redBorderLeft)
-
-redBorderRight = mpatches.Rectangle((-1.25+grid_size*1.15-0.2, -0.5),width=1,height=grid_size*1.15,angle=-30,rotation_point='xy', color='red')
-ax.add_patch(redBorderRight)
-
-blueBorderBottom = mpatches.Rectangle((-0.5, 0),width=1,height=grid_size+1.5,angle=-90,rotation_point='xy', color='blue')
-ax.add_patch(blueBorderBottom)
-
-blueBorderTop = mpatches.Rectangle((-0.3+grid_size/2, grid_size),width=1,height=grid_size*1.2-0.6,angle=-90,rotation_point='xy', color='blue')
-ax.add_patch(blueBorderTop)
+showPlot = False
 
 def GetHexByColumnRow(array, column, row):
     return array[column][row]
@@ -45,18 +26,50 @@ player1 = Player(1, 'blue')
 
 player_won = None
 
-# Draw the hexagons
-for i in range(grid_size):
-    hexArray.append([])
-    for j in range(grid_size):
-        hex = mpatches.RegularPolygon(((i+j/2)*1.15, j), numVertices=6, radius=0.64,
-                                      orientation=np.pi, edgecolor='black',facecolor='white')
-        ax.add_patch(hex)
+if showPlot:
+    fig, ax = plt.subplots(figsize=(7, 7))
 
-        hexArray[i].append(Position(i, j, hex, None, grid_size))
+    # Set the aspect ratio to match the hexagons
+    ax.set_aspect('equal', adjustable='box')
 
-plt.xlim(-2, grid_size*1.5*1.15+1)
-plt.ylim(-2, grid_size+1)
+    # Remove axis labels and ticks
+    ax.axis('off')
+
+    # Draw red/blue edges
+    redBorderLeft = mpatches.Rectangle((-1.25, 0), width=1, height=grid_size * 1.15, angle=-30, rotation_point='xy',
+                                       color='red')
+    ax.add_patch(redBorderLeft)
+
+    redBorderRight = mpatches.Rectangle((-1.25 + grid_size * 1.15 - 0.2, -0.5), width=1, height=grid_size * 1.15,
+                                        angle=-30, rotation_point='xy', color='red')
+    ax.add_patch(redBorderRight)
+
+    blueBorderBottom = mpatches.Rectangle((-0.5, 0), width=1, height=grid_size + 1.5, angle=-90, rotation_point='xy',
+                                          color='blue')
+    ax.add_patch(blueBorderBottom)
+
+    blueBorderTop = mpatches.Rectangle((-0.3 + grid_size / 2, grid_size), width=1, height=grid_size * 1.2 - 0.6,
+                                       angle=-90, rotation_point='xy', color='blue')
+    ax.add_patch(blueBorderTop)
+
+    # Draw the hexagons
+    for i in range(grid_size):
+        hexArray.append([])
+        for j in range(grid_size):
+            hex = mpatches.RegularPolygon(((i+j/2)*1.15, j), numVertices=6, radius=0.64,
+                                          orientation=np.pi, edgecolor='black',facecolor='white')
+            ax.add_patch(hex)
+
+            hexArray[i].append(Position(i, j, hex, None, grid_size))
+
+    plt.xlim(-2, grid_size*1.5*1.15+1)
+    plt.ylim(-2, grid_size+1)
+
+else:
+    for i in range(grid_size):
+        hexArray.append([])
+        for j in range(grid_size):
+            hexArray[i].append(Position(i, j, None, None, grid_size))
 
 def CheckIfPlayerWon(player):
     uncheckedHexes = []
@@ -94,8 +107,11 @@ def CheckIfPlayerWon(player):
 
 def PlaceAndCheck(player, column, row):
     hexArray[column][row].SetOccupationStatus(player)
-    hexArray[column][row].GetHex().set_facecolor(player.GetColor())
-    plt.plot()
+
+    if showPlot:
+        hexArray[column][row].GetHex().set_facecolor(player.GetColor())
+        plt.plot()
+
     if CheckIfPlayerWon(player):
         print('Game ended: ' + player.GetColor() + ' won!')
         return 1
@@ -116,8 +132,10 @@ while i < grid_size*grid_size:
             break
 
     i += 1
-    plt.pause(0.001)
+
+    if showPlot:
+        plt.pause(0.001)
 
 
-
-plt.show()
+if showPlot:
+    plt.show()
