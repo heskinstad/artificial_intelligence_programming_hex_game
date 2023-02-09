@@ -1,5 +1,8 @@
-class Position:
+from Board import Board
+
+class Position(Board):
     def __init__(self, column, row, hex, occupiedBy, board_size):
+        super().__init__(board_size)
         self.row = row
         self.column = column
         self.hex = hex

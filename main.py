@@ -14,7 +14,7 @@ from Position import Position
 grid_size = 11
 gameBoard = Board(grid_size)
 
-showPlot = False
+showPlot = True
 
 def GetHexByColumnRow(array, column, row):
     return array[column][row]
