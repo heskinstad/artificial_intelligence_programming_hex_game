@@ -1,8 +1,5 @@
-from Board import Board
-
-class Position(Board):
+class Position:
     def __init__(self, column, row, hex, occupiedBy, board_size):
-        super().__init__(board_size)
         self.row = row
         self.column = column
         self.hex = hex
@@ -28,7 +25,7 @@ class Position(Board):
         return self.occupiedBy
 
     def GetNeighbors(self):
-        neighbors = [[self.row, self.column-1,],
+        neighbors = [[self.row, self.column-1],
                      [self.row+1, self.column-1],
                      [self.row-1, self.column],
                      [self.row+1, self.column],
