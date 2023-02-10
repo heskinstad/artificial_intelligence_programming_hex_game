@@ -116,7 +116,7 @@ class Board:
 
         if self.CheckIfPlayerWon(player):
             print('Game ended: ' + player.GetColor() + ' won!')
-            return 1
+            return player
 
     def GetHexByColumnRow(self, column, row):
         return self.boardPositions[column][row]

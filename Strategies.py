@@ -1,5 +1,4 @@
 import random
-import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 from Board import Board
@@ -17,8 +16,6 @@ class Strategies:
         player0 = Player(0, 'red')
         player1 = Player(1, 'blue')
 
-        player_won = None
-
         i = 0
         while i < self.grid_size * self.grid_size:
             random1 = int(random.uniform(0, self.grid_size))
@@ -28,10 +25,10 @@ class Strategies:
                 continue
 
             if i % 2:
-                if gameBoard.PlaceAndCheck(player0, random1, random2):
+                if gameBoard.PlaceAndCheck(player0, random1, random2) == player0:
                     break
             else:
-                if gameBoard.PlaceAndCheck(player1, random1, random2):
+                if gameBoard.PlaceAndCheck(player1, random1, random2) == player1:
                     break
 
             i += 1
