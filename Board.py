@@ -8,7 +8,6 @@ from Position import Position
 mpl.use('TkAgg')
 
 class Board:
-
     def __init__(self, board_size, showPlot):
         self.board_size = board_size
         self.boardPositions = []
@@ -19,7 +18,7 @@ class Board:
         self.createBoard()
 
     def GetBoardSize(self):
-        return self.boardPositions
+        return self.board_size
 
     def GetBoard(self):
         return self.boardPositions
@@ -72,3 +71,52 @@ class Board:
                 self.boardPositions.append([])
                 for j in range(self.board_size):
                     self.boardPositions[i].append(Position(i, j, None, None, self.board_size))
+
+    def CheckIfPlayerWon(self, player):
+        uncheckedHexes = []
+        checkedHexes = []
+
+        for i in range(self.board_size):
+            if player.GetId() == 0:
+                if self.GetHexByColumnRow(0, i).occupiedBy == player:
+                    if self.GetHexByColumnRow(0, i) not in checkedHexes:
+                        uncheckedHexes.append(self.GetHexByColumnRow(0, i))
+            elif player.GetId() == 1:
+                if self.GetHexByColumnRow(i, 0).occupiedBy == player:
+                    if self.GetHexByColumnRow(i, 0) not in checkedHexes:
+                        uncheckedHexes.append(self.GetHexByColumnRow(i, 0))
+
+        while len(uncheckedHexes) > 0:
+
+            current = uncheckedHexes.pop()
+            checkedHexes.append(current)
+
+            if player.GetId() == 0:
+                if current.column == self.board_size - 1:
+                    return player
+            elif player.GetId() == 1:
+                if current.row == self.board_size - 1:
+                    return player
+
+            for neighbor in current.GetNeighbors():
+                try:
+                    hex = self.GetHexByColumnRow(neighbor[1], neighbor[0])
+                    if hex not in checkedHexes and hex.GetOccupationStatus() == player:
+                        uncheckedHexes.append(hex)
+                except:  # to be removed
+                    print("Exception occured!")
+                    continue
+
+    def PlaceAndCheck(self, player, column, row):
+        self.boardPositions[column][row].SetOccupationStatus(player)
+
+        if self.showPlot:
+            self.GetHexByColumnRow(column, row).GetHex().set_facecolor(player.GetColor())
+            plt.plot()
+
+        if self.CheckIfPlayerWon(player):
+            print('Game ended: ' + player.GetColor() + ' won!')
+            return 1
+
+    def GetHexByColumnRow(self, column, row):
+        return self.boardPositions[column][row]
