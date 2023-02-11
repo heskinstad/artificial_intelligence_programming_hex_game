@@ -3,8 +3,8 @@ class Player:
         self.id = id
         self.color = color
 
-    def GetId(self):
+    def get_id(self):
         return int(self.id)
 
-    def GetColor(self):
+    def get_color(self):
         return str(self.color)

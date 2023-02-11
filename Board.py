@@ -8,23 +8,23 @@ from Position import Position
 mpl.use('TkAgg')
 
 class Board:
-    def __init__(self, board_size, showPlot):
+    def __init__(self, board_size, show_plot):
         self.board_size = board_size
-        self.boardPositions = []
-        self.showPlot = showPlot
+        self.board_positions = []
+        self.show_plot = show_plot
 
         self.fig = None
         self.ax = None
-        self.createBoard()
+        self.create_board()
 
-    def GetBoardSize(self):
+    def get_board_size(self):
         return self.board_size
 
-    def GetBoard(self):
-        return self.boardPositions
+    def get_board(self):
+        return self.board_positions
 
-    def createBoard(self):
-        if self.showPlot:
+    def create_board(self):
+        if self.show_plot:
             self.fig, self.ax = plt.subplots(figsize=(7, 7))
 
             # Set the aspect ratio to match the hexagons
@@ -55,68 +55,68 @@ class Board:
 
             # Draw the hexagons
             for i in range(self.board_size):
-                self.boardPositions.append([])
+                self.board_positions.append([])
                 for j in range(self.board_size):
                     hex = mpatches.RegularPolygon(((i + j / 2) * 1.15, j), numVertices=6, radius=0.64,
                                                   orientation=np.pi, edgecolor='black', facecolor='white')
                     self.ax.add_patch(hex)
 
-                    self.boardPositions[i].append(Position(i, j, hex, None, self.board_size))
+                    self.board_positions[i].append(Position(i, j, hex, None, self.board_size))
 
             plt.xlim(-2, self.board_size * 1.5 * 1.15 + 1)
             plt.ylim(-2, self.board_size + 1)
 
         else:
             for i in range(self.board_size):
-                self.boardPositions.append([])
+                self.board_positions.append([])
                 for j in range(self.board_size):
-                    self.boardPositions[i].append(Position(i, j, None, None, self.board_size))
+                    self.board_positions[i].append(Position(i, j, None, None, self.board_size))
 
-    def CheckIfPlayerWon(self, player):
-        uncheckedHexes = []
-        checkedHexes = []
+    def check_if_player_won(self, player):
+        unchecked_hexes = []
+        checked_hexes = []
 
         for i in range(self.board_size):
-            if player.GetId() == 0:
-                if self.GetHexByColumnRow(0, i).occupiedBy == player:
-                    if self.GetHexByColumnRow(0, i) not in checkedHexes:
-                        uncheckedHexes.append(self.GetHexByColumnRow(0, i))
-            elif player.GetId() == 1:
-                if self.GetHexByColumnRow(i, 0).occupiedBy == player:
-                    if self.GetHexByColumnRow(i, 0) not in checkedHexes:
-                        uncheckedHexes.append(self.GetHexByColumnRow(i, 0))
+            if player.get_id() == 0:
+                if self.get_hex_by_column_row(0, i).occupied_by == player:
+                    if self.get_hex_by_column_row(0, i) not in checked_hexes:
+                        unchecked_hexes.append(self.get_hex_by_column_row(0, i))
+            elif player.get_id() == 1:
+                if self.get_hex_by_column_row(i, 0).occupied_by == player:
+                    if self.get_hex_by_column_row(i, 0) not in checked_hexes:
+                        unchecked_hexes.append(self.get_hex_by_column_row(i, 0))
 
-        while len(uncheckedHexes) > 0:
+        while len(unchecked_hexes) > 0:
 
-            current = uncheckedHexes.pop()
-            checkedHexes.append(current)
+            current = unchecked_hexes.pop()
+            checked_hexes.append(current)
 
-            if player.GetId() == 0:
+            if player.get_id() == 0:
                 if current.column == self.board_size - 1:
                     return player
-            elif player.GetId() == 1:
+            elif player.get_id() == 1:
                 if current.row == self.board_size - 1:
                     return player
 
-            for neighbor in current.GetNeighbors():
+            for neighbor in current.get_neighbors():
                 try:
-                    hex = self.GetHexByColumnRow(neighbor[1], neighbor[0])
-                    if hex not in checkedHexes and hex.GetOccupationStatus() == player:
-                        uncheckedHexes.append(hex)
+                    hex = self.get_hex_by_column_row(neighbor[1], neighbor[0])
+                    if hex not in checked_hexes and hex.get_occupation_status() == player:
+                        unchecked_hexes.append(hex)
                 except:  # to be removed
                     print("Exception occured!")
                     continue
 
-    def PlaceAndCheck(self, player, column, row):
-        self.boardPositions[column][row].SetOccupationStatus(player)
+    def place_and_check(self, player, column, row):
+        self.board_positions[column][row].set_occupation_status(player)
 
-        if self.showPlot:
-            self.GetHexByColumnRow(column, row).GetHex().set_facecolor(player.GetColor())
+        if self.show_plot:
+            self.get_hex_by_column_row(column, row).get_hex().set_facecolor(player.get_color())
             plt.plot()
 
-        if self.CheckIfPlayerWon(player):
-            print('Game ended: ' + player.GetColor() + ' won!')
+        if self.check_if_player_won(player):
+            print('Game ended: ' + player.get_color() + ' won!')
             return player
 
-    def GetHexByColumnRow(self, column, row):
-        return self.boardPositions[column][row]
+    def get_hex_by_column_row(self, column, row):
+        return self.board_positions[column][row]

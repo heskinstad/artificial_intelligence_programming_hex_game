@@ -1,5 +1,5 @@
 from Strategies import Strategies
 
-game = Strategies(11, True)
+game = Strategies(11, False)
 
-game.PlaceRandomly()
+game.place_randomly()

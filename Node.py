@@ -4,11 +4,11 @@ class Node:
         self.parent = None
         self.children = []
 
-    def ReplaceParent(self, parent):
+    def replace_parent(self, parent):
         self.parent = parent
 
-    def AddChild(self, child):
+    def add_child(self, child):
         self.children.append(child)
 
-    def RemoveChildAtIndex(self, index):
+    def remove_child_at_index(self, index):
         self.children.remove(index)

@@ -1,30 +1,30 @@
 class Position:
-    def __init__(self, column, row, hex, occupiedBy, board_size):
+    def __init__(self, column, row, hex, occupied_by, board_size):
         self.row = row
         self.column = column
         self.hex = hex
-        self.occupiedBy = occupiedBy
+        self.occupied_by = occupied_by
         self.board_size = board_size
 
-    def GetRow(self):
+    def get_row(self):
         return self.row
 
-    def GetColumn(self):
+    def get_column(self):
         return self.column
 
-    def GetCoordinates(self):
+    def get_coordinates(self):
         return str([self.column, self.row])
 
-    def GetHex(self):
+    def get_hex(self):
         return self.hex
 
-    def SetOccupationStatus(self, occupiedBy):
-        self.occupiedBy = occupiedBy
+    def set_occupation_status(self, occupied_by):
+        self.occupied_by = occupied_by
 
-    def GetOccupationStatus(self):
-        return self.occupiedBy
+    def get_occupation_status(self):
+        return self.occupied_by
 
-    def GetNeighbors(self):
+    def get_neighbors(self):
         neighbors = [[self.row, self.column-1],
                      [self.row+1, self.column-1],
                      [self.row-1, self.column],

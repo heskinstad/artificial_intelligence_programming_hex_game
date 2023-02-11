@@ -1,10 +1,10 @@
 class State:
-    def __init__(self, board, currentTurn):
+    def __init__(self, board, current_turn):
         self.board = board
-        self.currentTurn = currentTurn
+        self.current_turn = current_turn
 
-    def GetBoard(self):
+    def get_board(self):
         return self.board
 
-    def GetCurrentTurn(self):
-        return self.currentTurn
+    def get_current_turn(self):
+        return self.current_turn
