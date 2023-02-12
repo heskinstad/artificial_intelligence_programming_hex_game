@@ -120,3 +120,15 @@ class Board:
 
     def get_hex_by_column_row(self, column, row):
         return self.board_positions[column][row]
+
+    def set_hex_by_column_row(self, column, row, hex):
+        self.board_positions[column][row] = hex
+
+    def print_board(self):
+        for i in range(self.get_board_size()):
+            for j in range(self.get_board_size()):
+                print(self.get_board()[i][j].get_occupation_status(), end=' ')
+            print()
+        print()
+        #plt.plot()
+        #plt.show()
