@@ -25,10 +25,14 @@ class Strategies:
                 continue
 
             if i % 2:
-                if gameBoard.place_and_check(player0, random1, random2) == player0:
+                gameBoard.place(player0, random1, random2)
+                if gameBoard.check_if_player_won(player0):
+                    print('Game ended: ' + player0.get_color() + ' won!')
                     break
             else:
-                if gameBoard.place_and_check(player1, random1, random2) == player1:
+                gameBoard.place(player1, random1, random2)
+                if gameBoard.check_if_player_won(player1):
+                    print('Game ended: ' + player1.get_color() + ' won!')
                     break
 
             i += 1

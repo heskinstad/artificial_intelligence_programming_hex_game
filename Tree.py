@@ -6,4 +6,5 @@ class Tree:
         return self.top
 
     def print_all_nodes_as_boards(self):
-        self.get_top_node().print_all_child_nodes()
+        for child in self.get_top_node().get_children():
+            child.get_state().get_board().print_board()

@@ -107,16 +107,12 @@ class Board:
                     print("Exception occured!")
                     continue
 
-    def place_and_check(self, player, column, row):
+    def place(self, player, column, row):
         self.board_positions[column][row].set_occupation_status(player)
 
         if self.show_plot:
             self.get_hex_by_column_row(column, row).get_hex().set_facecolor(player.get_color())
             plt.plot()
-
-        if self.check_if_player_won(player):
-            print('Game ended: ' + player.get_color() + ' won!')
-            return player
 
     def get_hex_by_column_row(self, column, row):
         return self.board_positions[column][row]
@@ -127,8 +123,9 @@ class Board:
     def print_board(self):
         for i in range(self.get_board_size()):
             for j in range(self.get_board_size()):
-                print(self.get_board()[i][j].get_occupation_status(), end=' ')
+                if self.get_hex_by_column_row(i, j).get_occupation_status() == None:
+                    print('None', end=' ')
+                else:
+                    print(self.get_hex_by_column_row(i, j).get_occupation_status().get_color(), end=' ')
             print()
         print()
-        #plt.plot()
-        #plt.show()
