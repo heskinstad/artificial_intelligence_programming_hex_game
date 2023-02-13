@@ -27,15 +27,21 @@ class Node:
     def remove_child_at_index(self, index):
         self.children.remove(index)
 
-    def create_child_nodes_for_player(self, player):
-        board = self.get_state().get_board()
+    def create_child_nodes_for_player(self, player, other_player, depth):
+        if depth > 0:
 
-        for i in range(board.get_board_size()):
-            for j in range(board.get_board_size()):
-                if board.get_hex_by_column_row(i, j).get_occupation_status() == None:
+            board = self.get_state().get_board()
 
-                    board_deepcopy = copy.deepcopy(board)
+            for i in range(board.get_board_size()):
+                for j in range(board.get_board_size()):
+                    if board.get_hex_by_column_row(i, j).get_occupation_status() == None:
 
-                    board_deepcopy.get_hex_by_column_row(i, j).set_occupation_status(player)
+                        board_deepcopy = copy.deepcopy(board)
 
-                    self.add_child(Node(State(board_deepcopy, self.get_state().get_next_turn(), self.get_state().get_current_turn()), self))
+                        board_deepcopy.get_hex_by_column_row(i, j).set_occupation_status(player)
+
+                        child = Node(State(board_deepcopy, self.get_state().get_next_turn(), self.get_state().get_current_turn()), self)
+
+                        self.add_child(child)
+
+                        child.create_child_nodes_for_player(other_player, player, depth-1)
