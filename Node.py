@@ -4,13 +4,23 @@ from State import State
 
 
 class Node:
-    def __init__(self, state, parent=None):
+    def __init__(self, state, parent=None, score=None):
+        if score is None:
+            score = [0, 0]
         self.state = state
         self.parent = parent
         self.children = []
+        self.score = score # Holds the accumulated [number_of_wins, number_of_nodes] score
+        # TODO: Add to score when backtracking after each simulation
 
     def get_state(self):
         return self.state
+
+    def get_score(self):
+        return self.score
+
+    def set_score(self, score):
+        self.score = score
 
     def get_parent(self):
         return self.parent
