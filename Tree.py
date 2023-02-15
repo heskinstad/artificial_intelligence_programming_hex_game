@@ -8,3 +8,6 @@ class Tree:
     def print_all_nodes_as_boards(self):
         for child in self.get_top_node().get_children():
             child.get_state().get_board().print_board()
+
+    def simulate_all(self, player, opposing_player):
+        self.get_top_node().simulate_from_node(player, opposing_player)
