@@ -30,7 +30,11 @@ class Node:
     def opposing_player_victory(self):
         self.score[0] += 1
 
-    def get_leaf(self):
+    def add_score_from_child(self, child):
+        self.score[0] += child.score[0]
+        self.score[1] += child.score[1]
+
+    def is_leaf(self):
         return self.leaf
 
     def make_leaf(self):
@@ -51,7 +55,7 @@ class Node:
     def remove_child_at_index(self, index):
         self.children.remove(index)
 
-    def create_child_nodes_for_player(self, player, other_player, depth):
+    def create_child_nodes(self, depth):
         if depth > 0:
 
             board = self.get_state().get_board()
@@ -62,13 +66,13 @@ class Node:
 
                         board_deepcopy = copy.deepcopy(board)
 
-                        board_deepcopy.get_hex_by_column_row(i, j).set_occupation_status(player)
+                        board_deepcopy.get_hex_by_column_row(i, j).set_occupation_status(self.get_state().get_current_turn())
 
                         child = Node(State(board_deepcopy, self.get_state().get_next_turn(), self.get_state().get_current_turn()), self)
 
                         self.add_child(child)
 
-                        child.create_child_nodes_for_player(other_player, player, depth-1)
+                        child.create_child_nodes(depth - 1)
 
     def check_if_child_nodes_finished(self):
         for child in self.get_children():
@@ -78,21 +82,25 @@ class Node:
 
     def simulate_from_node(self, player, opposing_player):
         if len(self.get_children()) == 0:
-            self.create_child_nodes_for_player(player, opposing_player, 1)
+            self.create_child_nodes(1)
+
+        self.get_state().get_board().print_board()
 
         for child in self.get_children():
             # If player won this simulation
             if child.get_state().get_board().check_if_player_won(player) == player:
+                print('REDVICTORY')
                 child.player_victory()
                 child.make_leaf()
-                self.player_victory()
-                return
 
             # If player lost this simulation
             elif child.get_state().get_board().check_if_player_won(opposing_player) == opposing_player:
+                print('BLUEVICTORY')
                 child.opposing_player_victory()
                 child.make_leaf()
-                self.opposing_player_victory()
-                return
 
-            child.simulate_all()
+            if not child.is_leaf():
+                child.simulate_from_node(player, opposing_player)
+
+            self.add_score_from_child(child)
+

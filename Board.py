@@ -93,9 +93,11 @@ class Board:
 
             if player.get_id() == 0:
                 if current.column == self.board_size - 1:
+                    print("AAAAA")
                     return player
             elif player.get_id() == 1:
                 if current.row == self.board_size - 1:
+                    print("AAAAA")
                     return player
 
             for neighbor in current.get_neighbors():
