@@ -16,21 +16,21 @@ class Strategies:
         player0 = Player(0, 'red')
         player1 = Player(1, 'blue')
 
-        i = 0
-        while i < self.grid_size * self.grid_size:
-            random1 = int(random.uniform(0, self.grid_size))
-            random2 = int(random.uniform(0, self.grid_size))
+        i = -1
+        while i < self.grid_size * self.grid_size - 1:
+            random_x = int(random.uniform(0, self.grid_size))
+            random_y = int(random.uniform(0, self.grid_size))
 
-            if gameBoard.get_board()[random1][random2].get_occupation_status() != None:
+            if gameBoard.get_board()[random_x][random_y].get_occupation_status() != None:
                 continue
 
             if i % 2:
-                gameBoard.place(player0, random1, random2)
+                gameBoard.place(player0, random_x, random_y)
                 if gameBoard.check_if_player_won(player0):
                     print('Game ended: ' + player0.get_color() + ' won!')
                     break
             else:
-                gameBoard.place(player1, random1, random2)
+                gameBoard.place(player1, random_x, random_y)
                 if gameBoard.check_if_player_won(player1):
                     print('Game ended: ' + player1.get_color() + ' won!')
                     break

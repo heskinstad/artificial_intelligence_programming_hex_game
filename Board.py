@@ -76,15 +76,16 @@ class Board:
         unchecked_hexes = []
         checked_hexes = []
 
+        # Check if player has placed any at their "start" side - left for red, bottom for blue
         for i in range(self.board_size):
-            if player.get_id() == 0:
-                if self.get_hex_by_column_row(0, i).occupied_by == player:
-                    if self.get_hex_by_column_row(0, i) not in checked_hexes:
-                        unchecked_hexes.append(self.get_hex_by_column_row(0, i))
-            elif player.get_id() == 1:
-                if self.get_hex_by_column_row(i, 0).occupied_by == player:
-                    if self.get_hex_by_column_row(i, 0) not in checked_hexes:
-                        unchecked_hexes.append(self.get_hex_by_column_row(i, 0))
+            if player.get_id() == 0: # id 0 move left/right
+                if self.get_hex_by_x_y(0, i).occupied_by == player:
+                    if self.get_hex_by_x_y(0, i) not in checked_hexes:
+                        unchecked_hexes.append(self.get_hex_by_x_y(0, i))
+            elif player.get_id() == 1: # id 1 move top/bottom
+                if self.get_hex_by_x_y(i, 0).occupied_by == player:
+                    if self.get_hex_by_x_y(i, 0) not in checked_hexes:
+                        unchecked_hexes.append(self.get_hex_by_x_y(i, 0))
 
         while len(unchecked_hexes) > 0:
 
@@ -92,42 +93,46 @@ class Board:
             checked_hexes.append(current)
 
             if player.get_id() == 0:
-                if current.column == self.board_size - 1:
-                    print("AAAAA")
+                if current.x == self.board_size - 1:
                     return player
             elif player.get_id() == 1:
-                if current.row == self.board_size - 1:
-                    print("AAAAA")
+                if current.y == self.board_size - 1:
                     return player
 
             for neighbor in current.get_neighbors():
                 try:
-                    hex = self.get_hex_by_column_row(neighbor[1], neighbor[0])
+                    hex = self.get_hex_by_x_y(neighbor[1], neighbor[0])
                     if hex not in checked_hexes and hex.get_occupation_status() == player:
                         unchecked_hexes.append(hex)
                 except:  # to be removed
                     print("Exception occured!")
                     continue
 
-    def place(self, player, column, row):
-        self.board_positions[column][row].set_occupation_status(player)
+    def place(self, player, x, y):
+        # Only allow placement if spot is free
+        if self.get_board()[x][y].get_occupation_status() != None:
+            return 0
+
+        self.board_positions[x][y].set_occupation_status(player)
 
         if self.show_plot:
-            self.get_hex_by_column_row(column, row).get_hex().set_facecolor(player.get_color())
+            self.get_hex_by_x_y(x, y).get_hex().set_facecolor(player.get_color())
             plt.plot()
 
-    def get_hex_by_column_row(self, column, row):
-        return self.board_positions[column][row]
+        return 1
 
-    def set_hex_by_column_row(self, column, row, hex):
-        self.board_positions[column][row] = hex
+    def get_hex_by_x_y(self, x, y):
+        return self.board_positions[x][y]
+
+    def set_hex_by_x_y(self, x, y, hex):
+        self.board_positions[x][y] = hex
 
     def print_board(self):
         for i in range(self.get_board_size()):
             for j in range(self.get_board_size()):
-                if self.get_hex_by_column_row(i, j).get_occupation_status() == None:
+                if self.get_hex_by_x_y(i, j).get_occupation_status() == None:
                     print('None', end=' ')
                 else:
-                    print(self.get_hex_by_column_row(i, j).get_occupation_status().get_color(), end=' ')
+                    print(self.get_hex_by_x_y(i, j).get_occupation_status().get_color(), end=' ')
             print()
         print()

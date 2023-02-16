@@ -60,13 +60,15 @@ class Node:
 
             board = self.get_state().get_board()
 
-            for i in range(board.get_board_size()):
-                for j in range(board.get_board_size()):
-                    if board.get_hex_by_column_row(i, j).get_occupation_status() == None:
+            for x in range(board.get_board_size()):
+                for y in range(board.get_board_size()):
+                    if board.get_hex_by_x_y(x, y).get_occupation_status() == None:
 
                         board_deepcopy = copy.deepcopy(board)
 
-                        board_deepcopy.get_hex_by_column_row(i, j).set_occupation_status(self.get_state().get_current_turn())
+                        board_deepcopy.place(self.get_state().get_current_turn(), x, y)
+
+                        #board_deepcopy.get_hex_by_column_row(i, j).set_occupation_status(self.get_state().get_current_turn())
 
                         child = Node(State(board_deepcopy, self.get_state().get_next_turn(), self.get_state().get_current_turn()), self)
 
@@ -88,13 +90,13 @@ class Node:
 
         for child in self.get_children():
             # If player won this simulation
-            if child.get_state().get_board().check_if_player_won(player) == player:
+            if child.get_state().get_board().check_if_player_won(player):
                 print('REDVICTORY')
                 child.player_victory()
                 child.make_leaf()
 
             # If player lost this simulation
-            elif child.get_state().get_board().check_if_player_won(opposing_player) == opposing_player:
+            elif child.get_state().get_board().check_if_player_won(opposing_player):
                 print('BLUEVICTORY')
                 child.opposing_player_victory()
                 child.make_leaf()
