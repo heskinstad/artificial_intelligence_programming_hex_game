@@ -1,3 +1,5 @@
+import time
+
 class Tree:
     def __init__(self, top_node):
         self.top = top_node
@@ -10,4 +12,7 @@ class Tree:
             child.get_state().get_board().print_board()
 
     def simulate_all(self, player, opposing_player):
+        start = time.time()
         self.get_top_node().simulate_from_node(player, opposing_player)
+        end = time.time()
+        print(end - start)

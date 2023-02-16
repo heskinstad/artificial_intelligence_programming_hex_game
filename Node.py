@@ -86,18 +86,16 @@ class Node:
         if len(self.get_children()) == 0:
             self.create_child_nodes(1)
 
-        #self.get_state().get_board().print_board()
-
         for child in self.get_children():
             # If player won this simulation
             if child.get_state().get_board().check_if_player_won(player) == player:
-                print('REDVICTORY')
+                #print('REDVICTORY')
                 child.player_victory()
                 child.make_leaf()
 
             # If player lost this simulation
             elif child.get_state().get_board().check_if_player_won(opposing_player) == opposing_player:
-                print('BLUEVICTORY')
+                #print('BLUEVICTORY')
                 child.opposing_player_victory()
                 child.make_leaf()
 

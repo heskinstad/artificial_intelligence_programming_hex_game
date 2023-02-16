@@ -74,8 +74,6 @@ class Board:
         unchecked_hexes = []
         checked_hexes = []
 
-        print(self.print_board())
-
         # Check if player has placed any at their 'start edge' - left for red (0), bottom for blue (1)
         # If so, add them to the unchecked_hexes array
         for i in range(self.board_size):
@@ -102,8 +100,10 @@ class Board:
 
             for neighbor in current.get_neighbors_x_y():
                 hex = self.get_hex_by_x_y(neighbor[0], neighbor[1])
-                if hex not in checked_hexes and hex.get_occupation_status() == player:
-                    unchecked_hexes.append(hex)
+
+                if hex not in checked_hexes and not hex.get_occupation_status() == None:
+                    if hex.get_occupation_status().get_id() == player.get_id():
+                        unchecked_hexes.append(hex)
 
     def place(self, player, x, y):
         # Only allow placement if spot is free
