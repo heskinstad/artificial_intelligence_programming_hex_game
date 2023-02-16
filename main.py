@@ -5,7 +5,7 @@ from State import State
 from Strategies import Strategies
 from Tree import Tree
 
-board_size = 2
+board_size = 11
 show_board = True
 
 game = Strategies(board_size, show_board)
