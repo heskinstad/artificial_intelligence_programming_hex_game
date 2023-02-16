@@ -35,19 +35,16 @@ class Board:
             self.ax.axis('off')
 
             # Draw red/blue edges
-            redBorderLeft = mpatches.Rectangle((-1.25, 0), width=1, height=self.board_size * 1.15, angle=-30,
-                                               rotation_point='xy',
-                                               color='red')
+            redBorderLeft = mpatches.Rectangle((-1.25, 0), width=1, height=self.board_size * 1.15,
+                                               angle=-30, rotation_point='xy', color='red')
             self.ax.add_patch(redBorderLeft)
 
-            redBorderRight = mpatches.Rectangle((-1.25 + self.board_size * 1.15 - 0.2, -0.5), width=1,
-                                                height=self.board_size * 1.15,
+            redBorderRight = mpatches.Rectangle((-1.25 + self.board_size * 1.15 - 0.2, -0.5), width=1, height=self.board_size * 1.15,
                                                 angle=-30, rotation_point='xy', color='red')
             self.ax.add_patch(redBorderRight)
 
-            blueBorderBottom = mpatches.Rectangle((-0.5, 0), width=1, height=self.board_size + 1.5, angle=-90,
-                                                  rotation_point='xy',
-                                                  color='blue')
+            blueBorderBottom = mpatches.Rectangle((-0.5, 0), width=1, height=self.board_size + 1.5,
+                                                  angle=-90, rotation_point='xy', color='blue')
             self.ax.add_patch(blueBorderBottom)
 
             blueBorderTop = mpatches.Rectangle((-0.3 + self.board_size / 2, self.board_size), width=1, height=self.board_size * 1.2 - 0.6,
@@ -77,7 +74,9 @@ class Board:
         unchecked_hexes = []
         checked_hexes = []
 
-        # Check if player has placed any at their "start" side - left for red (0), bottom for blue (1)
+        print(self.print_board())
+
+        # Check if player has placed any at their 'start edge' - left for red (0), bottom for blue (1)
         # If so, add them to the unchecked_hexes array
         for i in range(self.board_size):
             if player.get_id() == 0: # id 0 move left/right
@@ -102,13 +101,9 @@ class Board:
                     return player
 
             for neighbor in current.get_neighbors_x_y():
-                try:
-                    hex = self.get_hex_by_x_y(neighbor[0], neighbor[1])
-                    if hex not in checked_hexes and hex.get_occupation_status() == player:
-                        unchecked_hexes.append(hex)
-                except:  # to be removed
-                    print("Exception occured!")
-                    continue
+                hex = self.get_hex_by_x_y(neighbor[0], neighbor[1])
+                if hex not in checked_hexes and hex.get_occupation_status() == player:
+                    unchecked_hexes.append(hex)
 
     def place(self, player, x, y):
         # Only allow placement if spot is free

@@ -5,12 +5,12 @@ from State import State
 from Strategies import Strategies
 from Tree import Tree
 
-board_size = 11
-show_board = True
+board_size = 2
+show_board = False
 
-game = Strategies(board_size, show_board)
+#game = Strategies(board_size, show_board)
 
-game.place_randomly()
+#game.place_randomly()
 
 player0 = Player(0, 'red')
 player1 = Player(1, 'blue')
@@ -21,6 +21,6 @@ player1 = Player(1, 'blue')
 #tree.print_all_nodes_as_boards()
 
 
-#tree = Tree(Node(State(Board(board_size, show_board), player0, player1)))
-#tree.simulate_all(player0, player1)
-#print(tree.get_top_node().get_score())
+tree = Tree(Node(State(Board(board_size, show_board), player0, player1)))
+tree.simulate_all(player0, player1)
+print(tree.get_top_node().get_score())

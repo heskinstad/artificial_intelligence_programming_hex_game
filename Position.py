@@ -15,6 +15,9 @@ class Position:
     def get_coordinates(self):
         return str([self.y, self.x])
 
+    def get_coordinates_x_y(self):
+        return str([self.x, self.y])
+
     def get_hex(self):
         return self.hex
 
