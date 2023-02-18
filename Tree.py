@@ -11,8 +11,8 @@ class Tree:
         for child in self.get_top_node().get_children():
             child.get_state().get_board().print_board()
 
-    def simulate_all(self, player, opposing_player):
+    def simulate_all(self, player, opposing_player, max_depth):
         start = time.time()
-        self.get_top_node().simulate_from_node(player, opposing_player)
+        self.get_top_node().simulate_from_node(player, opposing_player, max_depth)
         end = time.time()
-        print(end - start)
+        print("Time elapsed: " + str(end - start) + " s")

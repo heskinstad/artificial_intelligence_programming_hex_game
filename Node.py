@@ -82,7 +82,11 @@ class Node:
                 return 0
         return 1
 
-    def simulate_from_node(self, player, opposing_player):
+    def simulate_from_node(self, player, opposing_player, max_depth):
+        if max_depth <= 0:
+            return
+        max_depth -= 1
+
         if len(self.get_children()) == 0:
             self.create_child_nodes(1)
 
@@ -100,7 +104,7 @@ class Node:
                 child.make_leaf()
 
             if not child.is_leaf():
-                child.simulate_from_node(player, opposing_player)
+                child.simulate_from_node(player, opposing_player, max_depth)
 
             self.add_score_from_child(child)
 
