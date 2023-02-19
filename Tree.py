@@ -16,3 +16,7 @@ class Tree:
         self.get_top_node().simulate_from_node(player, opposing_player, max_depth)
         end = time.time()
         print("Time elapsed: " + str(end - start) + " s")
+
+        current_node = self.get_top_node().move_to_best_node()
+
+        current_node.get_state().get_board().print_board()

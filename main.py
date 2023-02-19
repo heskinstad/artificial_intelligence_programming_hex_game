@@ -24,5 +24,3 @@ player1 = Player(1, 'blue')
 tree = Tree(Node(State(Board(board_size, show_board), player0, player1)))
 tree.simulate_all(player0, player1, 1000)
 print(tree.get_top_node().get_score())
-
-# TODO: delete objects no longer needed

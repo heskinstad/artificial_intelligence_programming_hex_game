@@ -108,3 +108,26 @@ class Node:
 
             self.add_score_from_child(child)
 
+
+        # Delete objects without optimal score
+        #TODO: optimal score calculation need to swap player for each "floor" of the tree. Blue wants to make the best move for themselves, not for red
+        if len(self.get_children()) > 0:
+            best_child = self.get_children()[0]
+
+            for child in self.get_children():
+                if ((child.get_score()[1]+1) / (child.get_score()[0]+1)) > ((best_child.get_score()[1]+1) / (best_child.get_score()[0]+1)):
+                    best_child = child
+
+            i = 0
+            while len(self.get_children()) > 1:
+                if not self.get_children()[i].get_score() == best_child:
+                    del self.get_children()[i]
+                else:
+                    i += 1
+
+    # Traverse down the tree to the best known leaf node
+    def move_to_best_node(self):
+        if len(self.get_children()) > 0:
+            return self.get_children()[0].move_to_best_node()
+        else:
+            return self
