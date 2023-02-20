@@ -110,13 +110,18 @@ class Node:
 
 
         # Delete objects without optimal score
-        #TODO: optimal score calculation need to swap player for each "floor" of the tree. Blue wants to make the best move for themselves, not for red
         if len(self.get_children()) > 0:
             best_child = self.get_children()[0]
 
-            for child in self.get_children():
-                if ((child.get_score()[1]+1) / (child.get_score()[0]+1)) > ((best_child.get_score()[1]+1) / (best_child.get_score()[0]+1)):
-                    best_child = child
+            # Iterate through the children and set best_child to be the best (highest score for red, lowest score for blue)
+            if self.get_state().get_current_turn() == player:
+                for child in self.get_children():
+                    if ((child.get_score()[1]+1) / (child.get_score()[0]+1)) > ((best_child.get_score()[1]+1) / (best_child.get_score()[0]+1)):
+                        best_child = child
+            elif self.get_state().get_current_turn() == opposing_player:
+                for child in self.get_children():
+                    if ((child.get_score()[1]+1) / (child.get_score()[0]+1)) < ((best_child.get_score()[1]+1) / (best_child.get_score()[0]+1)):
+                        best_child = child
 
             i = 0
             while len(self.get_children()) > 1:
