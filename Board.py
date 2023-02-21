@@ -125,8 +125,9 @@ class Board:
         self.board_positions[y][x] = hex
 
     def print_board(self):
-        for i in range(self.get_board_size()):
-            for j in range(self.get_board_size()):
+        for j in range(self.get_board_size()-1, -1, -1):
+            print(j * "   ", end=' ')
+            for i in range(self.get_board_size()):
                 if self.get_hex_by_x_y(i, j).get_occupation_status() == None:
                     print('None', end=' ')
                 else:

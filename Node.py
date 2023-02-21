@@ -1,4 +1,5 @@
 import copy
+import random
 
 from State import State
 
@@ -130,9 +131,44 @@ class Node:
                 else:
                     i += 1
 
+    def mcts_default_policy_to_leaf_node(self, player, opposing_player):
+        print()
+        self.get_state().get_board().print_board()
+        # If player won this simulation
+        if self.get_state().get_board().check_if_player_won(player) == player:
+            print('REDVICTORY')
+            self.player_victory()
+            self.make_leaf()
+        # If player lost this simulation
+        elif self.get_state().get_board().check_if_player_won(opposing_player) == opposing_player:
+            print('BLUEVICTORY')
+            self.opposing_player_victory()
+            self.make_leaf()
+
+        if not self.is_leaf():
+
+            if len(self.get_children()) == 0:
+                self.create_child_nodes(1)
+
+            # Select a random child node and delete all other child nodes
+            child_node = random.choice(self.get_children())
+
+            i = 0
+            while len(self.get_children()) > 1:
+                if not self.get_children()[i] == child_node:
+                    del self.get_children()[i]
+                else:
+                    i += 1
+
+            child_node.mcts_default_policy_to_leaf_node(player, opposing_player)
+
+            self.add_score_from_child(child_node)
+
     # Traverse down the tree to the best known leaf node
     def move_to_best_node(self):
         if len(self.get_children()) > 0:
+            print()
+            self.get_children()[0].get_state().get_board().print_board()
             return self.get_children()[0].move_to_best_node()
         else:
             return self

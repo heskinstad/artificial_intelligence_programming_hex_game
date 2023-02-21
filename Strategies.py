@@ -40,5 +40,7 @@ class Strategies:
             if self.show_plot:
                 plt.pause(0.001)
 
+        gameBoard.print_board()
+
         if self.show_plot:
             plt.show()
