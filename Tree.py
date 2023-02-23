@@ -21,3 +21,18 @@ class Tree:
         current_node = self.get_top_node().move_to_best_node()
 
         current_node.get_state().get_board().print_board()
+
+
+    #TODO: tree search policy
+    def mcts_tree_default_until_end(self, player, opposing_player, max_depth):
+        start = time.time()
+
+        current_node = self.get_top_node()
+
+        while not current_node.is_leaf():
+            current_node.get_state().get_board().print_board()
+
+            self.get_top_node().mcts_default_policy_to_leaf_node(player, opposing_player)
+
+        end = time.time()
+        print("Time elapsed: " + str(end - start) + " s")
