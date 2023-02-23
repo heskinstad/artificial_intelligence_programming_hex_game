@@ -77,14 +77,12 @@ class Board:
         # Check if player has placed any at their 'start edge' - left for red (0), bottom for blue (1)
         # If so, add them to the unchecked_hexes array
         for i in range(self.board_size):
-            if player.get_id() == 0: # id 0 move left/right
-                if self.get_hex_by_x_y(0, i).occupied_by == player:
-                    if self.get_hex_by_x_y(0, i) not in checked_hexes:
-                        unchecked_hexes.append(self.get_hex_by_x_y(0, i))
-            elif player.get_id() == 1: # id 1 move top/bottom
-                if self.get_hex_by_x_y(i, 0).occupied_by == player:
-                    if self.get_hex_by_x_y(i, 0) not in checked_hexes:
-                        unchecked_hexes.append(self.get_hex_by_x_y(i, 0))
+            if self.get_hex_by_x_y(0, i).get_occupation_status() != None and player.get_id() == 0:
+                if self.get_hex_by_x_y(0, i).get_occupation_status().get_id() == player.get_id(): # id 0 move left/right
+                    unchecked_hexes.append(self.get_hex_by_x_y(0, i))
+            elif self.get_hex_by_x_y(i, 0).get_occupation_status() != None and player.get_id() == 1:
+                if self.get_hex_by_x_y(i, 0).get_occupation_status().get_id() == player.get_id(): # id 1 move top/bottom
+                    unchecked_hexes.append(self.get_hex_by_x_y(i, 0))
 
         while len(unchecked_hexes) > 0:
 
