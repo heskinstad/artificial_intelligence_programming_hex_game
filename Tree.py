@@ -14,25 +14,27 @@ class Tree:
     def simulate_all(self, player, opposing_player, max_depth):
         start = time.time()
         #self.get_top_node().simulate_from_node(player, opposing_player, max_depth)
-        self.get_top_node().mcts_default_policy_to_leaf_node(player, opposing_player)
+        self.get_top_node().mcts_default_policy(player, opposing_player)
         end = time.time()
         print("Time elapsed: " + str(end - start) + " s")
 
-        current_node = self.get_top_node().move_to_best_node()
+        current_node = self.get_top_node().move_to_best_node(1000)
 
         current_node.get_state().get_board().print_board()
 
 
     #TODO: tree search policy
-    def mcts_tree_default_until_end(self, player, opposing_player, max_depth):
+    def mcts_tree_default_until_end(self, player, opposing_player, depth):
         start = time.time()
 
         current_node = self.get_top_node()
 
-        while not current_node.is_leaf():
-            current_node.get_state().get_board().print_board()
+        #while not current_node.is_leaf():
+        self.get_top_node().mcts_tree_policy(player, opposing_player, depth)
 
-            self.get_top_node().mcts_default_policy_to_leaf_node(player, opposing_player)
+        current_node = current_node.move_to_best_node(depth)
+
+        current_node.get_state().get_board().print_board()
 
         end = time.time()
         print("Time elapsed: " + str(end - start) + " s")

@@ -2,6 +2,7 @@ import copy
 import random
 
 from Board import Board
+from Exceptions.IllegalDepthException import IllegalDepthException
 from State import State
 
 
@@ -93,17 +94,7 @@ class Node:
             self.create_child_nodes(1)
 
         for child in self.get_children():
-            # If player won this simulation
-            if child.get_state().get_board().check_if_player_won(player) == player:
-                #print('REDVICTORY')
-                child.player_victory()
-                child.make_leaf()
-
-            # If player lost this simulation
-            elif child.get_state().get_board().check_if_player_won(opposing_player) == opposing_player:
-                #print('BLUEVICTORY')
-                child.opposing_player_victory()
-                child.make_leaf()
+            child.node_check_win(player, opposing_player)
 
             if not child.is_leaf():
                 child.simulate_from_node(player, opposing_player, max_depth)
@@ -132,17 +123,50 @@ class Node:
                 else:
                     i += 1
 
-    def mcts_default_policy_to_leaf_node(self, player, opposing_player):
-        # If player won this simulation
-        if self.get_state().get_board().check_if_player_won(player) == player:
-            print('REDVICTORY')
-            self.player_victory()
-            self.make_leaf()
-        # If player lost this simulation
-        elif self.get_state().get_board().check_if_player_won(opposing_player) == opposing_player:
-            print('BLUEVICTORY')
-            self.opposing_player_victory()
-            self.make_leaf()
+    def mcts_tree_policy(self, player, opposing_player, max_depth):
+        if self.get_state().get_current_turn() == player and max_depth % 2 != 0:
+            raise IllegalDepthException("The tree policy must use a depth dividable by 2.")
+
+        if max_depth <= 0:
+            self.mcts_default_policy(player, opposing_player)
+            return
+        max_depth -= 1
+
+        if len(self.get_children()) == 0:
+            self.create_child_nodes(1)
+
+        for child in self.get_children():
+            child.node_check_win(player, opposing_player)
+
+            if not child.is_leaf():
+                child.mcts_tree_policy(player, opposing_player, max_depth)
+
+            self.add_score_from_child(child)
+
+
+        # Delete objects without optimal score
+        if len(self.get_children()) > 0:
+            best_child = self.get_children()[0]
+
+            # Iterate through the children and set best_child to be the best (highest score for red, lowest score for blue)
+            if self.get_state().get_current_turn() == player:
+                for child in self.get_children():
+                    if ((child.get_score()[1]+1) / (child.get_score()[0]+1)) > ((best_child.get_score()[1]+1) / (best_child.get_score()[0]+1)):
+                        best_child = child
+            elif self.get_state().get_current_turn() == opposing_player:
+                for child in self.get_children():
+                    if ((child.get_score()[1]+1) / (child.get_score()[0]+1)) < ((best_child.get_score()[1]+1) / (best_child.get_score()[0]+1)):
+                        best_child = child
+
+            i = 0
+            while len(self.get_children()) > 1:
+                if not self.get_children()[i].get_score() == best_child:
+                    del self.get_children()[i]
+                else:
+                    i += 1
+
+    def mcts_default_policy(self, player, opposing_player):
+        self.node_check_win(player, opposing_player)
 
         if not self.is_leaf():
 
@@ -159,15 +183,25 @@ class Node:
                 else:
                     i += 1
 
-            child_node.mcts_default_policy_to_leaf_node(player, opposing_player)
+            child_node.mcts_default_policy(player, opposing_player)
 
             self.add_score_from_child(child_node)
 
+    def node_check_win(self, player, opposing_player):
+        # If player won this simulation
+        if self.get_state().get_board().check_if_player_won(player) == player:
+            self.player_victory()
+            self.make_leaf()
+        # If player lost this simulation
+        elif self.get_state().get_board().check_if_player_won(opposing_player) == opposing_player:
+            self.opposing_player_victory()
+            self.make_leaf()
+
     # Traverse down the tree to the best known leaf node
-    def move_to_best_node(self):
-        if len(self.get_children()) > 0:
+    def move_to_best_node(self, depth):
+        if len(self.get_children()) > 0 and depth > 0:
             #print()
             #self.get_children()[0].get_state().get_board().print_board()
-            return self.get_children()[0].move_to_best_node()
+            return self.get_children()[0].move_to_best_node(depth - 1)
         else:
             return self

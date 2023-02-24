@@ -22,5 +22,5 @@ player1 = Player(1, 'blue')
 
 
 tree = Tree(Node(State(Board(board_size, show_board), player0, player1)))
-tree.simulate_all(player0, player1, 1000)
+tree.mcts_tree_default_until_end(player0, player1, 2)
 print(tree.get_top_node().get_score())
