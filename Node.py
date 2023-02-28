@@ -156,8 +156,11 @@ class Node:
                         best_child = child
             elif self.get_state().get_current_turn() == opposing_player:
                 for child in self.get_children():
-                    if ((child.get_score()[1]+1) / (child.get_score()[0]+1)) < ((best_child.get_score()[1]+1) / (best_child.get_score()[0]+1)):
+                    #print("[" + str(child.get_score()[0]) + ", " + str(child.get_score()[1]) + "]")
+                    if ((child.get_score()[1]+1) / (child.get_score()[0]+1)) > ((best_child.get_score()[1]+1) / (best_child.get_score()[0]+1)):
                         best_child = child
+
+            print("[" + str(best_child.get_score()[0]) + ", " + str(best_child.get_score()[1]) + "]")
 
             i = 0
             while len(self.get_children()) > 1:
@@ -200,6 +203,11 @@ class Node:
 
     # Traverse down the tree to the best known leaf node
     def move_to_best_node(self, depth):
+
+        self.get_state().get_board().print_board()
+        self.get_score()
+        print()
+
         if self.is_leaf():
             return self
 

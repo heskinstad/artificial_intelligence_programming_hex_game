@@ -131,4 +131,3 @@ class Board:
                 else:
                     print(self.get_hex_by_x_y(i, j).get_occupation_status().get_color(), end=' ')
             print()
-        print()
