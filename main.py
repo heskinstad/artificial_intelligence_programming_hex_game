@@ -5,7 +5,7 @@ from State import State
 from Strategies import Strategies
 from Tree import Tree
 
-board_size = 3
+board_size = 4
 show_board = False
 
 #game = Strategies(board_size, show_board)
@@ -23,4 +23,3 @@ player1 = Player(1, 'blue')
 
 tree = Tree(Node(State(Board(board_size, show_board), player0, player1)))
 tree.mcts_tree_default_until_end(player0, player1, 2)
-print(tree.get_top_node().get_score())

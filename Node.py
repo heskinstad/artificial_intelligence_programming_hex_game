@@ -3,6 +3,7 @@ import random
 
 from Board import Board
 from Exceptions.IllegalDepthException import IllegalDepthException
+from Exceptions.IllegalNumberOfChildrenException import IllegalNumberOfChildrenException
 from State import State
 
 
@@ -118,14 +119,14 @@ class Node:
 
             i = 0
             while len(self.get_children()) > 1:
-                if not self.get_children()[i].get_score() == best_child:
+                if not self.get_children()[i] == best_child:
                     del self.get_children()[i]
                 else:
                     i += 1
 
     def mcts_tree_policy(self, player, opposing_player, max_depth):
         if self.get_state().get_current_turn() == player and max_depth % 2 != 0:
-            raise IllegalDepthException("The tree policy must use a depth dividable by 2.")
+            raise IllegalDepthException("The tree policy must use a depth dividable by 2 on the top call.")
 
         if max_depth <= 0:
             self.mcts_default_policy(player, opposing_player)
@@ -160,7 +161,7 @@ class Node:
 
             i = 0
             while len(self.get_children()) > 1:
-                if not self.get_children()[i].get_score() == best_child:
+                if not self.get_children()[i] == best_child:
                     del self.get_children()[i]
                 else:
                     i += 1
@@ -199,7 +200,14 @@ class Node:
 
     # Traverse down the tree to the best known leaf node
     def move_to_best_node(self, depth):
+        if self.is_leaf():
+            return self
+
         if len(self.get_children()) > 0 and depth > 0:
+
+            if len(self.get_children()) > 1:
+                raise IllegalNumberOfChildrenException("There can only be one child per node")
+
             #print()
             #self.get_children()[0].get_state().get_board().print_board()
             return self.get_children()[0].move_to_best_node(depth - 1)

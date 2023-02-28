@@ -1,0 +1,2 @@
+class IllegalNumberOfChildrenException(Exception):
+    pass
