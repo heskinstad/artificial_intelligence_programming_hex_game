@@ -31,7 +31,7 @@ class Tree:
         while not current_node.is_leaf():
             self.get_top_node().mcts_tree_policy(player, opposing_player, depth)
 
-            score = current_node.get_score()
+            #score = current_node.get_score()
 
             current_node = current_node.move_to_best_node(2)
 

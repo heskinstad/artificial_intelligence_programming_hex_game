@@ -126,7 +126,7 @@ class Node:
 
     def mcts_tree_policy(self, player, opposing_player, max_depth):
         if self.get_state().get_current_turn() == player and max_depth % 2 != 0:
-            raise IllegalDepthException("The tree policy must use a depth dividable by 2 on the top call.")
+            raise IllegalDepthException("The tree policy must use a depth dividable by 2.")
 
         if max_depth <= 0:
             self.mcts_default_policy(player, opposing_player)
@@ -150,17 +150,14 @@ class Node:
             best_child = self.get_children()[0]
 
             # Iterate through the children and set best_child to be the best (highest score for red, lowest score for blue)
-            if self.get_state().get_current_turn() == player:
+            if self.get_state().get_current_turn() == opposing_player:  # Since we're talking about the child's turn, the player and opposing_player must be reversed (player wants low, opposing_player wants high)
                 for child in self.get_children():
                     if ((child.get_score()[1]+1) / (child.get_score()[0]+1)) > ((best_child.get_score()[1]+1) / (best_child.get_score()[0]+1)):
                         best_child = child
-            elif self.get_state().get_current_turn() == opposing_player:
+            elif self.get_state().get_current_turn() == player:
                 for child in self.get_children():
-                    #print("[" + str(child.get_score()[0]) + ", " + str(child.get_score()[1]) + "]")
-                    if ((child.get_score()[1]+1) / (child.get_score()[0]+1)) > ((best_child.get_score()[1]+1) / (best_child.get_score()[0]+1)):
+                    if ((child.get_score()[1]+1) / (child.get_score()[0]+1)) < ((best_child.get_score()[1]+1) / (best_child.get_score()[0]+1)):
                         best_child = child
-
-            print("[" + str(best_child.get_score()[0]) + ", " + str(best_child.get_score()[1]) + "]")
 
             i = 0
             while len(self.get_children()) > 1:
@@ -204,9 +201,9 @@ class Node:
     # Traverse down the tree to the best known leaf node
     def move_to_best_node(self, depth):
 
-        self.get_state().get_board().print_board()
-        self.get_score()
-        print()
+        #self.get_state().get_board().print_board()
+        #print(self.get_score())
+        #print()
 
         if self.is_leaf():
             return self
@@ -216,8 +213,10 @@ class Node:
             if len(self.get_children()) > 1:
                 raise IllegalNumberOfChildrenException("There can only be one child per node")
 
-            #print()
-            #self.get_children()[0].get_state().get_board().print_board()
+            print()
+            print(self.get_score())
+            self.get_children()[0].get_state().get_board().print_board()
+
             return self.get_children()[0].move_to_best_node(depth - 1)
         else:
             return self
