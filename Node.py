@@ -102,27 +102,7 @@ class Node:
 
             self.add_score_from_child(child)
 
-
-        # Delete objects without optimal score
-        if len(self.get_children()) > 0:
-            best_child = self.get_children()[0]
-
-            # Iterate through the children and set best_child to be the best (highest score for red, lowest score for blue)
-            if self.get_state().get_current_turn() == player:
-                for child in self.get_children():
-                    if ((child.get_score()[1]+1) / (child.get_score()[0]+1)) > ((best_child.get_score()[1]+1) / (best_child.get_score()[0]+1)):
-                        best_child = child
-            elif self.get_state().get_current_turn() == opposing_player:
-                for child in self.get_children():
-                    if ((child.get_score()[1]+1) / (child.get_score()[0]+1)) < ((best_child.get_score()[1]+1) / (best_child.get_score()[0]+1)):
-                        best_child = child
-
-            i = 0
-            while len(self.get_children()) > 1:
-                if not self.get_children()[i] == best_child:
-                    del self.get_children()[i]
-                else:
-                    i += 1
+        self.remove_bad_children(player, opposing_player)
 
     def mcts_tree_policy(self, player, opposing_player, max_depth):
         if self.get_state().get_current_turn() == player and max_depth % 2 != 0:
@@ -144,27 +124,7 @@ class Node:
 
             self.add_score_from_child(child)
 
-
-        # Delete objects without optimal score
-        if len(self.get_children()) > 0:
-            best_child = self.get_children()[0]
-
-            # Iterate through the children and set best_child to be the best (highest score for red, lowest score for blue)
-            if self.get_state().get_current_turn() == opposing_player:  # Since we're talking about the child's turn, the player and opposing_player must be reversed (player wants low, opposing_player wants high)
-                for child in self.get_children():
-                    if ((child.get_score()[1]+1) / (child.get_score()[0]+1)) > ((best_child.get_score()[1]+1) / (best_child.get_score()[0]+1)):
-                        best_child = child
-            elif self.get_state().get_current_turn() == player:
-                for child in self.get_children():
-                    if ((child.get_score()[1]+1) / (child.get_score()[0]+1)) < ((best_child.get_score()[1]+1) / (best_child.get_score()[0]+1)):
-                        best_child = child
-
-            i = 0
-            while len(self.get_children()) > 1:
-                if not self.get_children()[i] == best_child:
-                    del self.get_children()[i]
-                else:
-                    i += 1
+        self.remove_bad_children(player, opposing_player)
 
     def mcts_default_policy(self, player, opposing_player):
         self.node_check_win(player, opposing_player)
@@ -197,6 +157,30 @@ class Node:
         elif self.get_state().get_board().check_if_player_won(opposing_player) == opposing_player:
             self.opposing_player_victory()
             self.make_leaf()
+
+    def remove_bad_children(self, player, opposing_player):
+        # Delete objects without optimal score
+        if len(self.get_children()) > 0:
+            best_child = self.get_children()[0]
+
+            # Iterate through the children and set best_child to be the best (highest score for red, lowest score for blue)
+            if self.get_state().get_current_turn() == opposing_player:  # Since we're talking about the child's turn, the player and opposing_player must be reversed (player wants low, opposing_player wants high)
+                for child in self.get_children():
+                    if ((child.get_score()[1] + 1) / (child.get_score()[0] + 1)) > (
+                            (best_child.get_score()[1] + 1) / (best_child.get_score()[0] + 1)):
+                        best_child = child
+            elif self.get_state().get_current_turn() == player:
+                for child in self.get_children():
+                    if ((child.get_score()[1] + 1) / (child.get_score()[0] + 1)) < (
+                            (best_child.get_score()[1] + 1) / (best_child.get_score()[0] + 1)):
+                        best_child = child
+
+            i = 0
+            while len(self.get_children()) > 1:
+                if not self.get_children()[i] == best_child:
+                    del self.get_children()[i]
+                else:
+                    i += 1
 
     # Traverse down the tree to the best known leaf node
     def move_to_best_node(self, depth):
