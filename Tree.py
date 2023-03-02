@@ -16,7 +16,7 @@ class Tree:
         #self.get_top_node().simulate_from_node(player, opposing_player, max_depth)
         self.get_top_node().mcts_default_policy(player, opposing_player)
         end = time.time()
-        print("Time elapsed: " + str(end - start) + " s")
+        print("Time elapsed: " + str(end - start) + "s")
 
         current_node = self.get_top_node().move_to_best_node(1000)
 

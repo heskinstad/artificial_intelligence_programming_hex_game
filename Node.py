@@ -1,6 +1,8 @@
 import copy
 import random
+import time
 
+from Board import Board
 from Exceptions.IllegalNumberOfChildrenException import IllegalNumberOfChildrenException
 from State import State
 
@@ -73,8 +75,6 @@ class Node:
 
                         board_deepcopy.place(self.get_state().get_current_turn(), x, y)
 
-                        #board_deepcopy.get_hex_by_column_row(i, j).set_occupation_status(self.get_state().get_current_turn())
-
                         child = Node(State(board_deepcopy, self.get_state().get_next_turn(), self.get_state().get_current_turn()), self)
 
                         self.add_child(child)
@@ -88,18 +88,19 @@ class Node:
             x = int(random.uniform(0, board.get_board_size()))
             y = int(random.uniform(0, board.get_board_size()))
             if board.get_hex_by_x_y(x, y).get_occupation_status() == None:
+                #board_deepcopy = copy.deepcopy(board)
+
                 board_deepcopy = copy.deepcopy(board)
 
                 board_deepcopy.place(self.get_state().get_current_turn(), x, y)
 
                 # board_deepcopy.get_hex_by_column_row(i, j).set_occupation_status(self.get_state().get_current_turn())
 
-                child = Node(
-                    State(board_deepcopy, self.get_state().get_next_turn(), self.get_state().get_current_turn()), self)
+                child = Node(State(board_deepcopy, self.get_state().get_next_turn(), self.get_state().get_current_turn()), self)
 
                 self.add_child(child)
 
-                return
+                return child
 
 
     def check_if_child_nodes_finished(self):
@@ -124,12 +125,9 @@ class Node:
 
             self.add_score_from_child(child)
 
-        self.remove_bad_children(player, opposing_player)
+        self.remove_every_but_best_child(player, opposing_player)
 
     def mcts_tree_policy(self, player, opposing_player, max_depth):
-        #if self.get_state().get_current_turn() == player and max_depth % 2 != 0:
-        #    raise IllegalDepthException("The tree policy must use a depth dividable by 2.")
-
         if max_depth <= 0:
             self.mcts_default_policy(player, opposing_player)
             return
@@ -140,42 +138,22 @@ class Node:
 
         for child in self.get_children():
 
+            # Makes child leaf if end state (win or loss)
             child.node_check_win(player, opposing_player)
-
 
             if not child.is_leaf():
                 child.mcts_tree_policy(player, opposing_player, max_depth)
 
             self.add_score_from_child(child)
 
-
-        self.remove_bad_children(player, opposing_player)
+        self.remove_every_but_best_child(player, opposing_player)
 
 
     def mcts_default_policy(self, player, opposing_player):
         self.node_check_win(player, opposing_player)
 
         if not self.is_leaf():
-
-            #start = time.time()
-
-            if len(self.get_children()) == 0:
-                self.create_random_child_node()
-
-            #end = time.time()
-            #print("Time elapsed: " + str(end - start) + " s")
-
-            child_node = self.get_children()[0]
-
-            # Select a random child node and delete all other child nodes
-            '''child_node = random.choice(self.get_children())
-
-            i = 0
-            while len(self.get_children()) > 1:
-                if not self.get_children()[i] == child_node:
-                    del self.get_children()[i]
-                else:
-                    i += 1'''
+            child_node = self.create_random_child_node()
 
             child_node.mcts_default_policy(player, opposing_player)
 
@@ -193,12 +171,10 @@ class Node:
             self.make_leaf()
             return 1
 
-    def remove_bad_children(self, player, opposing_player):
+    def remove_every_but_best_child(self, player, opposing_player):
         # Delete objects without optimal score
         if len(self.get_children()) > 0:
             best_child = self.get_children()[0]
-
-            #print(len(self.get_children()))
 
             # Iterate through the children and set best_child to be the best (highest score for red, lowest score for blue)
             if self.get_state().get_current_turn() == player:

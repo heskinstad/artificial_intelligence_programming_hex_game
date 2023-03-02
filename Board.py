@@ -3,20 +3,21 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 
-from Player import Player
 from Position import Position
 
 mpl.use('TkAgg')
 
 class Board:
-    def __init__(self, board_size, show_plot):
+    def __init__(self, board_size, show_plot, initialize=True):
         self.board_size = board_size
         self.board_positions = []
         self.show_plot = show_plot
 
         self.fig = None
         self.ax = None
-        self.create_board()
+
+        if initialize:
+            self.create_board()
 
     def get_board_size(self):
         return self.board_size
