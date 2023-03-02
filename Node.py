@@ -1,5 +1,6 @@
 import copy
 import random
+import time
 
 from Board import Board
 from Exceptions.IllegalDepthException import IllegalDepthException
@@ -83,6 +84,26 @@ class Node:
 
                         child.create_child_nodes(depth - 1)
 
+    def create_random_child_node(self):
+        board = self.get_state().get_board()
+        while True:
+            x = int(random.uniform(0, board.get_board_size()))
+            y = int(random.uniform(0, board.get_board_size()))
+            if board.get_hex_by_x_y(x, y).get_occupation_status() == None:
+                board_deepcopy = copy.deepcopy(board)
+
+                board_deepcopy.place(self.get_state().get_current_turn(), x, y)
+
+                # board_deepcopy.get_hex_by_column_row(i, j).set_occupation_status(self.get_state().get_current_turn())
+
+                child = Node(
+                    State(board_deepcopy, self.get_state().get_next_turn(), self.get_state().get_current_turn()), self)
+
+                self.add_child(child)
+
+                return
+
+
     def check_if_child_nodes_finished(self):
         for child in self.get_children():
             if child.get_score() == [0, 0]:
@@ -120,32 +141,43 @@ class Node:
             self.create_child_nodes(1)
 
         for child in self.get_children():
+
             child.node_check_win(player, opposing_player)
+
 
             if not child.is_leaf():
                 child.mcts_tree_policy(player, opposing_player, max_depth)
 
             self.add_score_from_child(child)
 
+
         self.remove_bad_children(player, opposing_player)
+
 
     def mcts_default_policy(self, player, opposing_player):
         self.node_check_win(player, opposing_player)
 
         if not self.is_leaf():
 
+            #start = time.time()
+
             if len(self.get_children()) == 0:
-                self.create_child_nodes(1)
+                self.create_random_child_node()
+
+            #end = time.time()
+            #print("Time elapsed: " + str(end - start) + " s")
+
+            child_node = self.get_children()[0]
 
             # Select a random child node and delete all other child nodes
-            child_node = random.choice(self.get_children())
+            '''child_node = random.choice(self.get_children())
 
             i = 0
             while len(self.get_children()) > 1:
                 if not self.get_children()[i] == child_node:
                     del self.get_children()[i]
                 else:
-                    i += 1
+                    i += 1'''
 
             child_node.mcts_default_policy(player, opposing_player)
 
