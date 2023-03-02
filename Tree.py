@@ -29,9 +29,7 @@ class Tree:
         current_node = self.get_top_node()
 
         while not current_node.is_leaf():
-            self.get_top_node().mcts_tree_policy(player, opposing_player, depth)
-
-            #score = current_node.get_score()
+            current_node.mcts_tree_policy(player, opposing_player, depth)
 
             current_node = current_node.move_to_best_node(2)
 
@@ -39,4 +37,4 @@ class Tree:
         print(str(current_node.get_state().get_next_turn().get_color()) + " won!")
 
         end = time.time()
-        print("Time elapsed: " + str(end - start) + " s")
+        print("Time elapsed: " + str(end - start) + "s")
