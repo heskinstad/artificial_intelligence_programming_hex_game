@@ -31,7 +31,7 @@ class Tree:
         while not current_node.is_leaf():
             current_node.mcts_tree_policy(player, opposing_player, depth)
 
-            current_node = current_node.move_to_best_node(2)
+            current_node = current_node.move_to_best_node(1)
 
         print()
         print(str(current_node.get_state().get_next_turn().get_color()) + " won!")

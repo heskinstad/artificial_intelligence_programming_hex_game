@@ -108,8 +108,8 @@ class Node:
         self.remove_bad_children(player, opposing_player)
 
     def mcts_tree_policy(self, player, opposing_player, max_depth):
-        if self.get_state().get_current_turn() == player and max_depth % 2 != 0:
-            raise IllegalDepthException("The tree policy must use a depth dividable by 2.")
+        #if self.get_state().get_current_turn() == player and max_depth % 2 != 0:
+        #    raise IllegalDepthException("The tree policy must use a depth dividable by 2.")
 
         if max_depth <= 0:
             self.mcts_default_policy(player, opposing_player)
@@ -156,23 +156,37 @@ class Node:
         if self.get_state().get_board().check_if_player_won(player) == player:
             self.player_victory()
             self.make_leaf()
+            return 1
         # If player lost this simulation
         elif self.get_state().get_board().check_if_player_won(opposing_player) == opposing_player:
             self.opposing_player_victory()
             self.make_leaf()
+            return 1
 
     def remove_bad_children(self, player, opposing_player):
         # Delete objects without optimal score
         if len(self.get_children()) > 0:
             best_child = self.get_children()[0]
 
+            #print(len(self.get_children()))
+
             # Iterate through the children and set best_child to be the best (highest score for red, lowest score for blue)
             if self.get_state().get_current_turn() == player:
                 for child in self.get_children():
+                    if child.node_check_win(player, opposing_player):
+                        best_child = child
+                        child.score[1] += 100  # Add a very large value for red to choose this
+                        print(player.get_color() + " is about to win")
+                        break
                     if ((child.get_score()[1] + 1) / (child.get_score()[0] + 1)) > ((best_child.get_score()[1] + 1) / (best_child.get_score()[0] + 1)):
                         best_child = child
             elif self.get_state().get_current_turn() == opposing_player:
                 for child in self.get_children():
+                    if child.node_check_win(player, opposing_player):
+                        best_child = child
+                        child.score[1] -= 100  # Add a very large (negative) value for blue to choose this
+                        print(opposing_player.get_color() + " is about to win")
+                        break
                     if ((child.get_score()[1] + 1) / (child.get_score()[0] + 1)) < ((best_child.get_score()[1] + 1) / (best_child.get_score()[0] + 1)):
                         best_child = child
 
