@@ -1,9 +1,6 @@
 import copy
 import random
-import time
 
-from Board import Board
-from Exceptions.IllegalDepthException import IllegalDepthException
 from Exceptions.IllegalNumberOfChildrenException import IllegalNumberOfChildrenException
 from State import State
 
@@ -84,6 +81,7 @@ class Node:
 
                         child.create_child_nodes(depth - 1)
 
+    # Create a single, randomized child node
     def create_random_child_node(self):
         board = self.get_state().get_board()
         while True:

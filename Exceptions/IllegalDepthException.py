@@ -1,2 +1,0 @@
-class IllegalDepthException(Exception):
-    pass
