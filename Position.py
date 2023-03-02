@@ -1,3 +1,5 @@
+#TODO: remove position class. Move logic to Board class. Create new class for the visual board
+
 class Position:
     def __init__(self, x, y, hex, occupied_by, board_size):
         self.x = x
