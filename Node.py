@@ -1,6 +1,7 @@
 import copy
 import random
 
+from Board import Board
 from Exceptions.IllegalNumberOfChildrenException import IllegalNumberOfChildrenException
 from State import State
 
@@ -67,9 +68,11 @@ class Node:
 
             for x in range(board.get_board_size()):
                 for y in range(board.get_board_size()):
-                    if board.get_hex_by_x_y(x, y).get_occupation_status() == None:
+                    if board.get_hex_by_x_y(x, y) == None:
 
-                        board_deepcopy = copy.deepcopy(board)
+
+                        board_deepcopy = Board(board.get_board_size(), board.show_plot, False)
+                        board_deepcopy.board_positions = [x[:] for x in board.get_board()]
 
                         board_deepcopy.place(self.get_state().get_current_turn(), x, y)
 
@@ -85,10 +88,10 @@ class Node:
         while True:
             x = int(random.uniform(0, board.get_board_size()))
             y = int(random.uniform(0, board.get_board_size()))
-            if board.get_hex_by_x_y(x, y).get_occupation_status() == None:
-                #board_deepcopy = copy.deepcopy(board)
+            if board.get_hex_by_x_y(x, y) == None:
 
-                board_deepcopy = copy.deepcopy(board)
+                board_deepcopy = Board(board.get_board_size(), board.show_plot, False)
+                board_deepcopy.board_positions = [x[:] for x in board.get_board()]
 
                 board_deepcopy.place(self.get_state().get_current_turn(), x, y)
 

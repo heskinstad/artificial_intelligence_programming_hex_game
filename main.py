@@ -6,11 +6,11 @@ from Strategies import Strategies
 from Tree import Tree
 
 board_size = 4
-show_board = True
+show_board = False
 
-game = Strategies(board_size, show_board)
+#game = Strategies(board_size, show_board)
 
-game.place_randomly()
+#game.place_randomly()
 
 player0 = Player(0, 'red')
 player1 = Player(1, 'blue')
@@ -21,5 +21,5 @@ player1 = Player(1, 'blue')
 #tree.print_all_nodes_as_boards()
 
 
-#tree = Tree(Node(State(Board(board_size, show_board), player0, player1)))
-#tree.mcts_tree_default_until_end(player0, player1, 2)
+tree = Tree(Node(State(Board(board_size, show_board), player0, player1)))
+tree.mcts_tree_default_until_end(player0, player1, 2)

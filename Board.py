@@ -3,9 +3,9 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 
-from Position import Position
-
 mpl.use('TkAgg')
+
+#TODO: replace python arrays with numpy arrays
 
 class Board:
     def __init__(self, board_size, show_plot, initialize=True):
