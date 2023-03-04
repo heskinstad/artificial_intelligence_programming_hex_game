@@ -83,10 +83,10 @@ class Board:
         # Check if player has placed any at their 'start edge' - left for red (0), bottom for blue (1)
         # If so, add them to the unchecked_hexes array
         for i in range(self.board_size):
-            if self.get_hex_by_x_y(0, i) != None and player.get_id() == 0:
+            if player.get_id() == 0:
                 if self.get_hex_by_x_y(0, i) == player.get_id(): # id 0 move left/right
                     unchecked_hexes.append([0, i])
-            elif self.get_hex_by_x_y(i, 0) != None and player.get_id() == 1:
+            elif player.get_id() == 1:
                 if self.get_hex_by_x_y(i, 0) == player.get_id(): # id 1 move top/bottom
                     unchecked_hexes.append([i, 0])
 
@@ -103,7 +103,7 @@ class Board:
                     return player
 
             for neighbor in self.get_neighbors_x_y(current[0], current[1]):
-                if [neighbor[0], neighbor[1]] not in checked_hexes and not self.get_hex_by_x_y(neighbor[0], neighbor[1]) == None:
+                if [neighbor[0], neighbor[1]] not in checked_hexes:
                     if self.get_hex_by_x_y(neighbor[0], neighbor[1]) == player.get_id():
                         unchecked_hexes.append([neighbor[0], neighbor[1]])
 
@@ -155,11 +155,13 @@ class Board:
         return neighbors
 
     def print_board(self):
+        print(self.get_board_size() * " " + self.get_board_size() * 2 * "_" + "__")
         for j in range(self.get_board_size()-1, -1, -1):
-            print(j * " ", end=' ')
+            print(j * " ", end='/ ')
             for i in range(self.get_board_size()):
                 if self.get_hex_by_x_y(i, j) == None:
-                    print('N', end=' ')
+                    print(' ', end=' ')
                 else:
                     print(self.get_hex_by_x_y(i, j), end=' ')
-            print()
+            print("/")
+        print(self.get_board_size() * 2 * "¯" + "¯¯")

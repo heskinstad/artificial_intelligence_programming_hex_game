@@ -8,7 +8,7 @@ class Position:
         self.occupied_by = occupied_by
         self.board_size = board_size
 
-    def get_x(self):
+    '''def get_x(self):
         return self.x
 
     def get_y(self):
@@ -27,7 +27,7 @@ class Position:
         self.occupied_by = occupied_by
 
     def get_occupation_status(self):
-        return self.occupied_by
+        return self.occupied_by'''
 
     '''def get_neighbors(self):
         neighbors = [[self.y - 1, self.x + 1],
