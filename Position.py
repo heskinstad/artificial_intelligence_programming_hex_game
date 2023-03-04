@@ -29,7 +29,7 @@ class Position:
     def get_occupation_status(self):
         return self.occupied_by
 
-    def get_neighbors(self):
+    '''def get_neighbors(self):
         neighbors = [[self.y - 1, self.x + 1],
                      [self.y, self.x + 1],
                      [self.y - 1, self.x],
@@ -54,4 +54,4 @@ class Position:
             position[0] = position[1]
             position[1] = temp
 
-        return neighbors
+        return neighbors'''

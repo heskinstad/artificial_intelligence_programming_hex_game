@@ -21,7 +21,7 @@ class Strategies:
             random_x = int(random.uniform(0, self.grid_size))
             random_y = int(random.uniform(0, self.grid_size))
 
-            if gameBoard.get_hex_by_x_y(random_x, random_y).get_occupation_status() != None:
+            if gameBoard.get_hex_by_x_y(random_x, random_y) != None:
                 continue
 
             if i % 2:
