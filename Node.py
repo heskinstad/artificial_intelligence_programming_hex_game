@@ -71,7 +71,7 @@ class Node:
                     if board.get_hex_by_x_y(x, y) == None:
 
 
-                        board_deepcopy = Board(board.get_board_size(), board.show_plot, False)
+                        board_deepcopy = Board(board.get_board_size(), False, False)
                         board_deepcopy.board_positions = [x[:] for x in board.get_board()]
 
                         board_deepcopy.place(self.get_state().get_current_turn(), x, y)
@@ -90,7 +90,7 @@ class Node:
             y = int(random.uniform(0, board.get_board_size()))
             if board.get_hex_by_x_y(x, y) == None:
 
-                board_deepcopy = Board(board.get_board_size(), board.show_plot, False)
+                board_deepcopy = Board(board.get_board_size(), False, False)
                 board_deepcopy.board_positions = [x[:] for x in board.get_board()]
 
                 board_deepcopy.place(self.get_state().get_current_turn(), x, y)

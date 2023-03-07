@@ -2,16 +2,28 @@ import random
 import matplotlib.pyplot as plt
 
 from Board import Board
+from Node import Node
 from Player import Player
+from State import State
+from Tree import Tree
+
 
 class Strategies:
-    def __init__(self, grid_size, show_plot):
+    def __init__(self, grid_size, show_plot, game_type, pause_length=0.001):
         self.grid_size = grid_size
         self.show_plot = show_plot
+        self.game_type = game_type
 
+        if game_type == "random":
+            self.place_randomly(pause_length)
+        elif game_type == "mcts":
+            self.mcts(pause_length)
 
-    def place_randomly(self):
+    def place_randomly(self, pause_length):
         gameBoard = Board(self.grid_size, self.show_plot)
+
+        if self.show_plot:
+            gameBoard.initialize_board_plot()
 
         player0 = Player(0, 'red')
         player1 = Player(1, 'blue')
@@ -38,9 +50,18 @@ class Strategies:
             i += 1
 
             if self.show_plot:
-                plt.pause(0.001)
+                gameBoard.create_board_plot(gameBoard.get_fig(), gameBoard.get_ax())
+                plt.pause(pause_length)
 
         gameBoard.print_board()
 
         if self.show_plot:
+            gameBoard.create_board_plot(gameBoard.get_fig(), gameBoard.get_ax())
             plt.show()
+
+    def mcts(self, pause_length):
+        player0 = Player(0, 'red')
+        player1 = Player(1, 'blue')
+
+        tree = Tree(Node(State(Board(self.grid_size, self.show_plot), player0, player1)))
+        tree.mcts_tree_default_until_end(player0, player1, 2, self.show_plot, pause_length)

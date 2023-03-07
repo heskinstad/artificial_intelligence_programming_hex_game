@@ -5,19 +5,17 @@ import matplotlib.patches as mpatches
 
 mpl.use('TkAgg')
 
-#TODO: replace python arrays with numpy arrays
+#TODO: make the board visible for the mcts (only the path it choose)
 
 class Board:
     def __init__(self, board_size, show_plot, initialize=True):
         self.board_size = board_size
         self.board_positions = []
+        self.board_plot = []
         self.show_plot = show_plot
 
         self.fig = None
         self.ax = None
-
-        if show_plot:
-            self.board_plot = []
 
         if initialize:
             self.create_board()
@@ -29,52 +27,73 @@ class Board:
         return self.board_positions
 
     def create_board(self):
-        if self.show_plot:
-            self.fig, self.ax = plt.subplots(figsize=(7, 7))
+        for y in range(self.board_size):
+            self.board_positions.append([])
+            for x in range(self.board_size):
+                self.board_positions[y].append(None)
 
-            # Set the aspect ratio to match the hexagons
-            self.ax.set_aspect('equal', adjustable='box')
+    def get_fig(self):
+        return self.fig
 
-            # Remove axis labels and ticks
-            self.ax.axis('off')
+    def get_ax(self):
+        return self.ax
 
-            # Draw red/blue edges
-            redBorderLeft = mpatches.Rectangle((-1.25, 0), width=1, height=self.board_size * 1.15,
-                                               angle=-30, rotation_point='xy', color='red')
-            self.ax.add_patch(redBorderLeft)
+    def initialize_board_plot(self):
+        self.fig, self.ax = plt.subplots(figsize=(7, 7))
 
-            redBorderRight = mpatches.Rectangle((-1.25 + self.board_size * 1.15 - 0.2, -0.5), width=1, height=self.board_size * 1.15,
-                                                angle=-30, rotation_point='xy', color='red')
-            self.ax.add_patch(redBorderRight)
+    def create_board_plot(self, fig, ax):
+        self.fig = fig
+        self.ax = ax
 
-            blueBorderBottom = mpatches.Rectangle((-0.5, 0), width=1, height=self.board_size + 1.5,
-                                                  angle=-90, rotation_point='xy', color='blue')
-            self.ax.add_patch(blueBorderBottom)
+        # Set the aspect ratio to match the hexagons
+        self.ax.set_aspect('equal', adjustable='box')
 
-            blueBorderTop = mpatches.Rectangle((-0.3 + self.board_size / 2, self.board_size), width=1, height=self.board_size * 1.2 - 0.6,
-                                               angle=-90, rotation_point='xy', color='blue')
-            self.ax.add_patch(blueBorderTop)
+        # Remove axis labels and ticks
+        self.ax.axis('off')
 
-            # Draw the hexagons
-            for y in range(self.board_size):
-                self.board_positions.append([])
-                self.board_plot.append([])
-                for x in range(self.board_size):
+        # Draw red/blue edges
+        redBorderLeft = mpatches.Rectangle((-1.25, 0), width=1, height=self.board_size * 1.15,
+                                           angle=-30, rotation_point='xy', color='red')
+        self.ax.add_patch(redBorderLeft)
+
+        redBorderRight = mpatches.Rectangle((-1.25 + self.board_size * 1.15 - 0.2, -0.5), width=1,
+                                            height=self.board_size * 1.15,
+                                            angle=-30, rotation_point='xy', color='red')
+        self.ax.add_patch(redBorderRight)
+
+        blueBorderBottom = mpatches.Rectangle((-0.5, 0), width=1, height=self.board_size + 1.5,
+                                              angle=-90, rotation_point='xy', color='blue')
+        self.ax.add_patch(blueBorderBottom)
+
+        blueBorderTop = mpatches.Rectangle((-0.3 + self.board_size / 2, self.board_size), width=1,
+                                           height=self.board_size * 1.2 - 0.6,
+                                           angle=-90, rotation_point='xy', color='blue')
+        self.ax.add_patch(blueBorderTop)
+
+        # Draw the hexagons
+        for y in range(self.board_size):
+            self.board_positions.append([])
+            self.board_plot.append([])
+            for x in range(self.board_size):
+                if self.get_board()[y][x] == None:
                     hex = mpatches.RegularPolygon(((x + y / 2) * 1.15, y), numVertices=6, radius=0.64,
-                                                  orientation=np.pi, edgecolor='black', facecolor='white')
-                    self.ax.add_patch(hex)
+                                                orientation=np.pi, edgecolor='black', facecolor='white')
+                elif self.get_board()[y][x] == 0:
+                    hex = mpatches.RegularPolygon(((x + y / 2) * 1.15, y), numVertices=6, radius=0.64,
+                                                orientation=np.pi, edgecolor='black', facecolor='red')
+                elif self.get_board()[y][x] == 1:
+                    hex = mpatches.RegularPolygon(((x + y / 2) * 1.15, y), numVertices=6, radius=0.64,
+                                                orientation=np.pi, edgecolor='black', facecolor='blue')
 
-                    self.board_positions[y].append(None)
-                    self.board_plot[y].append(hex)
+                self.ax.add_patch(hex)
 
-            plt.xlim(-2, self.board_size * 1.5 * 1.15 + 1)
-            plt.ylim(-2, self.board_size + 1)
+                self.board_positions[y].append(self.get_board()[y][x])
+                self.board_plot[y].append(hex)
 
-        else:
-            for y in range(self.board_size):
-                self.board_positions.append([])
-                for x in range(self.board_size):
-                    self.board_positions[y].append(None)
+        plt.xlim(-2, self.board_size * 1.5 * 1.15 + 1)
+        plt.ylim(-2, self.board_size + 1)
+
+        plt.plot()
 
     def check_if_player_won(self, player):
         unchecked_hexes = []
@@ -114,9 +133,9 @@ class Board:
 
         self.set_hex_by_x_y(x, y, player.get_id())
 
-        if self.show_plot:
-            self.board_plot[y][x].set_facecolor(player.get_color())
-            plt.plot()
+        #if self.show_plot:
+        #    self.board_plot[y][x].set_facecolor(player.get_color())
+        #    plt.plot()
 
         #return 1
 
