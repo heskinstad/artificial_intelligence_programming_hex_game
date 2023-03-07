@@ -1,6 +1,5 @@
 from Board import Board
 
-
 class State:
     def __init__(self, board, current_turn, next_turn):
         self.board = board

@@ -1,10 +1,8 @@
-import copy
 import random
 
 from Board import Board
 from Exceptions.IllegalNumberOfChildrenException import IllegalNumberOfChildrenException
 from State import State
-
 
 class Node:
     def __init__(self, state, parent=None, score=None, leaf=False):
@@ -15,7 +13,6 @@ class Node:
         self.children = []
         self.score = score # Holds the accumulated [number_of_wins, number_of_nodes] score
         self.leaf = leaf
-        # TODO: Add to score when backtracking after each simulation
 
     def get_state(self):
         return self.state
