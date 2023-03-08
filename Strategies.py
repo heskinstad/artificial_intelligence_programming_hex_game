@@ -20,7 +20,7 @@ class Strategies:
             self.mcts(pause_length)
 
     def place_randomly(self, pause_length):
-        gameBoard = Board(self.grid_size, self.show_plot)
+        gameBoard = Board(self.grid_size)
 
         if self.show_plot:
             gameBoard.initialize_board_plot()
@@ -63,5 +63,5 @@ class Strategies:
         player0 = Player(0, 'red')
         player1 = Player(1, 'blue')
 
-        tree = Tree(Node(State(Board(self.grid_size, self.show_plot), player0, player1)))
+        tree = Tree(Node(State(Board(self.grid_size), player0, player1)))
         tree.mcts_tree_default_until_end(player0, player1, 2, self.show_plot, pause_length)

@@ -67,8 +67,7 @@ class Node:
                 for y in range(board.get_board_size()):
                     if board.get_hex_by_x_y(x, y) == None:
 
-
-                        board_deepcopy = Board(board.get_board_size(), False, False)
+                        board_deepcopy = Board(board.get_board_size(), False)
                         board_deepcopy.board_positions = [x[:] for x in board.get_board()]
 
                         board_deepcopy.place(self.get_state().get_current_turn(), x, y)
@@ -76,6 +75,7 @@ class Node:
                         child = Node(State(board_deepcopy, self.get_state().get_next_turn(), self.get_state().get_current_turn()), self)
 
                         self.add_child(child)
+                        child.set_parent(self)
 
                         child.create_child_nodes(depth - 1)
 
@@ -87,12 +87,10 @@ class Node:
             y = int(random.uniform(0, board.get_board_size()))
             if board.get_hex_by_x_y(x, y) == None:
 
-                board_deepcopy = Board(board.get_board_size(), False, False)
+                board_deepcopy = Board(board.get_board_size(), False)
                 board_deepcopy.board_positions = [x[:] for x in board.get_board()]
 
                 board_deepcopy.place(self.get_state().get_current_turn(), x, y)
-
-                # board_deepcopy.get_hex_by_column_row(i, j).set_occupation_status(self.get_state().get_current_turn())
 
                 child = Node(State(board_deepcopy, self.get_state().get_next_turn(), self.get_state().get_current_turn()), self)
 

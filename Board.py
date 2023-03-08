@@ -5,14 +5,11 @@ import matplotlib.patches as mpatches
 
 mpl.use('TkAgg')
 
-#TODO: make the board visible for the mcts (only the path it choose)
-
 class Board:
-    def __init__(self, board_size, show_plot, initialize=True):
+    def __init__(self, board_size, initialize=True):
         self.board_size = board_size
         self.board_positions = []
         self.board_plot = []
-        self.show_plot = show_plot
 
         self.fig = None
         self.ax = None
@@ -127,17 +124,7 @@ class Board:
                         unchecked_hexes.append([neighbor[0], neighbor[1]])
 
     def place(self, player, x, y):
-        # Only allow placement if spot is free
-        #if self.get_hex_by_x_y(x, y).get_occupation_status() != None:
-        #    return 0
-
         self.set_hex_by_x_y(x, y, player.get_id())
-
-        #if self.show_plot:
-        #    self.board_plot[y][x].set_facecolor(player.get_color())
-        #    plt.plot()
-
-        #return 1
 
     def get_hex_by_x_y(self, x, y):
         return self.board_positions[y][x]
