@@ -164,9 +164,11 @@ class Node:
                 child.mcts_tree_policy(player, opposing_player, max_depth, max_time)
 
             self.add_score_from_child(child)
+            self.add_visit()
+            child.add_visit()
 
         self.remove_every_but_best_child(player, opposing_player)
-
+        print(self.calc_u_s_a(self.get_children()[0]))
 
     def mcts_default_policy(self, player, opposing_player):
         self.node_check_win(player, opposing_player)
@@ -245,8 +247,9 @@ class Node:
             self.remove_all_children()
             return self
 
-    '''def calc_u_s_a(self):
-        N_s = self.
-        N_s_a = self.get_visits()
+    # Calculate exploration bonus. Parameter child can be viewed as the action
+    def calc_u_s_a(self, child):
+        N_s_a = child.get_visits() + 1
+        N_s = self.get_visits()
 
-        return self.c * math.sqrt(math.log(N_s) / (1 + N_s_a))'''
+        return self.c * math.sqrt(math.log(N_s) / (1 + N_s_a))
