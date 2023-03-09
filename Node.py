@@ -1,4 +1,6 @@
+import math
 import random
+import time
 
 from Board import Board
 from Exceptions.IllegalNumberOfChildrenException import IllegalNumberOfChildrenException
@@ -13,6 +15,8 @@ class Node:
         self.children = []
         self.score = score # Holds the accumulated [number_of_wins, number_of_nodes] score
         self.leaf = leaf
+        self.c = None
+        self.visits = 0
 
     def get_state(self):
         return self.state
@@ -22,6 +26,18 @@ class Node:
 
     def set_score(self, score):
         self.score = score
+
+    def set_c(self, c):
+        self.c = c
+
+    def get_c(self):
+        return self.c
+
+    def add_visit(self):
+        self.visits += 1
+
+    def get_visits(self):
+        return self.visits
 
     def player_victory(self):
         self.score[0] += 1
@@ -73,6 +89,7 @@ class Node:
                         board_deepcopy.place(self.get_state().get_current_turn(), x, y)
 
                         child = Node(State(board_deepcopy, self.get_state().get_next_turn(), self.get_state().get_current_turn()), self)
+                        child.set_c(self.get_c())
 
                         self.add_child(child)
                         child.set_parent(self)
@@ -123,7 +140,7 @@ class Node:
 
         self.remove_every_but_best_child(player, opposing_player)
 
-    def mcts_tree_policy(self, player, opposing_player, max_depth):
+    def mcts_tree_policy(self, player, opposing_player, max_depth, max_time):
         if max_depth <= 0:
             self.mcts_default_policy(player, opposing_player)
             return
@@ -132,13 +149,19 @@ class Node:
         if len(self.get_children()) == 0:
             self.create_child_nodes(1)
 
+        time_start = time.time()
+
         for child in self.get_children():
+            if time.time() > time_start + max_time:
+                self.add_score_from_child(child)
+                self.remove_every_but_best_child(player, opposing_player)
+                return
 
             # Makes child leaf if end state (win or loss)
             child.node_check_win(player, opposing_player)
 
             if not child.is_leaf():
-                child.mcts_tree_policy(player, opposing_player, max_depth)
+                child.mcts_tree_policy(player, opposing_player, max_depth, max_time)
 
             self.add_score_from_child(child)
 
@@ -180,8 +203,10 @@ class Node:
                         child.score[1] += 100  # Add a very large value for red to choose this
                         print(player.get_color() + " is about to win")
                         break
+
                     if ((child.get_score()[1] + 1) / (child.get_score()[0] + 1)) > ((best_child.get_score()[1] + 1) / (best_child.get_score()[0] + 1)):
                         best_child = child
+
             elif self.get_state().get_current_turn() == opposing_player:
                 for child in self.get_children():
                     if child.node_check_win(player, opposing_player):
@@ -189,6 +214,7 @@ class Node:
                         child.score[1] -= 100  # Add a very large (negative) value for blue to choose this
                         print(opposing_player.get_color() + " is about to win")
                         break
+
                     if ((child.get_score()[1] + 1) / (child.get_score()[0] + 1)) < ((best_child.get_score()[1] + 1) / (best_child.get_score()[0] + 1)):
                         best_child = child
 
@@ -218,3 +244,9 @@ class Node:
         else:
             self.remove_all_children()
             return self
+
+    '''def calc_u_s_a(self):
+        N_s = self.
+        N_s_a = self.get_visits()
+
+        return self.c * math.sqrt(math.log(N_s) / (1 + N_s_a))'''

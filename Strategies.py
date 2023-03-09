@@ -9,15 +9,16 @@ from Tree import Tree
 
 
 class Strategies:
-    def __init__(self, grid_size, show_plot, game_type, pause_length=0.001):
+    def __init__(self, grid_size, show_plot, game_type, c, max_time=9999, pause_length=0.01):
         self.grid_size = grid_size
         self.show_plot = show_plot
         self.game_type = game_type
+        self.max_time = max_time
 
         if game_type == "random":
             self.place_randomly(pause_length)
         elif game_type == "mcts":
-            self.mcts(pause_length)
+            self.mcts(c, pause_length)
 
     def place_randomly(self, pause_length):
         gameBoard = Board(self.grid_size)
@@ -59,9 +60,10 @@ class Strategies:
             gameBoard.create_board_plot(gameBoard.get_fig(), gameBoard.get_ax())
             plt.show()
 
-    def mcts(self, pause_length):
+    def mcts(self, c, pause_length):
         player0 = Player(0, 'red')
         player1 = Player(1, 'blue')
 
         tree = Tree(Node(State(Board(self.grid_size), player0, player1)))
-        tree.mcts_tree_default_until_end(player0, player1, 2, self.show_plot, pause_length)
+        tree.get_top_node().set_c(c)
+        tree.mcts_tree_default_until_end(player0, player1, 2, self.max_time, self.show_plot, pause_length)
