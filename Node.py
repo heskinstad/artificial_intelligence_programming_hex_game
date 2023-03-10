@@ -122,6 +122,7 @@ class Node:
                 return 0
         return 1
 
+    ''' old stuff - TO BE REMOVED
     def simulate_from_node(self, player, opposing_player, max_depth):
         if max_depth <= 0:
             return
@@ -139,6 +140,47 @@ class Node:
             self.add_score_from_child(child)
 
         self.remove_every_but_best_child(player, opposing_player)
+    '''
+
+    '''
+    Tree policy:
+    Choose the branch with the highest combination of exploitation + exploration
+    Q(s, a) + u(s, a)
+    where
+    Q(s, a) is the value of the final expected result of doing action a from node s (updated after each rollout)
+    - can be considered the score of a child node?
+    and
+    u(s, a) is 
+    '''
+    def mcts_tree_policy(self, player, opposing_player, max_depth, max_time):
+        if max_depth <= 0:
+            self.mcts_default_policy(player, opposing_player)
+            return
+        max_depth -= 1
+
+        if len(self.get_children()) == 0:
+            self.create_child_nodes(1)
+
+        time_start = time.time()
+
+        for child in self.get_children():
+            if time.time() > time_start + max_time:
+                self.add_score_from_child(child)
+                self.remove_every_but_best_child(player, opposing_player)
+                return
+
+            # Makes child leaf if end state (win or loss)
+            child.node_check_win(player, opposing_player)
+
+            if not child.is_leaf():
+                child.mcts_tree_policy(player, opposing_player, max_depth, max_time)
+
+            self.add_score_from_child(child)
+            self.add_visit()
+            child.add_visit()
+
+        self.remove_every_but_best_child(player, opposing_player)
+        print(self.calc_u_s_a(self.get_children()[0]))
 
     def mcts_tree_policy(self, player, opposing_player, max_depth, max_time):
         if max_depth <= 0:
@@ -253,3 +295,26 @@ class Node:
         N_s = self.get_visits()
 
         return self.c * math.sqrt(math.log(N_s) / (1 + N_s_a))
+
+    def calc_best_child(self, player, opposing_player):
+        exploration_bonus = self.calc_u_s_a()
+
+        if len(self.get_children()) > 0:
+            best_child = self.get_children()[0]
+
+            # Iterate through the children and set best_child to be the best (highest score for red, lowest score for blue)
+            if self.get_state().get_current_turn() == player:
+                for child in self.get_children():
+
+                    # Player want the highest score
+                    if ((child.get_score()[1] + 1) / (child.get_score()[0] + 1)) > (
+                            (best_child.get_score()[1] + 1) / (best_child.get_score()[0] + 1)):
+                        best_child = child
+
+            elif self.get_state().get_current_turn() == opposing_player:
+                for child in self.get_children():
+
+                    # Opposing player want the lowest score
+                    if ((child.get_score()[1] + 1) / (child.get_score()[0] + 1)) < (
+                            (best_child.get_score()[1] + 1) / (best_child.get_score()[0] + 1)):
+                        best_child = child

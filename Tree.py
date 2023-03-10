@@ -2,16 +2,6 @@ import time
 
 from matplotlib import pyplot as plt
 
-'''
-Tree policy:
-Choose the branch with the highest combination of exploitation + exploration
-Q(s, a) + u(s, a)
-where
-Q(s, a) is the value of the final expected result of doing action a from node s (updated after each rollout)
-and
-u(s, a) is 
-'''
-
 class Tree:
     def __init__(self, top_node):
         self.top = top_node

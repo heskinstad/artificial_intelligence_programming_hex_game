@@ -1,6 +1,6 @@
 from Strategies import Strategies
 
-board_size = 6
+board_size = 4
 show_board = False
 pause_length = 1.0
 strategy = "mcts"
