@@ -17,6 +17,7 @@ class Node:
         self.leaf = leaf
         self.c = None
         self.visits = 0
+        self.total_score = None
 
     def get_state(self):
         return self.state
@@ -49,6 +50,12 @@ class Node:
     def add_score_from_child(self, child):
         self.score[0] += child.score[0]
         self.score[1] += child.score[1]
+
+    def set_total_score(self, total_score):
+        self.total_score = total_score
+
+    def get_total_score(self):
+        return self.total_score
 
     def is_leaf(self):
         return self.leaf
@@ -122,26 +129,6 @@ class Node:
                 return 0
         return 1
 
-    ''' old stuff - TO BE REMOVED
-    def simulate_from_node(self, player, opposing_player, max_depth):
-        if max_depth <= 0:
-            return
-        max_depth -= 1
-
-        if len(self.get_children()) == 0:
-            self.create_child_nodes(1)
-
-        for child in self.get_children():
-            child.node_check_win(player, opposing_player)
-
-            if not child.is_leaf():
-                child.simulate_from_node(player, opposing_player, max_depth)
-
-            self.add_score_from_child(child)
-
-        self.remove_every_but_best_child(player, opposing_player)
-    '''
-
     '''
     Tree policy:
     Choose the branch with the highest combination of exploitation + exploration
@@ -152,12 +139,7 @@ class Node:
     and
     u(s, a) is 
     '''
-    def mcts_tree_policy(self, player, opposing_player, max_depth, max_time):
-        if max_depth <= 0:
-            self.mcts_default_policy(player, opposing_player)
-            return
-        max_depth -= 1
-
+    def mcts_tree_policy(self, player, opposing_player, max_time):
         if len(self.get_children()) == 0:
             self.create_child_nodes(1)
 
@@ -173,37 +155,7 @@ class Node:
             child.node_check_win(player, opposing_player)
 
             if not child.is_leaf():
-                child.mcts_tree_policy(player, opposing_player, max_depth, max_time)
-
-            self.add_score_from_child(child)
-            self.add_visit()
-            child.add_visit()
-
-        self.remove_every_but_best_child(player, opposing_player)
-        print(self.calc_u_s_a(self.get_children()[0]))
-
-    def mcts_tree_policy(self, player, opposing_player, max_depth, max_time):
-        if max_depth <= 0:
-            self.mcts_default_policy(player, opposing_player)
-            return
-        max_depth -= 1
-
-        if len(self.get_children()) == 0:
-            self.create_child_nodes(1)
-
-        time_start = time.time()
-
-        for child in self.get_children():
-            if time.time() > time_start + max_time:
-                self.add_score_from_child(child)
-                self.remove_every_but_best_child(player, opposing_player)
-                return
-
-            # Makes child leaf if end state (win or loss)
-            child.node_check_win(player, opposing_player)
-
-            if not child.is_leaf():
-                child.mcts_tree_policy(player, opposing_player, max_depth, max_time)
+                child.mcts_tree_policy(player, opposing_player, max_time)
 
             self.add_score_from_child(child)
             self.add_visit()
@@ -270,24 +222,20 @@ class Node:
                     i += 1
 
     # Traverse down the tree to the best known leaf node
-    def move_to_best_node(self, depth):
+    def expand_through_best_node(self, player, opposing_player):
+        if len(self.get_children()) > 0:
+            all_without_total_score = True
+            for child in self.get_children():
+                if child.get_total_score != None:
+                    all_without_total_score = False
+                    break
 
-        if self.is_leaf():
-            return self
+            if all_without_total_score:
+                return self
 
-        if len(self.get_children()) > 0 and depth > 0:
+            best_child = self.calc_best_child(player, opposing_player)
 
-            if len(self.get_children()) > 1:
-                raise IllegalNumberOfChildrenException("There can only be one child per node")
-
-            print()
-            print(self.get_score())
-            self.get_children()[0].get_state().get_board().print_board()
-
-            return self.get_children()[0].move_to_best_node(depth - 1)
-        else:
-            self.remove_all_children()
-            return self
+            best_child.mcts_default_policy(player, opposing_player)
 
     # Calculate exploration bonus. Parameter child can be viewed as the action
     def calc_u_s_a(self, child):
@@ -297,24 +245,29 @@ class Node:
         return self.c * math.sqrt(math.log(N_s) / (1 + N_s_a))
 
     def calc_best_child(self, player, opposing_player):
-        exploration_bonus = self.calc_u_s_a()
-
         if len(self.get_children()) > 0:
             best_child = self.get_children()[0]
 
             # Iterate through the children and set best_child to be the best (highest score for red, lowest score for blue)
-            if self.get_state().get_current_turn() == player:
-                for child in self.get_children():
+            for child in self.get_children():
+                if child.get_score[0] == 0:
+                    exploitation_bonus = 0
+                else:
+                    exploitation_bonus = child.get_score()[1] / child.get_score()[0]
+                exploration_bonus = self.calc_u_s_a(child)
+                child.set_total_score(exploitation_bonus + exploration_bonus)
 
+                if self.get_state().get_current_turn() == player:
                     # Player want the highest score
-                    if ((child.get_score()[1] + 1) / (child.get_score()[0] + 1)) > (
-                            (best_child.get_score()[1] + 1) / (best_child.get_score()[0] + 1)):
+                    if child.get_total_score() > best_child.get_total_score():
                         best_child = child
 
-            elif self.get_state().get_current_turn() == opposing_player:
-                for child in self.get_children():
-
+                elif self.get_state().get_current_turn() == opposing_player:
                     # Opposing player want the lowest score
-                    if ((child.get_score()[1] + 1) / (child.get_score()[0] + 1)) < (
-                            (best_child.get_score()[1] + 1) / (best_child.get_score()[0] + 1)):
+                    if child.get_total_score() < best_child.get_total_score():
                         best_child = child
+
+            return best_child
+
+        else:
+            raise IllegalNumberOfChildrenException("node needs to have at least one child")

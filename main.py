@@ -7,7 +7,9 @@ strategy = "mcts"
 c = 1.0
 M = 20.0  # Max time per actual move in seconds
 
-Strategies(board_size, show_board, strategy, c, M)
+#Strategies(board_size, show_board, strategy, c, M)
+
+print( 0 / 0)
 
 
 

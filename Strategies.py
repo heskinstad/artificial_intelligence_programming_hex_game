@@ -66,4 +66,4 @@ class Strategies:
 
         tree = Tree(Node(State(Board(self.grid_size), player0, player1)))
         tree.get_top_node().set_c(c)
-        tree.mcts_tree_default_until_end(player0, player1, 2, self.max_time, self.show_plot, pause_length)
+        tree.mcts_tree_default_until_end(player0, player1, self.max_time, self.show_plot, pause_length)
