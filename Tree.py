@@ -22,13 +22,20 @@ class Tree:
             current_node.get_state().get_board().initialize_board_plot()
 
         while not current_node.is_leaf():
-            current_node.mcts_tree_policy(player, opposing_player, max_time)
+            for i in range(10000):
+                current_node.mcts_tree_policy(player, opposing_player)
 
-            current_node = current_node.move_to_best_node(1)
+            current_node.remove_every_but_best_child(player, opposing_player)
+            current_node = current_node.get_children()[0]
+            current_node.remove_all_children()
 
             if show_plot:
                 current_node.get_state().get_board().create_board_plot(self.get_top_node().get_state().get_board().get_fig(), self.get_top_node().get_state().get_board().get_ax())
                 plt.pause(pause_length)
+
+            print()
+            print(current_node.get_score())
+            current_node.get_state().get_board().print_board()
 
 
         print()
