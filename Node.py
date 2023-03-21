@@ -172,7 +172,7 @@ class Node:
         if len(self.get_children()) > 0:
             best_child = self.calc_best_child(player, opposing_player)
 
-            if best_child.get_visits() < 3 * len(self.get_children()):
+            if best_child.get_visits() < 6 * len(self.get_children()):
                 best_child.mcts_tree_policy(player, opposing_player)
                 return
 
@@ -180,6 +180,8 @@ class Node:
         child = self.create_random_child_node()
 
         if child == None:
+            child = random.choice(self.get_children())
+            child.mcts_tree_policy(player, opposing_player)
             return
 
         child.mcts_default_policy(player, opposing_player)

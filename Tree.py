@@ -21,7 +21,7 @@ class Tree:
         if show_plot:
             current_node.get_state().get_board().initialize_board_plot()
 
-        for j in range(4):
+        while not current_node.is_leaf():
             for i in range(400):
                 current_node.mcts_tree_policy(player, opposing_player)
 
