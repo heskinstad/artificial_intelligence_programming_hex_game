@@ -108,6 +108,7 @@ class Node:
     def create_random_child_node(self):
         board = self.get_state().get_board()
 
+        # Create a 'board' with coordinates
         positions = []
         for y in range(board.get_board_size()):
             for x in range(board.get_board_size()):
@@ -115,10 +116,12 @@ class Node:
 
         while len(positions) > 1:
 
+            # Select x and y randomly from the available positions
             index = int(random.uniform(0, len(positions)))
             x = positions[index][1]
             y = positions[index][0]
 
+            # Check if it already exists in any of the other children nodes
             in_current_child = False
             if len(self.get_children()) > 0:
                 for child in self.get_children():
@@ -139,9 +142,11 @@ class Node:
 
                 return child
 
+            # If the space is occupied, delete the position from the array and try again
             else:
                 del positions[index]
 
+        # Return None if there are no free spaces left
         return None
 
 
@@ -167,7 +172,7 @@ class Node:
         if len(self.get_children()) > 0:
             best_child = self.calc_best_child(player, opposing_player)
 
-            if best_child.get_visits() < 2 * len(self.get_children()):
+            if best_child.get_visits() < 3 * len(self.get_children()):
                 best_child.mcts_tree_policy(player, opposing_player)
                 return
 
@@ -225,7 +230,7 @@ class Node:
             self.make_leaf()
             return 1
 
-
+    #TODO: make it select the best child based on the total score instead of win/loss ratio?
     def remove_every_but_best_child(self, player, opposing_player):
         # Delete objects without optimal score
         if len(self.get_children()) > 0:
