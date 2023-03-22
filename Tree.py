@@ -23,7 +23,7 @@ class Tree:
 
         while not current_node.is_leaf():
 
-            for i in range(400):
+            for i in range(1200):
                 current_node.mcts_tree_policy(player, opposing_player)
 
             print()
@@ -33,7 +33,7 @@ class Tree:
             print(tete)
 
 
-            current_node.remove_every_but_best_child(player, opposing_player)
+            current_node.remove_every_but_best_child2(player, opposing_player)
             current_node = current_node.get_children()[0]
             print(current_node.get_total_score())
             current_node.remove_all_children()

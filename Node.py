@@ -184,6 +184,7 @@ class Node:
 
             # child is None if there are no available child node slots
             if child == None:
+                print(len(self.get_children()))
                 child = random.choice(self.get_children())
                 child.mcts_tree_policy(player, opposing_player)
                 return
@@ -268,6 +269,29 @@ class Node:
                         break'''
 
                     if ((child.get_score()[1] + 1) / (child.get_score()[0] + 1)) < ((best_child.get_score()[1] + 1) / (best_child.get_score()[0] + 1)):
+                        best_child = child
+
+            i = 0
+            while len(self.get_children()) > 1:
+                if not self.get_children()[i] == best_child:
+                    del self.get_children()[i]
+                else:
+                    i += 1
+
+    def remove_every_but_best_child2(self, player, opposing_player):
+        # Delete objects without optimal score
+        if len(self.get_children()) > 0:
+            best_child = self.get_children()[0]
+
+            # Iterate through the children and set best_child to be the best (highest score for red, lowest score for blue)
+            if self.get_state().get_current_turn() == player:
+                for child in self.get_children():
+                    if child.get_total_score() > best_child.get_total_score():
+                        best_child = child
+
+            elif self.get_state().get_current_turn() == opposing_player:
+                for child in self.get_children():
+                    if child.get_total_score() < best_child.get_total_score():
                         best_child = child
 
             i = 0
