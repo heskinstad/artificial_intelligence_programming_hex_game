@@ -169,22 +169,29 @@ class Node:
     '''
     def mcts_tree_policy(self, player, opposing_player):
         self.add_visit()
-        if len(self.get_children()) > 0:
-            best_child = self.calc_best_child(player, opposing_player)
+        self.node_check_win(player, opposing_player)
 
-            if best_child.get_visits() < 6 * len(self.get_children()):
-                best_child.mcts_tree_policy(player, opposing_player)
+        if not self.is_leaf():
+            if len(self.get_children()) > 0:
+                best_child = self.calc_best_child(player, opposing_player)
+
+                if best_child.get_visits() < 6 * len(self.get_children()):
+                    best_child.mcts_tree_policy(player, opposing_player)
+                    return
+
+            # Try to create a new child node
+            child = self.create_random_child_node()
+
+            # child is None if there are no available child node slots
+            if child == None:
+                child = random.choice(self.get_children())
+                child.mcts_tree_policy(player, opposing_player)
                 return
 
-        # If no child nodes have been generated
-        child = self.create_random_child_node()
+            child.mcts_default_policy(player, opposing_player)
 
-        if child == None:
-            child = random.choice(self.get_children())
-            child.mcts_tree_policy(player, opposing_player)
-            return
-
-        child.mcts_default_policy(player, opposing_player)
+        else:
+            self.win_end_game(player, opposing_player)
 
 
     def mcts_default_policy(self, player, opposing_player):
@@ -202,23 +209,25 @@ class Node:
 
         # Propagate the score and visit up every node in the current path to the top node
         else:
-            child = self
-            current = self.get_parent()
+            self.win_end_game(player, opposing_player, True)
 
-            while current.get_parent() != None:
-                current.add_score_from_child(child)
-                current.add_visit()
 
-                child = current
-                current = current.get_parent()
+    def win_end_game(self, player, opposing_player, remove_children=False):
+        child = self
+        current = self.get_parent()
 
+        while current.get_parent() != None:
             current.add_score_from_child(child)
             current.add_visit()
 
-            #print(self.get_path())
+            child = current
+            current = current.get_parent()
 
-        self.remove_all_children()
+        current.add_score_from_child(child)
+        current.add_visit()
 
+        if remove_children:
+            self.remove_all_children()
 
     def node_check_win(self, player, opposing_player):
         # If player won this simulation
