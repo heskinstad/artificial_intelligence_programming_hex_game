@@ -175,7 +175,7 @@ class Node:
             if len(self.get_children()) > 0:
                 best_child = self.calc_best_child(player, opposing_player)
 
-                if best_child.get_visits() < 6 * len(self.get_children()):
+                if best_child.get_visits() < 5 * len(self.get_children()):
                     best_child.mcts_tree_policy(player, opposing_player)
                     return
 
@@ -192,7 +192,7 @@ class Node:
             child.mcts_default_policy(player, opposing_player)
 
         else:
-            self.win_end_game(player, opposing_player)
+            self.win_end_game(player, opposing_player, [0, 0])
 
 
     def mcts_default_policy(self, player, opposing_player):
@@ -204,31 +204,32 @@ class Node:
 
             # If there are no possible child nodes left (no free positions on the board)
             if child_node == None:
+                print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
                 return
 
             child_node.mcts_default_policy(player, opposing_player)
 
         # Propagate the score and visit up every node in the current path to the top node
         else:
-            self.win_end_game(player, opposing_player, True)
+            self.win_end_game(player, opposing_player, self.get_score(), True)
 
 
-    def win_end_game(self, player, opposing_player, remove_children=False):
+    def win_end_game(self, player, opposing_player, score, remove_children=False):
         child = self
         current = self.get_parent()
 
-        while current.get_parent() != None:
-            current.add_score_from_child(child)
-            current.add_visit()
+        # Propagate score
+        while child.get_parent() != None:
+            current.score[0] += score[0]
+            current.score[1] += score[1]
 
             child = current
             current = current.get_parent()
 
-        current.add_score_from_child(child)
-        current.add_visit()
-
+        # Remove children to be performed if during default policy
         if remove_children:
             self.remove_all_children()
+
 
     def node_check_win(self, player, opposing_player):
         # If player won this simulation
