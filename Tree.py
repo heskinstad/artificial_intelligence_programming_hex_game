@@ -23,25 +23,29 @@ class Tree:
 
         while not current_node.is_leaf():
 
-            for i in range(50):
+            for i in range(1000):
                 current_node.mcts_tree_policy(player, opposing_player)
 
             print()
             tete = ""
             toto = ""
             titi = ""
+            tata = 0
             for child in current_node.get_children():
                 tete = tete + " " + str(child.get_total_score())
                 toto = toto + " " + str(child.get_score())
                 titi = titi + " " + str(child.get_visits())
+                tata += child.get_visits()
             print(tete)
             print(toto)
             print(titi)
+            print(tata)
 
+            current_node.update_total_scores_children(player, opposing_player)
 
             current_node.remove_every_but_best_child2(player, opposing_player)
             current_node = current_node.get_children()[0]
-            print(current_node.get_total_score())
+            print(str(current_node.get_parent().get_state().get_current_turn().get_color()) + " chooses " + str(current_node.get_total_score()))
             current_node.remove_all_children()
 
             if show_plot:

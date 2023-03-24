@@ -169,13 +169,13 @@ class Node:
     '''
     def mcts_tree_policy(self, player, opposing_player):
         self.add_visit()
-        self.node_check_win(player, opposing_player)
+        score = self.node_check_win(player, opposing_player)
 
         if not self.is_leaf():
             if len(self.get_children()) > 0:
                 best_child = self.calc_best_child(player, opposing_player)
 
-                if best_child.get_visits() < 5 * len(self.get_children()):
+                if best_child.get_visits() < 8 * len(self.get_children()):
                     best_child.mcts_tree_policy(player, opposing_player)
                     return
 
@@ -192,26 +192,25 @@ class Node:
             child.mcts_default_policy(player, opposing_player)
 
         else:
-            self.win_end_game(player, opposing_player, [0, 0])
+            self.win_end_game(player, opposing_player, score)
 
 
     def mcts_default_policy(self, player, opposing_player):
         self.add_visit()
-        self.node_check_win(player, opposing_player)
+        score = self.node_check_win(player, opposing_player)
 
         if not self.is_leaf():
             child_node = self.create_random_child_node()
 
             # If there are no possible child nodes left (no free positions on the board)
             if child_node == None:
-                print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
                 return
 
             child_node.mcts_default_policy(player, opposing_player)
 
         # Propagate the score and visit up every node in the current path to the top node
         else:
-            self.win_end_game(player, opposing_player, self.get_score(), True)
+            self.win_end_game(player, opposing_player, score, True)
 
 
     def win_end_game(self, player, opposing_player, score, remove_children=False):
@@ -236,14 +235,13 @@ class Node:
         if self.get_state().get_board().check_if_player_won(player) == player:
             self.player_victory()
             self.make_leaf()
-            return 1
+            return [1, 1]
         # If player lost this simulation
         elif self.get_state().get_board().check_if_player_won(opposing_player) == opposing_player:
             self.opposing_player_victory()
             self.make_leaf()
-            return 1
+            return [1, 0]
 
-    #TODO: make it select the best child based on the total score instead of win/loss ratio?
     def remove_every_but_best_child(self, player, opposing_player):
         # Delete objects without optimal score
         if len(self.get_children()) > 0:
@@ -360,6 +358,20 @@ class Node:
         else:
             raise IllegalNumberOfChildrenException("node needs to have at least one child")
 
+
+    def update_total_scores_children(self, player, opposing_player):
+        for child in self.get_children():
+            if child.get_score()[0] == 0:
+                exploitation_bonus = 0
+            else:
+                exploitation_bonus = child.get_score()[1] / child.get_score()[0]
+
+            exploration_bonus = self.calc_u_s_a(child)
+
+            if self.get_state().get_current_turn() == player:
+                child.set_total_score(exploitation_bonus + exploration_bonus)
+            elif self.get_state().get_current_turn() == opposing_player:
+                child.set_total_score(exploitation_bonus - exploration_bonus)
 
     # Print the path (index number of every node down to the current node)
     def get_path(self):
