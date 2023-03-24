@@ -7,17 +7,18 @@ from Exceptions.IllegalNumberOfChildrenException import IllegalNumberOfChildrenE
 from State import State
 
 class Node:
-    def __init__(self, state, parent=None, score=None, leaf=False):
+    def __init__(self, state, parent=None, score=None, endstate=False):
         if score is None:
             score = [0, 0]
         self.state = state
         self.parent = parent
         self.children = []
         self.score = score # Holds the accumulated [number_of_wins, number_of_nodes] score
-        self.leaf = leaf
+        self.endstate = endstate
         self.c = None
         self.visits = 0
         self.total_score = None
+        self.leaf = False
 
     def get_state(self):
         return self.state
@@ -57,11 +58,20 @@ class Node:
     def get_total_score(self):
         return self.total_score
 
+    def is_endstate(self):
+        return self.endstate
+
+    def make_endstate(self):
+        self.endstate = True
+
     def is_leaf(self):
         return self.leaf
 
-    def make_leaf(self):
+    def set_leaf_status(self):
         self.leaf = True
+
+    def remove_leaf_status(self):
+        self.leaf = False
 
     def get_parent(self):
         return self.parent
@@ -171,7 +181,7 @@ class Node:
         self.add_visit()
         score = self.node_check_win(player, opposing_player)
 
-        if not self.is_leaf():
+        if not self.is_endstate():
             if len(self.get_children()) > 0:
                 best_child = self.calc_best_child(player, opposing_player)
 
@@ -183,7 +193,7 @@ class Node:
             child = self.create_random_child_node()
 
             # child is None if there are no available child node slots
-            if child == None:
+            if child == None and len(self.get_children()) > 0:
                 print(len(self.get_children()))
                 child = random.choice(self.get_children())
                 child.mcts_tree_policy(player, opposing_player)
@@ -199,7 +209,7 @@ class Node:
         self.add_visit()
         score = self.node_check_win(player, opposing_player)
 
-        if not self.is_leaf():
+        if not self.is_endstate():
             child_node = self.create_random_child_node()
 
             # If there are no possible child nodes left (no free positions on the board)
@@ -234,12 +244,12 @@ class Node:
         # If player won this simulation
         if self.get_state().get_board().check_if_player_won(player) == player:
             self.player_victory()
-            self.make_leaf()
+            self.make_endstate()
             return [1, 1]
         # If player lost this simulation
         elif self.get_state().get_board().check_if_player_won(opposing_player) == opposing_player:
             self.opposing_player_victory()
-            self.make_leaf()
+            self.make_endstate()
             return [1, 0]
 
     def remove_every_but_best_child(self, player, opposing_player):
@@ -301,7 +311,7 @@ class Node:
                     i += 1
 
 
-    # Traverse down the tree to the best known leaf node
+    # Traverse down the tree to the best known leaf node - DEPRECATED
     def expand_through_best_node(self, player, opposing_player):
         if len(self.get_children()) > 0:
             all_without_total_score = True
