@@ -21,6 +21,28 @@ class Actor:
 
 
     def calc_rollout_distribution(self):
+
+        # Input layer
         input_shape = len(self.get_state().get_board().get_positions())
         inputs = tf.keras.Input(shape = input_shape)
 
+        # Convolutional layers
+        x = tf.keras.layers.Conv2D(filters=32, kernel_size=(3, 3), activation='relu')(inputs)
+        x = tf.keras.layers.Conv2D(filters=64, kernel_size=(3, 3), activation='relu')(x)
+
+        # Flatten the output of the convolutional layers
+        x = tf.keras.layers.Flatten()(x)
+
+        # Fully connected layers
+        x = tf.keras.layers.Dense(units=128, activation='relu')(x)
+        outputs = tf.keras.layers.Dense(units=self.count_num_of_free_positions()-1, activation='softmax')(x)
+
+        # Model
+        model = tf.keras.Model(inputs=inputs, outputs=outputs)
+
+        # Loss function and optimizer
+        loss_fn = tf.keras.losses.CategoricalCrossentropy()
+        optimizer = tf.keras.optimizers.Adam()
+
+        # Compile the model
+        model.compile(optimizer=optimizer, loss=loss_fn)
