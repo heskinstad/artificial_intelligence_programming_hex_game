@@ -168,12 +168,45 @@ class Node:
     and
     u(s, a) is 
     '''
-    def mcts_tree_policy(self):
-        pass
+    def mcts_tree_policy(self, player, opposing_player):
 
 
-    def mcts_default_policy(self):
-        pass
+        # If self is a leaf it will have no children and needs to use the default policy
+        if self.is_leaf():
+            self.mcts_default_policy(player, opposing_player)
+            self.remove_leaf_status()
+
+
+    def mcts_default_policy(self, player, opposing_player):
+        score = self.node_check_win(player, opposing_player)
+
+        # If anyone won in this node
+        if score != 0:
+            self.make_endstate()
+            self.propagate_score(self, score)
+            return
+
+        # Choose a random child node and move to this recursively
+        random_child_node = self.create_random_child_node()
+        random_child_node.mcts_default_policy(player, opposing_player)
+
+        # If top node in the newly generated default policy tree
+        # Remove own children and set itself as a leaf
+        if self.get_parent().is_leaf():
+            self.remove_all_children()
+            self.set_leaf_status()
+
+
+    # Propagates the score given as a parameter to the node self and every parent up throughout the tree
+    def propagate_score(self, score):
+        current_node = self
+
+        # Go up to every parent and add score until there are no parents
+        while current_node.get_parent() != None:
+            current_node.set_score()[0] = current_node.get_score()[0] + score[0]
+            current_node.set_score()[1] = current_node.get_score()[1] + score[1]
+
+            current_node = current_node.get_parent()
 
 
     def node_check_win(self, player, opposing_player):
@@ -187,6 +220,8 @@ class Node:
             self.opposing_player_victory()
             self.make_endstate()
             return [1, 0]
+        else:
+            return 0
 
 
     # Calculate exploration bonus. Parameter child can be viewed as the action
