@@ -6,19 +6,18 @@ from Exceptions.IllegalNumberOfChildrenException import IllegalNumberOfChildrenE
 from State import State
 
 class Node:
-    def __init__(self, state, parent=None, score=None, endstate=False):
+    def __init__(self, state, max_children, parent=None, score=None, endstate=False, ):
         if score is None:
             score = [0, 0]
         self.state = state
         self.parent = parent
         self.children = []
-        self.score = score # Holds the accumulated [number_of_wins, number_of_nodes] score
+        self.score = score # Holds the accumulated [number_of_visits, score]
         self.endstate = endstate
         self.c = None
-        self.visits = 0
-        self.total_score = None
         self.leaf = False
         self.top_node = False
+        self.max_children = max_children
 
     def get_state(self):
         return self.state
@@ -34,29 +33,6 @@ class Node:
 
     def get_c(self):
         return self.c
-
-    def add_visit(self):
-        self.visits += 1
-
-    def get_visits(self):
-        return self.visits
-
-    def player_victory(self):
-        self.score[0] += 1
-        self.score[1] += 1
-
-    def opposing_player_victory(self):
-        self.score[0] += 1
-
-    def add_score_from_child(self, child):
-        self.score[0] += child.score[0]
-        self.score[1] += child.score[1]
-
-    def set_total_score(self, total_score):
-        self.total_score = total_score
-
-    def get_total_score(self):
-        return self.total_score
 
     def is_endstate(self):
         return self.endstate
@@ -85,9 +61,6 @@ class Node:
     def add_child(self, child):
         self.children.append(child)
 
-    def remove_child_at_index(self, index):
-        self.children.remove(index)
-
     def remove_all_children(self):
         self.children = []
 
@@ -96,6 +69,9 @@ class Node:
 
     def is_top_node(self):
         return self.top_node
+
+    def get_max_children(self):
+        return self.max_children
 
     def create_child_nodes(self, depth):
         if depth > 0:
@@ -111,7 +87,7 @@ class Node:
 
                         board_deepcopy.place(self.get_state().get_current_turn(), x, y)
 
-                        child = Node(State(board_deepcopy, self.get_state().get_next_turn(), self.get_state().get_current_turn()), self)
+                        child = Node(State(board_deepcopy, self.get_state().get_next_turn(), self.get_state().get_current_turn()), self.get_max_children() - 1, self)
                         child.set_c(self.get_c())
 
                         self.add_child(child)
@@ -130,7 +106,7 @@ class Node:
             for x in range(board.get_board_size()):
                 positions.append([y, x])
 
-        while len(positions) > 1:
+        while len(positions) > 0:
 
             # Select x and y randomly from the available positions
             index = int(random.uniform(0, len(positions)))
@@ -151,7 +127,7 @@ class Node:
 
                 board_deepcopy.place(self.get_state().get_current_turn(), x, y)
 
-                child = Node(State(board_deepcopy, self.get_state().get_next_turn(), self.get_state().get_current_turn()), self)
+                child = Node(State(board_deepcopy, self.get_state().get_next_turn(), self.get_state().get_current_turn()), self.get_max_children() - 1, self)
                 child.c = self.get_c()
 
                 self.add_child(child)
@@ -178,17 +154,38 @@ class Node:
     '''
     def mcts_tree_policy(self, player, opposing_player):
         # If self is a leaf it will have no children and needs to use the default policy
-        if self.is_leaf():
+        if self.is_endstate():
+            return
+        # IDEA: create new node if score of all current nodes are below c * something?
+        elif self.is_leaf() or len(self.get_children()) < (self.get_max_children() - 1) / 2 and self.get_max_children() > 0:
+            self.set_leaf_status()
             self.mcts_default_policy(player, opposing_player)
             self.remove_leaf_status()
-            return
+        else:
 
-        elif self.is_endstate():
-            return
+            ###TODO: REMOVE OR RECODE
+            if len(self.get_children()) > 0 and len(self.get_children()) - self.get_max_children() > 0:
+                score_over_c = False
+                for child in self.get_children():
+                    if self.get_state().get_current_turn() == player:
+                        if child.get_score()[1] / child.get_score()[0] > 0:
+                            score_over_c = True
+                            break
+                    elif self.get_state().get_current_turn() == opposing_player:
+                        if child.get_score()[1] / child.get_score()[0] < 0:
+                            score_over_c = True
+                            break
 
-        best_child = self.calc_best_child(player, opposing_player)
+                if score_over_c:
+                    self.set_leaf_status()
+                    self.mcts_default_policy(player, opposing_player)
+                    self.remove_leaf_status()
+                    return
+            ###
 
-        best_child.mcts_tree_policy(player, opposing_player)
+
+            best_child = self.calc_best_child(player, opposing_player)
+            best_child.mcts_tree_policy(player, opposing_player)
 
 
     # A run of the default policy is one rollout
@@ -197,9 +194,7 @@ class Node:
 
         # If anyone won in this node
         if score != 0:
-            self.make_endstate()
             self.propagate_score(score)
-            print(score)
             return
 
         # Choose a random child node and move to this recursively
@@ -225,6 +220,8 @@ class Node:
             current_node.set_score([current_node.get_score()[0] + score[0], current_node.get_score()[1] + score[1]])
             current_node = current_node.get_parent()
 
+        current_node.set_score([current_node.get_score()[0] + score[0], current_node.get_score()[1] + score[1]])
+
 
     def node_check_win(self, player, opposing_player):
         # If player won this simulation
@@ -248,39 +245,45 @@ class Node:
 
 
     # Return the child with the best score relative to the current player
-    def calc_best_child(self, player, opposing_player):
+    def calc_best_child(self, player, opposing_player, tete=False):
         # Make sure there is at least one child node
         if len(self.get_children()) == 0:
             raise IllegalNumberOfChildrenException("Error: Not enough children!")
 
         # Fill a list with all the scores of the children of the current node
-        scores_list = []
+        lili = []
+        best_child = None
+        best_score = None
+        if self.get_state().get_current_turn() == player:
+            best_score = -100
+        elif self.get_state().get_current_turn() == opposing_player:
+            best_score = 100
+
         for child in self.get_children():
             if self.get_score() == [0, 0]:
                 exploitation_bonus = 0
                 exploration_bonus = 0
             else:
-                exploitation_bonus = self.get_score()[1] / self.get_score()[0]
-                exploration_bonus = self.calc_u_s_a(child)
+                exploitation_bonus = child.get_score()[1] / child.get_score()[0]
+                exploration_bonus = child.calc_u_s_a(child)
 
             if self.get_state().get_current_turn() == player:
-                scores_list.append(exploitation_bonus + exploration_bonus)
+                score = exploitation_bonus + exploration_bonus
+                lili.append(score)
+                if score > best_score:
+                    best_score = score
+                    best_child = child
             elif self.get_state().get_current_turn() == opposing_player:
-                scores_list.append(exploitation_bonus - exploration_bonus)
+                score = exploitation_bonus - exploration_bonus
+                lili.append(score)
+                if score < best_score:
+                    best_score = score
+                    best_child = child
 
-        # Iterate through this list and get the index of the best child
-        # Best child is the one with the highest score for player
-        # and the one with the lowest score for opposing_player
-        best_score_index = 0
-        for i in range(len(scores_list)):
-            if self.get_state().get_current_turn() == player:
-                if scores_list[i] > scores_list[best_score_index]:
-                    best_score_index = i
-            elif self.get_state().get_current_turn() == opposing_player:
-                if scores_list[i] < scores_list[best_score_index]:
-                    best_score_index = i
+        if tete:
+            print(lili)
 
-        return self.get_children()[best_score_index]
+        return best_child
 
 
 

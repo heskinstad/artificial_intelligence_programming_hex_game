@@ -25,23 +25,30 @@ class Tree:
             current_node.set_as_top_node()
             current_node.set_leaf_status()
 
-            for i in range(20):
+            for i in range(5000):
                 current_node.mcts_tree_policy(player, opposing_player)
 
-            print(current_node.get_score())
+            tete = ""
+            for child in current_node.get_children():
+                tete += str(child.get_score()) + "  "
+            print(tete)
 
             # Move to best child node
-            current_node = current_node.calc_best_child(player, opposing_player)
+            current_node = current_node.calc_best_child(player, opposing_player, True)
+
+            print(current_node.get_state().get_next_turn().get_color() + " chose " + str(current_node.get_score()))
+
 
             # Remove parent
             current_node.set_parent(None)
-
 
             if show_plot:
                 current_node.get_state().get_board().create_board_plot(self.get_top_node().get_state().get_board().get_fig(), self.get_top_node().get_state().get_board().get_ax())
                 plt.pause(pause_length)
 
             current_node.get_state().get_board().print_board()
+
+            print("-----------------------------------")
 
 
         print()
