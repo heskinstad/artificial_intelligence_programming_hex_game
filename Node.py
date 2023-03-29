@@ -156,34 +156,14 @@ class Node:
         # If self is a leaf it will have no children and needs to use the default policy
         if self.is_endstate():
             return
-        # IDEA: create new node if score of all current nodes are below c * something?
-        elif self.is_leaf() or len(self.get_children()) < (self.get_max_children() - 1) / 2 and self.get_max_children() > 0:
+        # Expand with default policy if:
+        # Node is leaf or
+        # The current number of nodes on this level is less than half of the maximum number of nodes on this level
+        elif self.is_leaf() or len(self.get_children()) < (self.get_max_children() - 1): #TODO: from main.py: the / 2 or something value here
             self.set_leaf_status()
             self.mcts_default_policy(player, opposing_player)
             self.remove_leaf_status()
         else:
-
-            ###TODO: REMOVE OR RECODE
-            if len(self.get_children()) > 0 and len(self.get_children()) - self.get_max_children() > 0:
-                score_over_c = False
-                for child in self.get_children():
-                    if self.get_state().get_current_turn() == player:
-                        if child.get_score()[1] / child.get_score()[0] > 0:
-                            score_over_c = True
-                            break
-                    elif self.get_state().get_current_turn() == opposing_player:
-                        if child.get_score()[1] / child.get_score()[0] < 0:
-                            score_over_c = True
-                            break
-
-                if score_over_c:
-                    self.set_leaf_status()
-                    self.mcts_default_policy(player, opposing_player)
-                    self.remove_leaf_status()
-                    return
-            ###
-
-
             best_child = self.calc_best_child(player, opposing_player)
             best_child.mcts_tree_policy(player, opposing_player)
 
@@ -241,23 +221,23 @@ class Node:
         N_s_a = child.get_score()[0]
         N_s = self.get_score()[0]
 
-        return self.c * math.sqrt(math.log(N_s) / (1 + N_s_a))
+        return self.c * math.sqrt(math.log(N_s, 10) / (1 + N_s_a))
 
 
     # Return the child with the best score relative to the current player
-    def calc_best_child(self, player, opposing_player, tete=False):
+    def calc_best_child(self, player, opposing_player, debug=False):
         # Make sure there is at least one child node
         if len(self.get_children()) == 0:
             raise IllegalNumberOfChildrenException("Error: Not enough children!")
 
         # Fill a list with all the scores of the children of the current node
-        lili = []
+        child_score_list = []
         best_child = None
         best_score = None
         if self.get_state().get_current_turn() == player:
-            best_score = -100
+            best_score = -9999
         elif self.get_state().get_current_turn() == opposing_player:
-            best_score = 100
+            best_score = 9999
 
         for child in self.get_children():
             if self.get_score() == [0, 0]:
@@ -265,23 +245,23 @@ class Node:
                 exploration_bonus = 0
             else:
                 exploitation_bonus = child.get_score()[1] / child.get_score()[0]
-                exploration_bonus = child.calc_u_s_a(child)
+                exploration_bonus = self.calc_u_s_a(child)
 
             if self.get_state().get_current_turn() == player:
                 score = exploitation_bonus + exploration_bonus
-                lili.append(score)
+                child_score_list.append(score)
                 if score > best_score:
                     best_score = score
                     best_child = child
             elif self.get_state().get_current_turn() == opposing_player:
                 score = exploitation_bonus - exploration_bonus
-                lili.append(score)
+                child_score_list.append(score)
                 if score < best_score:
                     best_score = score
                     best_child = child
 
-        if tete:
-            print(lili)
+        if debug:
+            print(child_score_list)
 
         return best_child
 

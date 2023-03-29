@@ -25,7 +25,7 @@ class Tree:
             current_node.set_as_top_node()
             current_node.set_leaf_status()
 
-            for i in range(5000):
+            for i in range(500):
                 current_node.mcts_tree_policy(player, opposing_player)
 
             tete = ""

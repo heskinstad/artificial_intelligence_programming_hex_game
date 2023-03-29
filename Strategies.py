@@ -1,4 +1,6 @@
 import random
+import time
+
 import matplotlib.pyplot as plt
 
 from Board import Board
@@ -9,16 +11,16 @@ from Tree import Tree
 
 
 class Strategies:
-    def __init__(self, grid_size, show_plot, game_type, c, max_time=9999, pause_length=0.01):
+    def __init__(self, grid_size, show_plot, game_type, c, max_time=9999, min_pause_length=0.01):
         self.grid_size = grid_size
         self.show_plot = show_plot
         self.game_type = game_type
         self.max_time = max_time
 
         if game_type == "random":
-            self.place_randomly(pause_length)
+            self.place_randomly(min_pause_length)
         elif game_type == "mcts":
-            self.mcts(c, pause_length)
+            self.mcts(c, min_pause_length)
 
     def place_randomly(self, pause_length):
         gameBoard = Board(self.grid_size)
@@ -31,6 +33,8 @@ class Strategies:
 
         i = -1
         while i < self.grid_size * self.grid_size - 1:
+            pause_start = time.time()
+
             random_x = int(random.uniform(0, self.grid_size))
             random_y = int(random.uniform(0, self.grid_size))
 
@@ -52,7 +56,8 @@ class Strategies:
 
             if self.show_plot:
                 gameBoard.create_board_plot(gameBoard.get_fig(), gameBoard.get_ax())
-                plt.pause(pause_length)
+                if time.time() > pause_start + pause_length:
+                    plt.pause(time.time() - pause_start + pause_length)
 
         gameBoard.print_board()
 
