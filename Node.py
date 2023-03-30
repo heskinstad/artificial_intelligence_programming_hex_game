@@ -159,8 +159,6 @@ class Node:
         # Expand with default policy if:
         # Node is leaf or
         # The current number of nodes on this level is less than half of the maximum number of nodes on this level
-        #elif self.is_leaf() or len(self.get_children()) < (self.get_max_children() - 1) / node_expansion:
-        # OR NO CHILDREN HIGHER THAN 0 IF PLAYER/LOWER THAN 0 IF OPPOSING_PLAYER
         elif self.is_leaf() or len(self.get_children()) < (self.get_max_children() - 1) / node_expansion:
             self.set_leaf_status()
             self.mcts_default_policy(player, opposing_player)
