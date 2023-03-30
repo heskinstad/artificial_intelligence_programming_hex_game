@@ -13,7 +13,7 @@ class Tree:
         for child in self.get_top_node().get_children():
             child.get_state().get_board().print_board()
 
-    def mcts_tree_default_until_end(self, player, opposing_player, max_time, show_plot=False, pause_length=0.001):
+    def mcts_tree_default_until_end(self, player, opposing_player, rollouts_per_episode, show_plot=False, pause_length=0.001, node_expansion=1):
         start = time.time()
 
         current_node = self.get_top_node()
@@ -25,8 +25,8 @@ class Tree:
             current_node.set_as_top_node()
             current_node.set_leaf_status()
 
-            for i in range(500):
-                current_node.mcts_tree_policy(player, opposing_player)
+            for i in range(rollouts_per_episode):
+                current_node.mcts_tree_policy(player, opposing_player, node_expansion)
 
             tete = ""
             for child in current_node.get_children():
@@ -38,9 +38,10 @@ class Tree:
 
             print(current_node.get_state().get_next_turn().get_color() + " chose " + str(current_node.get_score()))
 
-
             # Remove parent
             current_node.set_parent(None)
+            #current_node.remove_all_children()
+            #current_node.set_score([0, 0])
 
             if show_plot:
                 current_node.get_state().get_board().create_board_plot(self.get_top_node().get_state().get_board().get_fig(), self.get_top_node().get_state().get_board().get_ax())

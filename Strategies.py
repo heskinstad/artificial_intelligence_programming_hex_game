@@ -11,11 +11,12 @@ from Tree import Tree
 
 
 class Strategies:
-    def __init__(self, grid_size, show_plot, game_type, c, max_time=9999, min_pause_length=0.01):
+    def __init__(self, grid_size, show_plot, game_type, c, rollouts_per_episode, min_pause_length=0.01, node_expansion=1):
         self.grid_size = grid_size
         self.show_plot = show_plot
         self.game_type = game_type
-        self.max_time = max_time
+        self.num_of_rollouts = rollouts_per_episode
+        self.node_expansion = node_expansion
 
         if game_type == "random":
             self.place_randomly(min_pause_length)
@@ -71,4 +72,4 @@ class Strategies:
 
         tree = Tree(Node(State(Board(self.grid_size), player0, player1), self.grid_size*self.grid_size))
         tree.get_top_node().set_c(c)
-        tree.mcts_tree_default_until_end(player0, player1, self.max_time, self.show_plot, pause_length)
+        tree.mcts_tree_default_until_end(player0, player1, self.num_of_rollouts, self.show_plot, pause_length, self.node_expansion)

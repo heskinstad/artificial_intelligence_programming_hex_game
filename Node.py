@@ -152,20 +152,22 @@ class Node:
     and
     u(s, a) is 
     '''
-    def mcts_tree_policy(self, player, opposing_player):
+    def mcts_tree_policy(self, player, opposing_player, node_expansion=1):
         # If self is a leaf it will have no children and needs to use the default policy
         if self.is_endstate():
             return
         # Expand with default policy if:
         # Node is leaf or
         # The current number of nodes on this level is less than half of the maximum number of nodes on this level
-        elif self.is_leaf() or len(self.get_children()) < (self.get_max_children() - 1): #TODO: from main.py: the / 2 or something value here
+        #elif self.is_leaf() or len(self.get_children()) < (self.get_max_children() - 1) / node_expansion:
+        # OR NO CHILDREN HIGHER THAN 0 IF PLAYER/LOWER THAN 0 IF OPPOSING_PLAYER
+        elif self.is_leaf() or len(self.get_children()) < (self.get_max_children() - 1) / node_expansion:
             self.set_leaf_status()
             self.mcts_default_policy(player, opposing_player)
             self.remove_leaf_status()
         else:
             best_child = self.calc_best_child(player, opposing_player)
-            best_child.mcts_tree_policy(player, opposing_player)
+            best_child.mcts_tree_policy(player, opposing_player, node_expansion)
 
 
     # A run of the default policy is one rollout
