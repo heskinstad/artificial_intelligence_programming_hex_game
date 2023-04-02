@@ -71,7 +71,7 @@ class Strategies:
 
     def mcts(self, c, pause_length):
         player0 = Player(0, 'red')
-        player1 = Player(1, 'blue')
+        player1 = Player(1, 'black')
 
         tree = Tree(Node(State(Board(self.grid_size), player0, player1), self.grid_size*self.grid_size))
         tree.get_top_node().set_c(c)
@@ -89,3 +89,11 @@ class Strategies:
         num_of_actions = 7 * 7
         anet = ANET(input_shape, num_of_actions)
 
+        #For g_a in number_of_actual_games
+        for g_a in number_of_actual_games:
+            # Initialize the actual game board to an empty board
+            # Initialize the Monte Carlo Tree to a single root
+            tree = Tree(Node(State(Board(self.grid_size), player0, player1), self.grid_size * self.grid_size))
+            tree.get_top_node().set_c(c)
+            # While not in a final state
+            tree.mcts_tree_default_until_end2(player0, player1, self.num_of_rollouts, RBUF, self.show_plot, pause_length, self.node_expansion)
