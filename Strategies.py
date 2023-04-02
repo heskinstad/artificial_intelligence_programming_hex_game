@@ -102,3 +102,7 @@ class Strategies:
             # While not in a final state
             tree.mcts_tree_default_until_end2(player0, player1, self.num_of_rollouts, RBUF, self.show_plot, pause_length, self.node_expansion)
 
+            #TODO: train ANET on a random minibatch of cases from RBUF
+
+            #TODO: if g_a % i_s == 0:
+                # Save ANET's current parameters for later use in tournament play
