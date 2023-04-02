@@ -85,7 +85,7 @@ class Tree:
 
             current_root_arcs = []
             for child in current_node.get_children():
-                current_root_arcs.append(child.get_score[0])
+                current_root_arcs.append(child.get_score()[0] / current_node.get_score()[0])
 
             RBUF.append([current_node, current_root_arcs])
 

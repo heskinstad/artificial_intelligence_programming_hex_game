@@ -24,7 +24,7 @@ class Strategies:
         elif game_type == "mcts":
             self.mcts(c, min_pause_length)
         elif game_type == "anet":
-            self.anet(number_of_actual_games)
+            self.anet(c, number_of_actual_games, min_pause_length)
 
     def place_randomly(self, pause_length):
         gameBoard = Board(self.grid_size)
@@ -78,7 +78,11 @@ class Strategies:
         tree.mcts_tree_default_until_end(player0, player1, self.num_of_rollouts, self.show_plot, pause_length, self.node_expansion)
 
 
-    def anet(self, number_of_actual_games):
+    def anet(self, c, number_of_actual_games, pause_length):
+
+        player0 = Player(0, 'red')
+        player1 = Player(1, 'black')
+
 
         i_s = 1000  # Save interval for ANET parameters
 
@@ -90,10 +94,11 @@ class Strategies:
         anet = ANET(input_shape, num_of_actions)
 
         #For g_a in number_of_actual_games
-        for g_a in number_of_actual_games:
+        for g_a in range(number_of_actual_games):
             # Initialize the actual game board to an empty board
             # Initialize the Monte Carlo Tree to a single root
             tree = Tree(Node(State(Board(self.grid_size), player0, player1), self.grid_size * self.grid_size))
             tree.get_top_node().set_c(c)
             # While not in a final state
             tree.mcts_tree_default_until_end2(player0, player1, self.num_of_rollouts, RBUF, self.show_plot, pause_length, self.node_expansion)
+

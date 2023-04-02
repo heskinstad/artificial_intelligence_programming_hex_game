@@ -266,7 +266,6 @@ class Node:
         return best_child
 
 
-
     # Print the path (index number of every node down to the current node)
     def get_path(self):
         path = ""
