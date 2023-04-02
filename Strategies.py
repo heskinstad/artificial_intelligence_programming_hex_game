@@ -3,6 +3,7 @@ import time
 
 import matplotlib.pyplot as plt
 
+from ANET import ANET
 from Board import Board
 from Node import Node
 from Player import Player
@@ -11,7 +12,7 @@ from Tree import Tree
 
 
 class Strategies:
-    def __init__(self, grid_size, show_plot, game_type, c, rollouts_per_episode, min_pause_length=0.01, node_expansion=1):
+    def __init__(self, grid_size, show_plot, game_type, c, rollouts_per_episode, min_pause_length=0.01, node_expansion=1, number_of_actual_games=1):
         self.grid_size = grid_size
         self.show_plot = show_plot
         self.game_type = game_type
@@ -22,6 +23,8 @@ class Strategies:
             self.place_randomly(min_pause_length)
         elif game_type == "mcts":
             self.mcts(c, min_pause_length)
+        elif game_type == "anet":
+            self.anet(number_of_actual_games)
 
     def place_randomly(self, pause_length):
         gameBoard = Board(self.grid_size)
@@ -73,3 +76,16 @@ class Strategies:
         tree = Tree(Node(State(Board(self.grid_size), player0, player1), self.grid_size*self.grid_size))
         tree.get_top_node().set_c(c)
         tree.mcts_tree_default_until_end(player0, player1, self.num_of_rollouts, self.show_plot, pause_length, self.node_expansion)
+
+
+    def anet(self, number_of_actual_games):
+
+        i_s = 1000  # Save interval for ANET parameters
+
+        RBUF = []  # Clear Replay Buffer
+
+        # Randomly initialize parameters (weights and biases) of ANET
+        input_shape = (7, 7, 2)
+        num_of_actions = 7 * 7
+        anet = ANET(input_shape, num_of_actions)
+
