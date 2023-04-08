@@ -6,7 +6,7 @@ from Exceptions.IllegalNumberOfChildrenException import IllegalNumberOfChildrenE
 from State import State
 
 class Node:
-    def __init__(self, state, max_children, parent=None, score=None, endstate=False, ):
+    def __init__(self, state, max_children, parent=None, score=None, endstate=False):
         if score is None:
             score = [0, 0]
         self.state = state
@@ -18,6 +18,7 @@ class Node:
         self.leaf = False
         self.top_node = False
         self.max_children = max_children
+        self.node_num = None
 
     def get_state(self):
         return self.state
@@ -72,6 +73,12 @@ class Node:
 
     def get_max_children(self):
         return self.max_children
+
+    def set_node_num(self, node_num):
+        self.node_num = node_num
+
+    def get_node_num(self):
+        return self.node_num
 
     def create_child_nodes(self, depth):
         if depth > 0:
@@ -129,6 +136,7 @@ class Node:
 
                 child = Node(State(board_deepcopy, self.get_state().get_next_turn(), self.get_state().get_current_turn()), self.get_max_children() - 1, self)
                 child.c = self.get_c()
+                child.set_node_num(y*board.get_board_size() + x)
 
                 self.add_child(child)
 

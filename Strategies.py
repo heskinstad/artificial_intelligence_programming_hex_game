@@ -1,7 +1,10 @@
 import random
 import time
 
+import tensorflow as tf
+from tensorflow import keras
 import matplotlib.pyplot as plt
+import numpy as np
 
 from ANET import ANET
 from Board import Board
@@ -89,9 +92,58 @@ class Strategies:
         RBUF = []  # Clear Replay Buffer
 
         # Randomly initialize parameters (weights and biases) of ANET
-        input_shape = (7, 7, 2)
+        input_shape = (7, 7, 1)
         num_of_actions = 7 * 7
-        anet = ANET(input_shape, num_of_actions)
+        #anet = ANET(input_shape, num_of_actions)
+        anet = keras.models.Sequential()
+
+        '''anet.add(
+            keras.layers.InputLayer(
+                input_shape=input_shape
+            )
+        )
+
+        anet.add(
+            keras.layers.Conv2D(
+                32,
+                (3, 3),
+                input_shape=input_shape,
+                activation='relu',
+                padding='same',
+            )
+        )
+
+        anet.add(
+            keras.layers.Conv2D(
+                32,
+                (3, 3),
+                activation='relu',
+                padding='same',
+                kernel_regularizer=keras.regularizers.l2()
+            )
+        )
+
+        anet.add(
+            keras.layers.Flatten()
+        )
+
+        anet.add(
+            keras.layers.Dense(
+            num_of_actions,
+            activation='softmax'
+            )
+        )'''
+
+        anet.add(tf.keras.layers.Conv2D(64, (3, 3), activation='relu', padding='same', input_shape=input_shape))
+        anet.add(tf.keras.layers.Conv2D(64, (3, 3), activation='relu', padding='same'))
+        anet.add(tf.keras.layers.Conv2D(64, (3, 3), activation='relu', padding='same'))
+        anet.add(tf.keras.layers.Flatten())
+        anet.add(tf.keras.layers.Dense(128, activation='relu'))
+        anet.add(tf.keras.layers.Dropout(0.5))
+        anet.add(tf.keras.layers.Dense(num_of_actions, activation='softmax'))
+
+        num_epochs = 10
+        batch_size = 10
 
         #For g_a in number_of_actual_games
         for g_a in range(number_of_actual_games):
@@ -103,6 +155,31 @@ class Strategies:
             tree.mcts_tree_default_until_end2(player0, player1, self.num_of_rollouts, RBUF, self.show_plot, pause_length, self.node_expansion)
 
             #TODO: train ANET on a random minibatch of cases from RBUF
+            for epoch in range(num_epochs):
+                minibatch = random.sample(RBUF, batch_size)
+                X_train = []
+                y_train = []
+                for root, D in minibatch:
+                    node_probabilities = []
+                    for e in D:
+                        node_probabilities.append(e[1])
+
+                    X_train.append(root.get_state().get_board().get_board_np())
+                    y_train.append(node_probabilities)
+                X_train = tf.cast(np.array(X_train), dtype=tf.int32)
+                y_train = np.asarray(y_train)
+
+                anet.compile(
+                    optimizer="adam",
+                    loss=keras.losses.CategoricalCrossentropy(),
+                    metrics=['accuracy']
+                )
+                anet.fit(
+                    X_train,
+                    y_train,
+                    batch_size=batch_size,
+                    epochs=num_epochs, verbose=1
+                )
 
             #TODO: if g_a % i_s == 0:
                 # Save ANET's current parameters for later use in tournament play

@@ -79,13 +79,19 @@ class Tree:
                 current_node.mcts_tree_policy(player, opposing_player, node_expansion)
 
             tete = ""
+            titi = ""
             for child in current_node.get_children():
                 tete += str(child.get_score()) + "  "
+                titi += str(child.get_node_num()) + "  "
             print(tete)
+            print(titi)
 
             current_root_arcs = []
+            for i in range(0, current_node.get_state().get_board().get_board_size()**2):
+                current_root_arcs.append([i, 0.0])
+
             for child in current_node.get_children():
-                current_root_arcs.append(child.get_score()[0] / current_node.get_score()[0])
+                current_root_arcs[child.get_node_num()][1] = child.get_score()[0] / current_node.get_score()[0]
 
             RBUF.append([current_node, current_root_arcs])
 

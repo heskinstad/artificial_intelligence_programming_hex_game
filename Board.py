@@ -1,3 +1,5 @@
+import copy
+
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -22,6 +24,18 @@ class Board:
 
     def get_board(self):
         return self.board_positions
+
+    def get_board_np(self):
+        tete = np.empty((self.get_board_size(), self.get_board_size()), np.int)
+        board = copy.deepcopy(self.get_board())
+        for i in range(len(board)):
+            for j in range(len(board[i])):
+                if board[i][j] == None:
+                    board[i][j] = 2
+                tete[i][j] = board[i][j]
+
+        return np.array(tete, dtype=np.int)
+
 
     def create_board(self):
         for y in range(self.board_size):
