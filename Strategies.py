@@ -15,7 +15,7 @@ from Tree import Tree
 
 
 class Strategies:
-    def __init__(self, grid_size, show_plot, game_type, c, rollouts_per_episode, min_pause_length=0.01, node_expansion=1, number_of_actual_games=1):
+    def __init__(self, grid_size, show_plot, game_type, c, rollouts_per_episode, min_pause_length=0.01, node_expansion=1, number_of_actual_games=1, anet_parameters=None):
         self.grid_size = grid_size
         self.show_plot = show_plot
         self.game_type = game_type
@@ -27,7 +27,7 @@ class Strategies:
         elif game_type == "mcts":
             self.mcts(c, min_pause_length)
         elif game_type == "anet":
-            self.anet(c, number_of_actual_games, min_pause_length)
+            self.anet(c, number_of_actual_games, min_pause_length, anet_parameters)
 
     def place_randomly(self, pause_length):
         gameBoard = Board(self.grid_size)
@@ -81,19 +81,24 @@ class Strategies:
         tree.mcts_tree_default_until_end(player0, player1, self.num_of_rollouts, self.show_plot, pause_length, self.node_expansion)
 
 
-    def anet(self, c, number_of_actual_games, pause_length):
+    def anet(self, c, number_of_actual_games, pause_length, anet_parameters):
 
         player0 = Player(0, 'red')
         player1 = Player(1, 'black')
 
 
-        i_s = 1000  # Save interval for ANET parameters
+        i_s = anet_parameters[0]  # Save interval for ANET parameters
+        num_epochs = anet_parameters[1]
+        batch_size = anet_parameters[2]
+        optimizer = anet_parameters[3]
+        loss = anet_parameters[4]
 
+        # Each case (current node and children node probabilities) are stored at the end of each episode
         RBUF = []  # Clear Replay Buffer
 
         # Randomly initialize parameters (weights and biases) of ANET
-        input_shape = (7, 7, 1)
-        num_of_actions = 7 * 7
+        input_shape = (self.grid_size, self.grid_size, 1)
+        num_of_actions = self.grid_size * self.grid_size
         #anet = ANET(input_shape, num_of_actions)
         anet = keras.models.Sequential()
 
@@ -142,9 +147,6 @@ class Strategies:
         anet.add(tf.keras.layers.Dropout(0.5))
         anet.add(tf.keras.layers.Dense(num_of_actions, activation='softmax'))
 
-        num_epochs = 10
-        batch_size = 10
-
         #For g_a in number_of_actual_games
         for g_a in range(number_of_actual_games):
             # Initialize the actual game board to an empty board
@@ -160,18 +162,21 @@ class Strategies:
                 X_train = []
                 y_train = []
                 for root, D in minibatch:
+
+                    # Extract every normalized probability element from the numerated node lists into its own list
                     node_probabilities = []
                     for e in D:
                         node_probabilities.append(e[1])
 
                     X_train.append(root.get_state().get_board().get_board_np())
                     y_train.append(node_probabilities)
-                X_train = tf.cast(np.array(X_train), dtype=tf.int32)
+
+                X_train = np.array(X_train)
                 y_train = np.asarray(y_train)
 
                 anet.compile(
-                    optimizer="adam",
-                    loss=keras.losses.CategoricalCrossentropy(),
+                    optimizer=optimizer,
+                    loss=loss,
                     metrics=['accuracy']
                 )
                 anet.fit(
@@ -181,5 +186,6 @@ class Strategies:
                     epochs=num_epochs, verbose=1
                 )
 
-            #TODO: if g_a % i_s == 0:
+            if g_a % i_s == 0:
                 # Save ANET's current parameters for later use in tournament play
+                anet.save_weights('anet_weights_' + str(g_a) + '.h5')
