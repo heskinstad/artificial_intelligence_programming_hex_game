@@ -137,8 +137,10 @@ class Tree:
             current_node.set_leaf_status()
 
             for i in range(rollouts_per_episode):
+                tetete = time.time()
                 current_node.mcts_tree_policy2(player, opposing_player, node_expansion, anet)
                 #current_node.mcts_tree_policy(player, opposing_player, node_expansion)
+                print(time.time() - tetete)
 
             tete = ""
             titi = ""

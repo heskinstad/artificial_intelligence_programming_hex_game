@@ -2,7 +2,7 @@ from Strategies import Strategies
 
 board_size = 7
 show_board = False
-rollouts_per_episode = 2
+rollouts_per_episode = 5
 node_expansion = 1  # Determines how much the tree should expand for each "floor". Expands to max_number_of_nodes_left / node_expansion
 min_pause_length = 0.01  # Pause will be longer if time to run each episode > min_pause_length
 strategy = "anet"
