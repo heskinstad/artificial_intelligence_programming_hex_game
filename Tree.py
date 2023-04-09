@@ -124,7 +124,7 @@ class Tree:
             plt.show()
 
 
-    def mcts_tree_default_until_end3(self, player, opposing_player, rollouts_per_episode, RBUF, show_plot=False, pause_length=0.001, node_expansion=1):
+    def mcts_tree_default_until_end3(self, player, opposing_player, rollouts_per_episode, RBUF, show_plot=False, pause_length=0.001, node_expansion=1, anet=None):
         start = time.time()
 
         current_node = self.get_top_node()
@@ -137,7 +137,8 @@ class Tree:
             current_node.set_leaf_status()
 
             for i in range(rollouts_per_episode):
-                current_node.mcts_tree_policy(player, opposing_player, node_expansion)
+                current_node.mcts_tree_policy2(player, opposing_player, node_expansion, anet)
+                #current_node.mcts_tree_policy(player, opposing_player, node_expansion)
 
             tete = ""
             titi = ""

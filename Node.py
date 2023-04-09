@@ -1,6 +1,8 @@
 import math
 import random
 
+import numpy as np
+
 from Board import Board
 from Exceptions.IllegalNumberOfChildrenException import IllegalNumberOfChildrenException
 from State import State
@@ -104,7 +106,7 @@ class Node:
 
 
     # Create a single, randomized child node
-    def create_random_child_node(self):
+    def create_random_child_node(self, position=None):
         board = self.get_state().get_board()
 
         # Create a 'board' with coordinates
@@ -128,19 +130,7 @@ class Node:
                         in_current_child = True
 
             if board.get_hex_by_x_y(x, y) == None and not in_current_child:
-
-                board_deepcopy = Board(board.get_board_size(), False)
-                board_deepcopy.board_positions = [x[:] for x in board.get_board()]
-
-                board_deepcopy.place(self.get_state().get_current_turn(), x, y)
-
-                child = Node(State(board_deepcopy, self.get_state().get_next_turn(), self.get_state().get_current_turn()), self.get_max_children() - 1, self)
-                child.c = self.get_c()
-                child.set_node_num(y*board.get_board_size() + x)
-
-                self.add_child(child)
-
-                return child
+                return self.create_child_node([y, x])
 
             # If the space is occupied, delete the position from the array and try again
             else:
@@ -149,6 +139,25 @@ class Node:
         # Return None if there are no free spaces left
         return None
 
+    def create_child_node(self, position):
+        x = position[1]
+        y = position[0]
+
+        board = self.get_state().get_board()
+
+        board_deepcopy = Board(board.get_board_size(), False)
+        board_deepcopy.board_positions = [x[:] for x in board.get_board()]
+
+        board_deepcopy.place(self.get_state().get_current_turn(), x, y)
+
+        child = Node(State(board_deepcopy, self.get_state().get_next_turn(), self.get_state().get_current_turn()),
+                     self.get_max_children() - 1, self)
+        child.c = self.get_c()
+        child.set_node_num(y * board.get_board_size() + x)
+
+        self.add_child(child)
+
+        return child
 
     '''
     Tree policy:
@@ -176,6 +185,22 @@ class Node:
             best_child.mcts_tree_policy(player, opposing_player, node_expansion)
 
 
+    def mcts_tree_policy2(self, player, opposing_player, node_expansion=1, anet=None):
+        # If self is a leaf it will have no children and needs to use the default policy
+        if self.is_endstate():
+            return
+        # Expand with default policy if:
+        # Node is leaf or
+        # The current number of nodes on this level is less than half of the maximum number of nodes on this level
+        elif self.is_leaf() or len(self.get_children()) < (self.get_max_children() - 1) / node_expansion:
+            self.set_leaf_status()
+            self.mcts_default_policy2(player, opposing_player, anet)
+            self.remove_leaf_status()
+        else:
+            best_child = self.calc_best_child(player, opposing_player)
+            best_child.mcts_tree_policy2(player, opposing_player, node_expansion, anet)
+
+
     # A run of the default policy is one rollout
     def mcts_default_policy(self, player, opposing_player):
         score = self.node_check_win(player, opposing_player)
@@ -188,6 +213,37 @@ class Node:
         # Choose a random child node and move to this recursively
         random_child_node = self.create_random_child_node()
         random_child_node.mcts_default_policy(player, opposing_player)
+
+        # If top node in the newly generated default policy tree
+        # Remove own children and set itself as a leaf
+        if self.get_parent() != None:
+            if self.get_parent().is_leaf():
+                self.remove_all_children()
+                self.set_leaf_status()
+        else:
+            return
+
+
+    def mcts_default_policy2(self, player, opposing_player, anet=None):
+        score = self.node_check_win(player, opposing_player)
+
+        # If anyone won in this node
+        if score != 0:
+            self.propagate_score(score)
+            return
+
+        # Choose a random child node and move to this recursively
+
+        action_probs = anet.predict(self.get_state().get_board().board_positions)
+        action_probs = action_probs / np.sum(action_probs)
+        action_idx = np.random.choice(len(action_probs), p=action_probs)
+
+        position = [None, None]
+        position[0] = math.floor(action_idx / self.get_state().get_board().get_board_size())
+        position[1] = action_idx % self.get_state().get_board().get_board_size()
+
+        random_child_node = self.create_random_child_node(position)
+        random_child_node.mcts_default_policy2(player, opposing_player)
 
         # If top node in the newly generated default policy tree
         # Remove own children and set itself as a leaf

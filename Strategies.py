@@ -154,7 +154,7 @@ class Strategies:
             tree = Tree(Node(State(Board(self.grid_size), player0, player1), self.grid_size * self.grid_size))
             tree.get_top_node().set_c(c)
             # While not in a final state
-            tree.mcts_tree_default_until_end2(player0, player1, self.num_of_rollouts, RBUF, self.show_plot, pause_length, self.node_expansion)
+            tree.mcts_tree_default_until_end3(player0, player1, self.num_of_rollouts, RBUF, self.show_plot, pause_length, self.node_expansion, anet)
 
             #TODO: train ANET on a random minibatch of cases from RBUF
             for epoch in range(num_epochs):
