@@ -141,7 +141,7 @@ class Strategies:
 
         anet.add(tf.keras.layers.Conv2D(64, (3, 3), activation='relu', padding='same', input_shape=input_shape))
         anet.add(tf.keras.layers.Conv2D(64, (3, 3), activation='relu', padding='same'))
-        anet.add(tf.keras.layers.Conv2D(64, (3, 3), activation='relu', padding='same'))
+        #anet.add(tf.keras.layers.Conv2D(64, (3, 3), activation='relu', padding='same'))
         anet.add(tf.keras.layers.Flatten())
         anet.add(tf.keras.layers.Dense(128, activation='relu'))
         anet.add(tf.keras.layers.Dropout(0.5))
@@ -149,13 +149,13 @@ class Strategies:
 
         #For g_a in number_of_actual_games
         for g_a in range(number_of_actual_games):
-            anet.load_weights('anet_weights_10.h5')
+            #anet.load_weights('anet_weights_10.h5')
             # Initialize the actual game board to an empty board
             # Initialize the Monte Carlo Tree to a single root
             tree = Tree(Node(State(Board(self.grid_size), player0, player1), self.grid_size * self.grid_size))
             tree.get_top_node().set_c(c)
             # While not in a final state
-            tree.mcts_tree_default_until_end3(player0, player1, self.num_of_rollouts, RBUF, self.show_plot, pause_length, self.node_expansion, anet)
+            tree.mcts_tree_default_until_end2(player0, player1, self.num_of_rollouts, RBUF, self.show_plot, pause_length, self.node_expansion)
 
             #TODO: train ANET on a random minibatch of cases from RBUF
             for epoch in range(num_epochs):
