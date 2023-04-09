@@ -26,22 +26,16 @@ class Board:
         return self.board_positions
 
     def get_board_np(self):
-        tete = np.empty((self.get_board_size(), self.get_board_size()), np.int)
         board = copy.deepcopy(self.get_board())
-        for i in range(len(board)):
-            for j in range(len(board[i])):
-                if board[i][j] == None:
-                    board[i][j] = 2
-                tete[i][j] = board[i][j]
 
-        return np.array(tete, dtype=np.int)
+        return np.array(board, dtype=np.int)
 
 
     def create_board(self):
         for y in range(self.board_size):
             self.board_positions.append([])
             for x in range(self.board_size):
-                self.board_positions[y].append(None)
+                self.board_positions[y].append(0)
 
     def get_fig(self):
         return self.fig
@@ -86,13 +80,13 @@ class Board:
             self.board_positions.append([])
             self.board_plot.append([])
             for x in range(self.board_size):
-                if self.get_board()[y][x] == None:
+                if self.get_board()[y][x] == 0:
                     hex = mpatches.RegularPolygon(((x + y / 2) * 1.15, y), numVertices=6, radius=0.64,
                                                 orientation=np.pi, edgecolor='black', facecolor='white')
-                elif self.get_board()[y][x] == 0:
+                elif self.get_board()[y][x] == 1:
                     hex = mpatches.RegularPolygon(((x + y / 2) * 1.15, y), numVertices=6, radius=0.64,
                                                 orientation=np.pi, edgecolor='black', facecolor='red')
-                elif self.get_board()[y][x] == 1:
+                elif self.get_board()[y][x] == 2:
                     hex = mpatches.RegularPolygon(((x + y / 2) * 1.15, y), numVertices=6, radius=0.64,
                                                 orientation=np.pi, edgecolor='black', facecolor='blue')
 
@@ -113,10 +107,10 @@ class Board:
         # Check if player has placed any at their 'start edge' - left for red (0), bottom for blue (1)
         # If so, add them to the unchecked_hexes array
         for i in range(self.board_size):
-            if player.get_id() == 0:
+            if player.get_id() == 1:
                 if self.get_hex_by_x_y(0, i) == player.get_id(): # id 0 move left/right
                     unchecked_hexes.append([0, i])
-            elif player.get_id() == 1:
+            elif player.get_id() == 2:
                 if self.get_hex_by_x_y(i, 0) == player.get_id(): # id 1 move top/bottom
                     unchecked_hexes.append([i, 0])
 
@@ -125,10 +119,10 @@ class Board:
             current = unchecked_hexes.pop()
             checked_hexes.append(current)
 
-            if player.get_id() == 0:
+            if player.get_id() == 1:
                 if current[0] == self.board_size - 1:
                     return player
-            elif player.get_id() == 1:
+            elif player.get_id() == 2:
                 if current[1] == self.board_size - 1:
                     return player
 
@@ -187,7 +181,7 @@ class Board:
         for j in range(self.get_board_size()-1, -1, -1):
             print(j * " ", end='/ ')
             for i in range(self.get_board_size()):
-                if self.get_hex_by_x_y(i, j) == None:
+                if self.get_hex_by_x_y(i, j) == 0:
                     print(' ', end=' ')
                 else:
                     print(self.get_hex_by_x_y(i, j), end=' ')

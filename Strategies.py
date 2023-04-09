@@ -83,8 +83,8 @@ class Strategies:
 
     def anet(self, c, number_of_actual_games, pause_length, anet_parameters):
 
-        player0 = Player(0, 'red')
-        player1 = Player(1, 'black')
+        player0 = Player(1, 'red')
+        player1 = Player(2, 'blue')
 
 
         i_s = anet_parameters[0]  # Save interval for ANET parameters
@@ -149,6 +149,7 @@ class Strategies:
 
         #For g_a in number_of_actual_games
         for g_a in range(number_of_actual_games):
+            anet.load_weights('anet_weights_10.h5')
             # Initialize the actual game board to an empty board
             # Initialize the Monte Carlo Tree to a single root
             tree = Tree(Node(State(Board(self.grid_size), player0, player1), self.grid_size * self.grid_size))

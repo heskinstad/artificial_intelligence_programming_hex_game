@@ -1,3 +1,4 @@
+import copy
 import math
 import random
 
@@ -89,7 +90,7 @@ class Node:
 
             for x in range(board.get_board_size()):
                 for y in range(board.get_board_size()):
-                    if board.get_hex_by_x_y(x, y) == None:
+                    if board.get_hex_by_x_y(x, y) == 0:
 
                         board_deepcopy = Board(board.get_board_size(), False)
                         board_deepcopy.board_positions = [x[:] for x in board.get_board()]
@@ -122,14 +123,18 @@ class Node:
             x = positions[index][1]
             y = positions[index][0]
 
+            if position != None:
+                x = position[1]
+                y = position[0]
+
             # Check if it already exists in any of the other children nodes
             in_current_child = False
             if len(self.get_children()) > 0:
                 for child in self.get_children():
-                    if child.get_state().get_board().get_hex_by_x_y(x, y) != None:
+                    if child.get_state().get_board().get_hex_by_x_y(x, y) != 0:
                         in_current_child = True
 
-            if board.get_hex_by_x_y(x, y) == None and not in_current_child:
+            if board.get_hex_by_x_y(x, y) == 0 and not in_current_child:
                 return self.create_child_node([y, x])
 
             # If the space is occupied, delete the position from the array and try again
@@ -234,7 +239,9 @@ class Node:
 
         # Choose a random child node and move to this recursively
 
-        action_probs = anet.predict(self.get_state().get_board().board_positions)
+        action_probs = anet.predict(self.get_state().get_board().get_board_np().reshape((1,) + self.get_state().get_board().get_board_np().shape), verbose=0)[0]
+        action_probs = action_probs / np.sum(action_probs)
+        action_probs = action_probs * self.get_valid_moves(action_probs).flatten()
         action_probs = action_probs / np.sum(action_probs)
         action_idx = np.random.choice(len(action_probs), p=action_probs)
 
@@ -243,7 +250,7 @@ class Node:
         position[1] = action_idx % self.get_state().get_board().get_board_size()
 
         random_child_node = self.create_random_child_node(position)
-        random_child_node.mcts_default_policy2(player, opposing_player)
+        random_child_node.mcts_default_policy2(player, opposing_player, anet)
 
         # If top node in the newly generated default policy tree
         # Remove own children and set itself as a leaf
@@ -253,6 +260,20 @@ class Node:
                 self.set_leaf_status()
         else:
             return
+
+
+    def get_valid_moves(self, predictions):
+        #size = self.get_state().get_board().get_board_size()
+        #mask = np.zeros((size, size))
+        valid_moves = copy.deepcopy(self.get_state().get_board().get_board_np())
+        for y in range(len(valid_moves)):
+            for x in range(len(valid_moves[y])):
+                if valid_moves[y][x] == 0:
+                    valid_moves[y][x] = 1
+                else:
+                    valid_moves[y][x] = 0
+
+        return valid_moves
 
 
     # Propagates the score given as a parameter to the node self and every parent up throughout the tree
