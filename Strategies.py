@@ -128,9 +128,9 @@ class Strategies:
             keras.layers.Conv2D(
                 64,
                 (3, 3),
+                input_shape=input_shape,
                 activation='relu',
                 padding='same',
-                kernel_regularizer=keras.regularizers.l2()
             )
         )
 
@@ -185,7 +185,6 @@ class Strategies:
             # While not in a final state
             tree.mcts_tree_default_until_end3(player0, player1, self.num_of_rollouts, RBUF, self.show_plot, pause_length, self.node_expansion, anet)
 '''
-            #TODO: train ANET on a random minibatch of cases from RBUF
             minibatch = random.sample(RBUF, 14*g_a+1)
             #train, val = train_test_split(RBUF, test_size=0.2, random_state=42)
             X_train = []
@@ -211,7 +210,7 @@ class Strategies:
                     metrics=['accuracy']
                 )
                 from keras import backend as K
-                K.set_value(anet.optimizer.learning_rate, 0.01)
+                K.set_value(anet.optimizer.learning_rate, 0.003)
                 history = anet.fit(
                     X_train,
                     y_train,

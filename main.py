@@ -13,7 +13,7 @@ number_of_actual_games = 51  # How many games are to be played
 # ANET parameters
 save_interval = 50  # Save for each n number of actual games/episodes
 num_epochs = 250
-batch_size = 32
+batch_size = 100
 optimizer = "adam"
 loss = "categorical_crossentropy"
 
