@@ -5,7 +5,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 
-mpl.use('TkAgg')
+#mpl.use('TkAgg')
 
 class Board:
     def __init__(self, board_size, initialize=True):

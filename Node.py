@@ -144,6 +144,7 @@ class Node:
         # Return None if there are no free spaces left
         return None
 
+
     def create_child_node(self, position):
         x = position[1]
         y = position[0]
@@ -239,18 +240,29 @@ class Node:
 
         # Choose a random child node and move to this recursively
 
-        action_probs = anet.predict(self.get_state().get_board().get_board_np().reshape((1,) + self.get_state().get_board().get_board_np().shape), verbose=0)[0]
+        action_probs = anet.predict(self.get_state().get_board().get_board_np().reshape(
+            (1,) + self.get_state().get_board().get_board_np().shape), verbose=0)[0]
         action_probs = action_probs / np.sum(action_probs)
         action_probs = action_probs * self.get_valid_moves(action_probs).flatten()
-        action_probs = action_probs / np.sum(action_probs)
-        action_idx = np.random.choice(len(action_probs), p=action_probs)
 
-        position = [None, None]
-        position[0] = math.floor(action_idx / self.get_state().get_board().get_board_size())
-        position[1] = action_idx % self.get_state().get_board().get_board_size()
+        random_child_node = None
+        while random_child_node == None:
 
-        random_child_node = self.create_random_child_node(position)
+            action_probs = action_probs / np.sum(action_probs)
+            action_idx = np.random.choice(len(action_probs), p=action_probs)
+
+            position = [None, None]
+            position[0] = math.floor(action_idx / self.get_state().get_board().get_board_size())
+            position[1] = action_idx % self.get_state().get_board().get_board_size()
+
+            #print(action_probs)
+
+            random_child_node = self.create_random_child_node(position)
+
+            action_probs[action_idx] = 0.0
+        #print()
         random_child_node.mcts_default_policy2(player, opposing_player, anet)
+        #print()
 
         # If top node in the newly generated default policy tree
         # Remove own children and set itself as a leaf
@@ -347,6 +359,18 @@ class Node:
 
         if debug:
             print(child_score_list)
+
+        return best_child
+
+    def get_child_with_highest_visit_count(self):
+        if len(self.get_children()) == 0:
+            raise IllegalNumberOfChildrenException("Error: Not enough children!")
+
+        best_child = self.get_children()[0]
+
+        for child in self.get_children():
+            if child.get_score()[0] > best_child.get_score()[0]:
+                best_child = child
 
         return best_child
 

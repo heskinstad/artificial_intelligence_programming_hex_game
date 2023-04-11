@@ -1,3 +1,4 @@
+import pickle
 import random
 import time
 
@@ -12,6 +13,8 @@ from Node import Node
 from Player import Player
 from State import State
 from Tree import Tree
+
+from sklearn.model_selection import train_test_split
 
 
 class Strategies:
@@ -83,6 +86,7 @@ class Strategies:
 
     def anet(self, c, number_of_actual_games, pause_length, anet_parameters):
 
+        history = None
         player0 = Player(1, 'red')
         player1 = Player(2, 'blue')
 
@@ -94,7 +98,9 @@ class Strategies:
         loss = anet_parameters[4]
 
         # Each case (current node and children node probabilities) are stored at the end of each episode
-        RBUF = []  # Clear Replay Buffer
+        RBUF = []
+        with open('tete', 'rb') as f:
+            RBUF = pickle.load(f)
 
         # Randomly initialize parameters (weights and biases) of ANET
         input_shape = (self.grid_size, self.grid_size, 1)
@@ -102,7 +108,7 @@ class Strategies:
         #anet = ANET(input_shape, num_of_actions)
         anet = keras.models.Sequential()
 
-        '''anet.add(
+        anet.add(
             keras.layers.InputLayer(
                 input_shape=input_shape
             )
@@ -110,7 +116,7 @@ class Strategies:
 
         anet.add(
             keras.layers.Conv2D(
-                32,
+                64,
                 (3, 3),
                 input_shape=input_shape,
                 activation='relu',
@@ -120,7 +126,17 @@ class Strategies:
 
         anet.add(
             keras.layers.Conv2D(
-                32,
+                64,
+                (3, 3),
+                activation='relu',
+                padding='same',
+                kernel_regularizer=keras.regularizers.l2()
+            )
+        )
+
+        anet.add(
+            keras.layers.Conv2D(
+                64,
                 (3, 3),
                 activation='relu',
                 padding='same',
@@ -137,56 +153,113 @@ class Strategies:
             num_of_actions,
             activation='softmax'
             )
-        )'''
+        )
 
-        anet.add(tf.keras.layers.Conv2D(64, (3, 3), activation='relu', padding='same', input_shape=input_shape))
-        anet.add(tf.keras.layers.Conv2D(64, (3, 3), activation='relu', padding='same'))
-        #anet.add(tf.keras.layers.Conv2D(64, (3, 3), activation='relu', padding='same'))
+        # Add convolutional layers to extract features from the input
+        '''anet.add(keras.layers.Conv2D(64, kernel_size=2, activation='relu', input_shape=input_shape))
+        anet.add(keras.layers.Conv2D(32, kernel_size=2, activation='relu'))
+
+        # Flatten the output of the convolutional layers
+        anet.add(keras.layers.Flatten())
+
+        # Add fully connected layers to predict the probability of good child states
+        anet.add(keras.layers.Dense(128, activation='relu'))
+        anet.add(keras.layers.Dense(64, activation='relu'))
+        anet.add(keras.layers.Dense(49, activation='softmax'))'''
+
+        '''anet.add(tf.keras.layers.Conv2D(49, (3, 3), activation='relu', padding='same', input_shape=input_shape))
+        anet.add(tf.keras.layers.Conv2D(49, (3, 3), activation='relu', padding='same'))
+        anet.add(tf.keras.layers.Conv2D(49, (3, 3), activation='relu', padding='same'))
         anet.add(tf.keras.layers.Flatten())
-        anet.add(tf.keras.layers.Dense(128, activation='relu'))
+        anet.add(tf.keras.layers.Dense(49, activation='relu'))
         anet.add(tf.keras.layers.Dropout(0.5))
-        anet.add(tf.keras.layers.Dense(num_of_actions, activation='softmax'))
+        anet.add(tf.keras.layers.Dense(num_of_actions, activation='softmax'))'''
 
         #For g_a in number_of_actual_games
         for g_a in range(number_of_actual_games):
-            #anet.load_weights('anet_weights_10.h5')
+            #anet.load_weights('anet_weights_15.h5')
             # Initialize the actual game board to an empty board
             # Initialize the Monte Carlo Tree to a single root
-            tree = Tree(Node(State(Board(self.grid_size), player0, player1), self.grid_size * self.grid_size))
+            '''tree = Tree(Node(State(Board(self.grid_size), player0, player1), self.grid_size * self.grid_size))
             tree.get_top_node().set_c(c)
             # While not in a final state
-            tree.mcts_tree_default_until_end2(player0, player1, self.num_of_rollouts, RBUF, self.show_plot, pause_length, self.node_expansion)
-
+            tree.mcts_tree_default_until_end3(player0, player1, self.num_of_rollouts, RBUF, self.show_plot, pause_length, self.node_expansion, anet)
+'''
             #TODO: train ANET on a random minibatch of cases from RBUF
-            for epoch in range(num_epochs):
-                minibatch = random.sample(RBUF, batch_size)
-                X_train = []
-                y_train = []
-                for root, D in minibatch:
+            minibatch = random.sample(RBUF, 14*g_a+1)
+            #train, val = train_test_split(RBUF, test_size=0.2, random_state=42)
+            X_train = []
+            y_train = []
+            for root, D in minibatch:
 
-                    # Extract every normalized probability element from the numerated node lists into its own list
-                    node_probabilities = []
-                    for e in D:
-                        node_probabilities.append(e[1])
+                # Extract every normalized probability element from the numerated node lists into its own list
+                node_probabilities = []
+                for e in D:
+                    node_probabilities.append(e[1])
 
-                    X_train.append(root.get_state().get_board().get_board_np())
-                    y_train.append(node_probabilities)
+                X_train.append(root.get_state().get_board().get_board_np())
+                y_train.append(node_probabilities)
 
-                X_train = np.array(X_train)
-                y_train = np.asarray(y_train)
+            X_train = np.array(X_train)
+            y_train = np.asarray(y_train)
+
+            if g_a % i_s == 0:
 
                 anet.compile(
                     optimizer=optimizer,
                     loss=loss,
                     metrics=['accuracy']
                 )
-                anet.fit(
+                from keras import backend as K
+                K.set_value(anet.optimizer.learning_rate, 0.01)
+                history = anet.fit(
                     X_train,
                     y_train,
                     batch_size=batch_size,
-                    epochs=num_epochs, verbose=1
+                    epochs=num_epochs,
+                    verbose=1
                 )
 
-            if g_a % i_s == 0:
+                '''X_test = []
+                y_test = []
+                for root, D in val:
+
+                    node_probabilities = []
+                    for e in D:
+                        node_probabilities.append(e[1])
+
+                    X_test.append(root.get_state().get_board().get_board_np())
+                    y_test.append(node_probabilities)
+
+                X_test = np.array(X_test)
+                y_test = np.asarray(y_test)
+
+                losss, accuracy = anet.evaluate(
+                    X_test,
+                    y_test
+                )
+
+                # Print the loss and accuracy
+                print(f'\nTest loss: {losss:.6f}')
+                print(f'Test accuracy: {accuracy * 100:.2f}%')'''
+
                 # Save ANET's current parameters for later use in tournament play
                 anet.save_weights('anet_weights_' + str(g_a) + '.h5')
+                #with open('tete','wb') as f:
+                #    pickle.dump(RBUF, f)
+
+        plt.plot(history.history['accuracy'])
+        #plt.plot(history.history['val_accuracy'])
+        plt.title('model accuracy')
+        plt.ylabel('accuracy')
+        plt.xlabel('epoch')
+        plt.legend(['train', 'val'], loc='upper left')
+        plt.show()
+
+        plt.plot(history.history['loss'])
+        #plt.plot(history.history['val_loss'])
+        plt.title('model loss')
+        plt.ylabel('loss')
+        plt.xlabel('epoch')
+        plt.legend(['train', 'val'], loc='upper left')
+        plt.show()

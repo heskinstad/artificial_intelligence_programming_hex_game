@@ -136,11 +136,11 @@ class Tree:
             current_node.set_as_top_node()
             current_node.set_leaf_status()
 
+            tetete = time.time()
             for i in range(rollouts_per_episode):
-                tetete = time.time()
-                current_node.mcts_tree_policy2(player, opposing_player, node_expansion, anet)
-                #current_node.mcts_tree_policy(player, opposing_player, node_expansion)
-                print(time.time() - tetete)
+                #current_node.mcts_tree_policy2(player, opposing_player, node_expansion, anet)
+                current_node.mcts_tree_policy(player, opposing_player, node_expansion)
+            print(str(((time.time() - tetete) / rollouts_per_episode)) + 's per rollout')
 
             tete = ""
             titi = ""
@@ -161,6 +161,7 @@ class Tree:
 
             # Move to best child node
             current_node = current_node.calc_best_child(player, opposing_player, True)
+            #current_node = current_node.get_child_with_highest_visit_count()
 
             print(current_node.get_state().get_next_turn().get_color() + " chose " + str(current_node.get_score()))
 
