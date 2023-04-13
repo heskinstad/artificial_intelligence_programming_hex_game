@@ -240,8 +240,8 @@ class Node:
 
         # Choose a random child node and move to this recursively
 
-        action_probs = anet.predict(self.get_state().get_board().get_board_np().reshape(
-            (1,) + self.get_state().get_board().get_board_np().shape), verbose=0)[0]
+        action_probs = anet.predict_on_batch(self.get_state().get_board().get_board_np().reshape(
+            (1,) + self.get_state().get_board().get_board_np().shape))[0]
         action_probs = action_probs / np.sum(action_probs)
         action_probs = action_probs * self.get_valid_moves(action_probs).flatten()
 

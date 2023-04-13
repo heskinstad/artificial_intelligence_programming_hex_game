@@ -2,19 +2,20 @@ import pickle
 import random
 import time
 
-import tensorflow as tf
+
 from tensorflow import keras
 import matplotlib.pyplot as plt
 import numpy as np
 
-from ANET import ANET
+
+
 from Board import Board
 from Node import Node
 from Player import Player
 from State import State
 from Tree import Tree
 
-from sklearn.model_selection import train_test_split
+
 
 
 class Strategies:
@@ -99,7 +100,7 @@ class Strategies:
 
         # Each case (current node and children node probabilities) are stored at the end of each episode
         RBUF = []
-        with open('tete3', 'rb') as f:
+        with open('playernoc', 'rb') as f:
             RBUF = pickle.load(f)
 
         # Randomly initialize parameters (weights and biases) of ANET
@@ -116,7 +117,7 @@ class Strategies:
 
         anet.add(
             keras.layers.Conv2D(
-                64,
+                16,
                 (3, 3),
                 input_shape=input_shape,
                 activation='relu',
@@ -126,7 +127,7 @@ class Strategies:
 
         anet.add(
             keras.layers.Conv2D(
-                64,
+                16,
                 (3, 3),
                 input_shape=input_shape,
                 activation='relu',
@@ -136,7 +137,7 @@ class Strategies:
 
         anet.add(
             keras.layers.Conv2D(
-                64,
+                16,
                 (3, 3),
                 activation='relu',
                 padding='same',
@@ -169,7 +170,7 @@ class Strategies:
 
         #For g_a in number_of_actual_games
         for g_a in range(number_of_actual_games):
-            #anet.load_weights('anet_weights_15.h5')
+            #anet.load_weights('anet_weightss_50.h5')
             # Initialize the actual game board to an empty board
             # Initialize the Monte Carlo Tree to a single root
             '''tree = Tree(Node(State(Board(self.grid_size), player0, player1), self.grid_size * self.grid_size))
@@ -177,15 +178,20 @@ class Strategies:
             # While not in a final state
             tree.mcts_tree_default_until_end3(player0, player1, self.num_of_rollouts, RBUF, self.show_plot, pause_length, self.node_expansion, anet)
 '''
-            minibatch = random.sample(RBUF, 8*g_a+1)
-            #train, val = train_test_split(RBUF, test_size=0.2, random_state=42)
+
+            for i in RBUF:
+                if i[0][1] == 1:
+                    i.clear()
+            RBUF = [empty for empty in RBUF if empty]
+
+            minibatch = random.sample(RBUF, 250)
             X_train = []
-            X_train_2 = []
             y_train = []
+
             for root, D in minibatch:
-                board = root.get_state().get_board().get_board_np()
-                np.append(board, root.get_state().get_current_turn().get_id())
+                board = root[0]
                 X_train.append(board)
+
 
                 # Extract every normalized probability element from the numerated node lists into its own list
                 node_probabilities = []
@@ -196,24 +202,7 @@ class Strategies:
             X_train = np.array(X_train)
             y_train = np.asarray(y_train)
 
-            '''for root, D in minibatch:
-                X_train.append(root.get_state().get_board().get_board_np())
-                #X_train_2.append(root.get_state().get_current_turn().get_id())
-                tete = [root.get_state().get_current_turn().get_id()] * 7
-                tetete = [tete] * 7
-                X_train_2.append(tetete)
-
-                # Extract every normalized probability element from the numerated node lists into its own list
-                node_probabilities = []
-                for e in D:
-                    node_probabilities.append(e[1])
-                y_train.append(node_probabilities)'''
-
-            #X_train = np.array(X_train)
-            #X_train_2 = np.array(X_train_2)
-            #y_train = np.array(y_train)
-
-            if g_a % i_s == 0:
+            if g_a == i_s:
 
                 anet.compile(
                     optimizer=optimizer,
@@ -221,7 +210,7 @@ class Strategies:
                     metrics=['accuracy']
                 )
                 from keras import backend as K
-                K.set_value(anet.optimizer.learning_rate, 0.003)
+                K.set_value(anet.optimizer.learning_rate, 1.5)
                 history = anet.fit(
                     X_train,
                     y_train,
@@ -255,7 +244,7 @@ class Strategies:
 
                 # Save ANET's current parameters for later use in tournament play
                 #anet.save_weights('anet_weights_' + str(g_a) + '.h5')
-                #with open('tete3','wb') as f:
+                #with open('playernoc','wb') as f:
                 #    pickle.dump(RBUF, f)
 
         plt.plot(history.history['accuracy'])
