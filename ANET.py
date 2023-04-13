@@ -12,46 +12,12 @@ class ANET:
             )
         )
 
-        anet.add(
-            keras.layers.Conv2D(
-                16,
-                (3, 3),
-                input_shape=input_shape,
-                activation='relu',
-                padding='same',
-            )
-        )
+        # Flatten the output of the convolutional layers
+        anet.add(keras.layers.Flatten())
 
-        anet.add(
-            keras.layers.Conv2D(
-                16,
-                (3, 3),
-                input_shape=input_shape,
-                activation='relu',
-                padding='same',
-            )
-        )
-
-        anet.add(
-            keras.layers.Conv2D(
-                16,
-                (3, 3),
-                activation='relu',
-                padding='same',
-                kernel_regularizer=keras.regularizers.l2()
-            )
-        )
-
-        anet.add(
-            keras.layers.Flatten()
-        )
-
-        anet.add(
-            keras.layers.Dense(
-                num_actions,
-                activation='softmax'
-            )
-        )
+        # Add fully connected layers to predict the probability of good child states
+        anet.add(keras.layers.Dense(32, activation='relu'))
+        anet.add(keras.layers.Dense(num_actions, activation='softmax'))
 
         return anet
 
@@ -74,14 +40,3 @@ class ANET:
         )
 
         return history
-
-    '''anet.add(keras.layers.Conv2D(64, kernel_size=2, activation='relu', input_shape=input_shape))
-    anet.add(keras.layers.Conv2D(32, kernel_size=2, activation='relu'))
-
-    # Flatten the output of the convolutional layers
-    anet.add(keras.layers.Flatten())
-
-    # Add fully connected layers to predict the probability of good child states
-    anet.add(keras.layers.Dense(128, activation='relu'))
-    anet.add(keras.layers.Dense(64, activation='relu'))
-    anet.add(keras.layers.Dense(49, activation='softmax'))'''

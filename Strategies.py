@@ -2,8 +2,7 @@ import pickle
 import random
 import time
 
-
-from tensorflow import keras
+import tensorflow as tf
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -96,42 +95,46 @@ class Strategies:
         batch_size = anet_parameters[2]
         optimizer = anet_parameters[3]
         loss = anet_parameters[4]
+        num_episodes = anet_parameters[5]
 
         # Each case (current node and children node probabilities) are stored at the end of each episode
         RBUF = []
-        with open('playernoc', 'rb') as f:
+        with open('playersmall', 'rb') as f:
             RBUF = pickle.load(f)
 
         # Randomly initialize parameters (weights and biases) of ANET
-        input_shape = (self.grid_size, self.grid_size, 1)
+        input_shape = anet_parameters[6]
         num_of_actions = self.grid_size * self.grid_size
         anet = ANET()
         model = anet.initialize_model(input_shape, num_of_actions)
 
-
         #For g_a in number_of_actual_games
         for g_a in range(number_of_actual_games):
-            #anet.load_weights('anet_weightss_50.h5')
+            #model.load_weights('anet_weights_densse_250.h5')
             # Initialize the actual game board to an empty board
             # Initialize the Monte Carlo Tree to a single root
-            '''tree = Tree(Node(State(Board(self.grid_size), player0, player1), self.grid_size * self.grid_size))
-            tree.get_top_node().set_c(c)
+            #tree = Tree(Node(State(Board(self.grid_size), player0, player1), self.grid_size * self.grid_size))
+            #tree.get_top_node().set_c(c)
             # While not in a final state
-            tree.mcts_tree_default_until_end3(player0, player1, self.num_of_rollouts, RBUF, self.show_plot, pause_length, self.node_expansion, anet)
-'''
+            #tree.mcts_tree_default_until_end3(player0, player1, self.num_of_rollouts, RBUF, self.show_plot, pause_length, self.node_expansion, model)
+
 
             # Remove every turn of one of the players from RBUF
-            for i in RBUF:
+            '''for i in RBUF:
                 if i[0][1] == 1:
                     i.clear()
-            RBUF = [empty for empty in RBUF if empty]
+            RBUF = [empty for empty in RBUF if empty]'''
 
-            minibatch = random.sample(RBUF, 250)
+            minibatch = random.sample(RBUF, num_episodes)
             X_train = []
             y_train = []
 
+            print(RBUF)
+
             for root, D in minibatch:
                 board = root[0]
+                board = np.append(board, root[1])
+
                 X_train.append(board)
 
                 # Extract every normalized probability element from the numerated node lists into its own list
@@ -147,32 +150,9 @@ class Strategies:
 
                 history = anet.train_model(model, num_epochs, batch_size, optimizer, loss, X_train, y_train)
 
-                '''X_test = []
-                y_test = []
-                for root, D in val:
-
-                    node_probabilities = []
-                    for e in D:
-                        node_probabilities.append(e[1])
-
-                    X_test.append(root.get_state().get_board().get_board_np())
-                    y_test.append(node_probabilities)
-
-                X_test = np.array(X_test)
-                y_test = np.asarray(y_test)
-
-                losss, accuracy = anet.evaluate(
-                    X_test,
-                    y_test
-                )
-
-                # Print the loss and accuracy
-                print(f'\nTest loss: {losss:.6f}')
-                print(f'Test accuracy: {accuracy * 100:.2f}%')'''
-
                 # Save ANET's current parameters for later use in tournament play
-                model.save_weights('anet_weights_' + str(g_a) + '.h5')
-                #with open('playernoc','wb') as f:
+                model.save_weights('anet_weights_dense_small_' + str(250) + '.h5')
+                #with open('playersmall','wb') as f:
                 #    pickle.dump(RBUF, f)
 
         plt.plot(history.history['accuracy'])

@@ -1,6 +1,7 @@
 import copy
 import math
 import random
+import time
 
 import numpy as np
 
@@ -238,12 +239,19 @@ class Node:
             self.propagate_score(score)
             return
 
-        # Choose a random child node and move to this recursively
+        # Create the array of the current game board in one dimension and append the id of the current player
+        array = np.append(self.get_state().get_board().get_board_np(), self.get_state().get_current_turn().get_id())
 
-        action_probs = anet.predict_on_batch(self.get_state().get_board().get_board_np().reshape(
-            (1,) + self.get_state().get_board().get_board_np().shape))[0]
+        array = array.reshape(-1, 50)
+
+        #te = time.time()
+        action_probs = anet(array)[0]
+        #print(time.time() - te)
+
         action_probs = action_probs / np.sum(action_probs)
         action_probs = action_probs * self.get_valid_moves(action_probs).flatten()
+
+        action_probs = np.array(action_probs)
 
         random_child_node = None
         while random_child_node == None:
