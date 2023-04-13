@@ -7,8 +7,7 @@ from tensorflow import keras
 import matplotlib.pyplot as plt
 import numpy as np
 
-
-
+from ANET import ANET
 from Board import Board
 from Node import Node
 from Player import Player
@@ -106,67 +105,9 @@ class Strategies:
         # Randomly initialize parameters (weights and biases) of ANET
         input_shape = (self.grid_size, self.grid_size, 1)
         num_of_actions = self.grid_size * self.grid_size
-        #anet = ANET(input_shape, num_of_actions)
-        anet = keras.models.Sequential()
+        anet = ANET()
+        model = anet.initialize_model(input_shape, num_of_actions)
 
-        anet.add(
-            keras.layers.InputLayer(
-                input_shape=input_shape
-            )
-        )
-
-        anet.add(
-            keras.layers.Conv2D(
-                16,
-                (3, 3),
-                input_shape=input_shape,
-                activation='relu',
-                padding='same',
-            )
-        )
-
-        anet.add(
-            keras.layers.Conv2D(
-                16,
-                (3, 3),
-                input_shape=input_shape,
-                activation='relu',
-                padding='same',
-            )
-        )
-
-        anet.add(
-            keras.layers.Conv2D(
-                16,
-                (3, 3),
-                activation='relu',
-                padding='same',
-                kernel_regularizer=keras.regularizers.l2()
-            )
-        )
-
-        anet.add(
-            keras.layers.Flatten()
-        )
-
-        anet.add(
-            keras.layers.Dense(
-            num_of_actions,
-            activation='softmax'
-            )
-        )
-
-        # Add convolutional layers to extract features from the input
-        '''anet.add(keras.layers.Conv2D(64, kernel_size=2, activation='relu', input_shape=input_shape))
-        anet.add(keras.layers.Conv2D(32, kernel_size=2, activation='relu'))
-
-        # Flatten the output of the convolutional layers
-        anet.add(keras.layers.Flatten())
-
-        # Add fully connected layers to predict the probability of good child states
-        anet.add(keras.layers.Dense(128, activation='relu'))
-        anet.add(keras.layers.Dense(64, activation='relu'))
-        anet.add(keras.layers.Dense(49, activation='softmax'))'''
 
         #For g_a in number_of_actual_games
         for g_a in range(number_of_actual_games):
@@ -179,6 +120,7 @@ class Strategies:
             tree.mcts_tree_default_until_end3(player0, player1, self.num_of_rollouts, RBUF, self.show_plot, pause_length, self.node_expansion, anet)
 '''
 
+            # Remove every turn of one of the players from RBUF
             for i in RBUF:
                 if i[0][1] == 1:
                     i.clear()
@@ -192,7 +134,6 @@ class Strategies:
                 board = root[0]
                 X_train.append(board)
 
-
                 # Extract every normalized probability element from the numerated node lists into its own list
                 node_probabilities = []
                 for e in D:
@@ -204,20 +145,7 @@ class Strategies:
 
             if g_a == i_s:
 
-                anet.compile(
-                    optimizer=optimizer,
-                    loss=loss,
-                    metrics=['accuracy']
-                )
-                from keras import backend as K
-                K.set_value(anet.optimizer.learning_rate, 1.5)
-                history = anet.fit(
-                    X_train,
-                    y_train,
-                    batch_size=batch_size,
-                    epochs=num_epochs,
-                    verbose=1
-                )
+                history = anet.train_model(model, num_epochs, batch_size, optimizer, loss, X_train, y_train)
 
                 '''X_test = []
                 y_test = []
@@ -243,7 +171,7 @@ class Strategies:
                 print(f'Test accuracy: {accuracy * 100:.2f}%')'''
 
                 # Save ANET's current parameters for later use in tournament play
-                #anet.save_weights('anet_weights_' + str(g_a) + '.h5')
+                model.save_weights('anet_weights_' + str(g_a) + '.h5')
                 #with open('playernoc','wb') as f:
                 #    pickle.dump(RBUF, f)
 
