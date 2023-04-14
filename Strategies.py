@@ -14,37 +14,52 @@ from Tree import Tree
 
 
 class Strategies:
-    def __init__(self, grid_size, show_plot, game_type, c, rollouts_per_episode, min_pause_length=0.01, node_expansion=1, number_of_actual_games=1, data_filename="", anet_parameters=None):
-        self.grid_size = grid_size
-        self.show_plot = show_plot
-        self.game_type = game_type
-        self.num_of_rollouts = rollouts_per_episode
-        self.node_expansion = node_expansion
+    def __init__(self, game_type, game_parameters, anet_parameters):
+
+        board_size = game_parameters[0]
+        show_plot = game_parameters[1]
+        rollouts_per_episode = game_parameters[2]
+        node_expansion = game_parameters[3]
+        min_pause_length = game_parameters[4]
+        c = game_parameters[5]
+        number_of_actual_games = game_parameters[6]
+        data_filename = game_parameters[7]
+
+        save_interval = anet_parameters[0]
+        num_epochs = anet_parameters[1]
+        batch_size = anet_parameters[2]
+        optimizer = anet_parameters[3]
+        loss = anet_parameters[4]
+        num_episodes = anet_parameters[5]
+        weights_filename = anet_parameters[6]
 
         if game_type == "random":
-            self.place_randomly(min_pause_length)
+            self.place_randomly(board_size, show_plot, min_pause_length)
         elif game_type == "mcts":
-            self.mcts(c, min_pause_length)
+            self.mcts(board_size, c, rollouts_per_episode, node_expansion, min_pause_length, show_plot)
         elif game_type == "generate_data":
-            self.generate_data(c, number_of_actual_games, min_pause_length, data_filename)
+            self.generate_data(board_size, c, number_of_actual_games, rollouts_per_episode, node_expansion, min_pause_length, show_plot, data_filename)
         elif game_type == "train_network":
-            self.train_network(anet_parameters, data_filename)
+            self.train_network(board_size, num_epochs, batch_size, optimizer, loss, num_episodes, weights_filename, data_filename)
+        elif game_type == "train_networks":
+            self.train_networks(board_size, num_epochs, batch_size, optimizer, loss, num_episodes, weights_filename, data_filename, save_interval)
 
-    def place_randomly(self, pause_length):
-        gameBoard = Board(self.grid_size)
 
-        if self.show_plot:
+    def place_randomly(self, board_size, show_plot, pause_length):
+        gameBoard = Board(board_size)
+
+        if show_plot:
             gameBoard.initialize_board_plot()
 
         player0 = Player(0, 'red')
         player1 = Player(1, 'blue')
 
         i = -1
-        while i < self.grid_size * self.grid_size - 1:
+        while i < board_size * board_size - 1:
             pause_start = time.time()
 
-            random_x = int(random.uniform(0, self.grid_size))
-            random_y = int(random.uniform(0, self.grid_size))
+            random_x = int(random.uniform(0, board_size))
+            random_y = int(random.uniform(0, board_size))
 
             if gameBoard.get_hex_by_x_y(random_x, random_y) != None:
                 continue
@@ -62,27 +77,28 @@ class Strategies:
 
             i += 1
 
-            if self.show_plot:
+            if show_plot:
                 gameBoard.create_board_plot(gameBoard.get_fig(), gameBoard.get_ax())
                 if time.time() > pause_start + pause_length:
                     plt.pause(time.time() - pause_start + pause_length)
 
         gameBoard.print_board()
 
-        if self.show_plot:
+        if show_plot:
             gameBoard.create_board_plot(gameBoard.get_fig(), gameBoard.get_ax())
             plt.show()
 
-    def mcts(self, c, pause_length):
+
+    def mcts(self, board_size, c, rollouts_per_episode, node_expansion, pause_length, show_plot):
         player0 = Player(0, 'red')
         player1 = Player(1, 'black')
 
-        tree = Tree(Node(State(Board(self.grid_size), player0, player1), self.grid_size*self.grid_size))
+        tree = Tree(Node(State(Board(board_size), player0, player1), board_size**2))
         tree.get_top_node().set_c(c)
-        tree.mcts_tree_default_until_end(player0, player1, self.num_of_rollouts, self.show_plot, pause_length, self.node_expansion)
+        tree.mcts_tree_default_until_end(player0, player1, rollouts_per_episode, show_plot, pause_length, node_expansion)
 
 
-    def generate_data(self, c, number_of_actual_games, pause_length, filename):
+    def generate_data(self, board_size, c, number_of_actual_games, rollouts_per_episode, node_expansion, min_pause_length, show_plot, filename):
 
         player0 = Player(1, 'red')
         player1 = Player(2, 'blue')
@@ -98,31 +114,25 @@ class Strategies:
         for g_a in range(number_of_actual_games):
             # Initialize the actual game board to an empty board
             # Initialize the Monte Carlo Tree to a single root
-            tree = Tree(Node(State(Board(self.grid_size), player0, player1), self.grid_size * self.grid_size))
+            tree = Tree(Node(State(Board(board_size), player0, player1), board_size**2))
             tree.get_top_node().set_c(c)
             # While not in a final state
-            tree.mcts_tree_default_until_end3(player0, player1, self.num_of_rollouts, RBUF, self.show_plot, pause_length, self.node_expansion)
+            tree.mcts_tree_default_until_end3(player0, player1, rollouts_per_episode, RBUF, show_plot, min_pause_length, node_expansion)
 
         with open(filename, 'wb') as f:
             pickle.dump(RBUF, f)
 
 
-    def train_network(self, anet_parameters, filename):
-
-        num_epochs = anet_parameters[1]
-        batch_size = anet_parameters[2]
-        optimizer = anet_parameters[3]
-        loss = anet_parameters[4]
-        num_episodes = anet_parameters[5]
+    def train_network(self, board_size, num_epochs, batch_size, optimizer, loss, num_episodes, weights_filename, data_filename):
 
         # Each case (current node and children node probabilities) are stored at the end of each episode
         RBUF = []
-        with open(filename, 'rb') as f:
+        with open(data_filename, 'rb') as f:
             RBUF = pickle.load(f)
 
         # Randomly initialize parameters (weights and biases) of ANET
-        input_shape = anet_parameters[6]
-        num_of_actions = self.grid_size * self.grid_size
+        input_shape = board_size**2 + 1
+        num_of_actions = board_size**2
         anet = ANET()
         model = anet.initialize_model(input_shape, num_of_actions)
 
@@ -153,7 +163,7 @@ class Strategies:
         history = anet.train_model(model, num_epochs, batch_size, optimizer, loss, X_train, y_train)
 
         # Save ANET's current parameters for later use in tournament play
-        model.save_weights('anet_weights_' + str(num_episodes) + '.h5')
+        model.save_weights(weights_filename)
 
         plt.plot(history.history['accuracy'])
         plt.title('model accuracy')
@@ -168,3 +178,10 @@ class Strategies:
         plt.xlabel('epoch')
         plt.legend(['train', 'val'], loc='upper left')
         plt.show()
+
+
+    def train_networks(self, board_size, num_epochs, batch_size, optimizer, loss, num_episodes, weights_filename, data_filename, save_interval):
+
+        for i in range(num_episodes+1):
+            if i % save_interval:
+                self.train_network(board_size, num_epochs, batch_size, optimizer, loss, i, weights_filename, data_filename)
