@@ -244,9 +244,7 @@ class Node:
 
         array = array.reshape(-1, 50)
 
-        #te = time.time()
         action_probs = anet(array)[0]
-        #print(time.time() - te)
 
         action_probs = action_probs / np.sum(action_probs)
         action_probs = action_probs * self.get_valid_moves(action_probs).flatten()
@@ -263,14 +261,12 @@ class Node:
             position[0] = math.floor(action_idx / self.get_state().get_board().get_board_size())
             position[1] = action_idx % self.get_state().get_board().get_board_size()
 
-            #print(action_probs)
-
             random_child_node = self.create_random_child_node(position)
 
             action_probs[action_idx] = 0.0
-        #print()
+
         random_child_node.mcts_default_policy2(player, opposing_player, anet)
-        #print()
+
 
         # If top node in the newly generated default policy tree
         # Remove own children and set itself as a leaf

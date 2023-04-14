@@ -6,17 +6,19 @@ class ANET:
     def initialize_model(self, input_shape, num_actions):
         anet = keras.models.Sequential()
 
+        # Create an input layer
         anet.add(
             keras.layers.InputLayer(
                 input_shape=input_shape
             )
         )
 
-        # Flatten the output of the convolutional layers
+        # Flatten
         anet.add(keras.layers.Flatten())
 
         # Add fully connected layers to predict the probability of good child states
-        anet.add(keras.layers.Dense(32, activation='relu'))
+        anet.add(keras.layers.Dense(128, activation='relu'))
+        anet.add(keras.layers.Dense(64, activation='relu'))
         anet.add(keras.layers.Dense(num_actions, activation='softmax'))
 
         return anet
