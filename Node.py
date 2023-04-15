@@ -192,22 +192,6 @@ class Node:
             best_child.mcts_tree_policy(player, opposing_player, node_expansion)
 
 
-    def mcts_tree_policy2(self, player, opposing_player, node_expansion=1, anet=None):
-        # If self is a leaf it will have no children and needs to use the default policy
-        if self.is_endstate():
-            return
-        # Expand with default policy if:
-        # Node is leaf or
-        # The current number of nodes on this level is less than half of the maximum number of nodes on this level
-        elif self.is_leaf() or len(self.get_children()) < (self.get_max_children() - 1) / node_expansion:
-            self.set_leaf_status()
-            self.mcts_default_policy2(player, opposing_player, anet)
-            self.remove_leaf_status()
-        else:
-            best_child = self.calc_best_child(player, opposing_player)
-            best_child.mcts_tree_policy2(player, opposing_player, node_expansion, anet)
-
-
     # A run of the default policy is one rollout
     def mcts_default_policy(self, player, opposing_player):
         score = self.node_check_win(player, opposing_player)
@@ -231,20 +215,13 @@ class Node:
             return
 
 
-    def mcts_default_policy2(self, player, opposing_player, anet=None):
-        score = self.node_check_win(player, opposing_player)
-
-        # If anyone won in this node
-        if score != 0:
-            self.propagate_score(score)
-            return
-
+    def anet_policy(self, player, opposing_player, anet):
         # Create the array of the current game board in one dimension and append the id of the current player
         array = np.append(self.get_state().get_board().get_board_np(), self.get_state().get_current_turn().get_id())
 
         array = array.reshape(-1, 50)
 
-        action_probs = anet(array)[0]
+        action_probs = anet.predict(array)[0]
 
         action_probs = action_probs / np.sum(action_probs)
         action_probs = action_probs * self.get_valid_moves(action_probs).flatten()
@@ -253,29 +230,15 @@ class Node:
 
         random_child_node = None
         while random_child_node == None:
-
             action_probs = action_probs / np.sum(action_probs)
             action_idx = np.random.choice(len(action_probs), p=action_probs)
 
-            position = [None, None]
-            position[0] = math.floor(action_idx / self.get_state().get_board().get_board_size())
-            position[1] = action_idx % self.get_state().get_board().get_board_size()
+            #position = [None, None]
+            #position[0] = math.floor(action_idx / self.get_state().get_board().get_board_size())
+            #position[1] = action_idx % self.get_state().get_board().get_board_size()
 
-            random_child_node = self.create_random_child_node(position)
-
-            action_probs[action_idx] = 0.0
-
-        random_child_node.mcts_default_policy2(player, opposing_player, anet)
-
-
-        # If top node in the newly generated default policy tree
-        # Remove own children and set itself as a leaf
-        if self.get_parent() != None:
-            if self.get_parent().is_leaf():
-                self.remove_all_children()
-                self.set_leaf_status()
-        else:
-            return
+            print(action_idx)
+            return action_idx
 
 
     def get_valid_moves(self, predictions):
@@ -304,14 +267,18 @@ class Node:
         current_node.set_score([current_node.get_score()[0] + score[0], current_node.get_score()[1] + score[1]])
 
 
-    def node_check_win(self, player, opposing_player):
+    def node_check_win(self, player, opposing_player, return_player=False):
         # If player won this simulation
         if self.get_state().get_board().check_if_player_won(player) == player:
             self.make_endstate()
+            if return_player:
+                return player
             return [1, 1]
         # If player lost this simulation
         elif self.get_state().get_board().check_if_player_won(opposing_player) == opposing_player:
             self.make_endstate()
+            if return_player:
+                return opposing_player
             return [1, -1]
         else:
             return 0

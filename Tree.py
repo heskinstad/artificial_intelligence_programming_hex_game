@@ -1,3 +1,4 @@
+import math
 import time
 
 from matplotlib import pyplot as plt
@@ -187,3 +188,31 @@ class Tree:
 
         if show_plot:
             plt.show()
+
+
+    def anet_one_turn(self, current_node, player, opposing_player, anet, show_plot, pause_length):
+
+        if show_plot:
+            current_node.get_state().get_board().initialize_board_plot()
+
+        next_move = current_node.anet_policy(player, opposing_player, anet)
+
+        next_move = [math.floor(next_move / current_node.get_state().get_board().get_board_size()), next_move % current_node.get_state().get_board().get_board_size()]
+
+        current_node.create_child_node(next_move)
+
+        current_node = current_node.get_children()[0]
+
+        if show_plot:
+            current_node.get_state().get_board().create_board_plot(
+                self.get_top_node().get_state().get_board().get_fig(),
+                self.get_top_node().get_state().get_board().get_ax())
+            plt.pause(pause_length)
+
+        current_node.get_state().get_board().print_board()
+        print()
+
+        if show_plot:
+            plt.show()
+
+        return current_node

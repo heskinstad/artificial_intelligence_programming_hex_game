@@ -14,7 +14,7 @@ from Tree import Tree
 
 
 class Strategies:
-    def __init__(self, game_type, game_parameters, anet_parameters):
+    def __init__(self, game_type, game_parameters, anet_parameters, topp_parameters):
 
         board_size = game_parameters[0]
         show_plot = game_parameters[1]
@@ -33,6 +33,12 @@ class Strategies:
         num_episodes = anet_parameters[5]
         weights_filename = anet_parameters[6]
 
+        player1 = topp_parameters[0]
+        player2 = topp_parameters[1]
+        player1_weights_loc = topp_parameters[2]
+        player2_weights_loc = topp_parameters[3]
+        number_of_topp_games = topp_parameters[4]
+
         if game_type == "random":
             self.place_randomly(board_size, show_plot, min_pause_length)
         elif game_type == "mcts":
@@ -43,6 +49,8 @@ class Strategies:
             self.train_network(board_size, num_epochs, batch_size, optimizer, loss, num_episodes, weights_filename, data_filename)
         elif game_type == "train_networks":
             self.train_networks(board_size, num_epochs, batch_size, optimizer, loss, num_episodes, weights_filename, data_filename, save_interval)
+        elif game_type == "topp_tournament_2_players":
+            self.topp_tournament_2_players(player1, player2, player1_weights_loc, player2_weights_loc, board_size, number_of_topp_games, show_plot, min_pause_length)
 
 
     def place_randomly(self, board_size, show_plot, pause_length):
@@ -185,3 +193,57 @@ class Strategies:
         for i in range(num_episodes+1):
             if i % save_interval:
                 self.train_network(board_size, num_epochs, batch_size, optimizer, loss, i, weights_filename, data_filename)
+
+
+    def topp_tournament_2_players(self, player1, player2, player1_weights_loc, player2_weights_loc, board_size, number_of_topp_games, show_plot, min_pause_length):
+
+        player1 = Player(player1, "red")
+        player2 = Player(player2, "blue")
+
+        player1_wins = 0
+        player2_wins = 0
+
+        anet_player1 = ANET()
+        model_player1 = anet_player1.initialize_model(board_size**2+1, board_size**2)
+        model_player1.load_weights(player1_weights_loc)
+
+        anet_player2 = ANET()
+        model_player2 = anet_player2.initialize_model(board_size**2+1, board_size**2)
+        model_player2.load_weights(player2_weights_loc)
+
+        for game_number in range(number_of_topp_games):
+            tree = Tree(Node(State(Board(board_size), player1, player2), board_size**2))
+
+            current_node = tree.get_top_node()
+
+            # Starting player switches each game
+            if game_number % 2 == 0:
+                current_node.get_state().set_current_next_turn(player1, player2)
+            else:
+                current_node.get_state().set_current_next_turn(player2, player1)
+
+            while True:
+                if current_node.get_state().get_current_turn() == player1:
+                    anet = model_player1
+                else:
+                    anet = model_player2
+
+                current_node = tree.anet_one_turn(
+                    current_node,
+                    current_node.get_state().get_current_turn(),
+                    current_node.get_state().get_next_turn(),
+                    anet,
+                    show_plot,
+                    min_pause_length)
+
+                check_win = current_node.node_check_win(player1, player2, True)
+
+                if check_win == player1:
+                    player1_wins += 1
+                    break
+                elif check_win == player2:
+                    player2_wins += 1
+                    break
+
+        print("Player 1 won " + str(player1_wins) + " times")
+        print("Player 2 won " + str(player2_wins) + " times")

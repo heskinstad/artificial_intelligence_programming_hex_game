@@ -15,5 +15,9 @@ class State:
     def get_next_turn(self):
         return self.next_turn
 
+    def set_current_next_turn(self, current_turn, next_turn):
+        self.current_turn = current_turn
+        self.next_turn = next_turn
+
     def create_next_state(self):
         return Board(self.board.get_board_size(), False)
