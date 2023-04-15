@@ -221,24 +221,17 @@ class Node:
 
         array = array.reshape(-1, 50)
 
-        action_probs = anet.predict(array)[0]
+        action_probs = anet(array)[0]
 
         action_probs = action_probs / np.sum(action_probs)
         action_probs = action_probs * self.get_valid_moves(action_probs).flatten()
 
         action_probs = np.array(action_probs)
 
-        random_child_node = None
-        while random_child_node == None:
-            action_probs = action_probs / np.sum(action_probs)
-            action_idx = np.random.choice(len(action_probs), p=action_probs)
+        action_probs = action_probs / np.sum(action_probs)
+        action_idx = np.random.choice(len(action_probs), p=action_probs)
 
-            #position = [None, None]
-            #position[0] = math.floor(action_idx / self.get_state().get_board().get_board_size())
-            #position[1] = action_idx % self.get_state().get_board().get_board_size()
-
-            print(action_idx)
-            return action_idx
+        return action_idx
 
 
     def get_valid_moves(self, predictions):

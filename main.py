@@ -15,7 +15,7 @@ show_board = False
 rollouts_per_episode = "x"
 node_expansion = 1  # Determines how much the tree should expand for each "floor". Expands to max_number_of_nodes_left / node_expansion
 min_pause_length = 0.01  # Pause will be longer if time to run each episode > min_pause_length
-c = 0.8  # The higher this value is, the more likely the players are to try less optimal nodes (more exploration)
+c = 0.0  # The higher this value is, the more likely the players are to try less optimal nodes (more exploration)
 number_of_actual_games = "x"  # How many games are to be played
 
 data_filename = "gamedata/gamedata_" + str(number_of_actual_games) + "_games_" + str(rollouts_per_episode) + "_rollouts_" + str(c) + "c"
@@ -37,9 +37,9 @@ anet_parameters = [save_interval, num_epochs, batch_size, optimizer, loss, num_e
 # TOPP parameters
 player1_id = 1
 player2_id = 2
-player1_weights_loc = "weights/weights_1_episodes_250_epochs.h5"
+player1_weights_loc = "weights/weights_0_episodes_250_epochs.h5"
 player2_weights_loc = "weights/weights_250_episodes_250_epochs.h5"
-number_of_topp_games = 20  # Should be dividable by 2 so that each player start first equal number of times
+number_of_topp_games = 100  # Should be dividable by 2 so that each player start first equal number of times
 
 topp_parameters = [player1_id, player2_id, player1_weights_loc, player2_weights_loc, number_of_topp_games]
 

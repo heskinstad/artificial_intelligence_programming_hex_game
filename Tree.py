@@ -212,7 +212,4 @@ class Tree:
         current_node.get_state().get_board().print_board()
         print()
 
-        if show_plot:
-            plt.show()
-
         return current_node

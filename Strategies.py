@@ -149,43 +149,45 @@ class Strategies:
         # Also then get rid of the 1/2 at the end of every board.
         # Remember to implement this when it uses the ANET while playing too, not just in training.
 
-        minibatch = random.sample(RBUF, num_episodes)
-        X_train = []
-        y_train = []
+        if num_episodes > 0:  # If there are no episodes skip the training
 
-        for root, D in minibatch:
-            board = root[0]
-            board = np.append(board, root[1])
+            minibatch = random.sample(RBUF, num_episodes)
+            X_train = []
+            y_train = []
 
-            X_train.append(board)
+            for root, D in minibatch:
+                board = root[0]
+                board = np.append(board, root[1])
 
-            # Extract every normalized probability element from the numerated node lists into its own list
-            node_probabilities = []
-            for e in D:
-                node_probabilities.append(e[1])
-            y_train.append(node_probabilities)
+                X_train.append(board)
 
-        X_train = np.array(X_train)
-        y_train = np.asarray(y_train)
+                # Extract every normalized probability element from the numerated node lists into its own list
+                node_probabilities = []
+                for e in D:
+                    node_probabilities.append(e[1])
+                y_train.append(node_probabilities)
 
-        history = anet.train_model(model, num_epochs, batch_size, optimizer, loss, X_train, y_train)
+            X_train = np.array(X_train)
+            y_train = np.asarray(y_train)
+
+            history = anet.train_model(model, num_epochs, batch_size, optimizer, loss, X_train, y_train)
+
+            plt.plot(history.history['accuracy'])
+            plt.title('model accuracy')
+            plt.ylabel('accuracy')
+            plt.xlabel('epoch')
+            plt.legend(['train', 'val'], loc='upper left')
+            plt.show()
+
+            plt.plot(history.history['loss'])
+            plt.title('model loss')
+            plt.ylabel('loss')
+            plt.xlabel('epoch')
+            plt.legend(['train', 'val'], loc='upper left')
+            plt.show()
 
         # Save ANET's current parameters for later use in tournament play
         model.save_weights(weights_filename)
-
-        plt.plot(history.history['accuracy'])
-        plt.title('model accuracy')
-        plt.ylabel('accuracy')
-        plt.xlabel('epoch')
-        plt.legend(['train', 'val'], loc='upper left')
-        plt.show()
-
-        plt.plot(history.history['loss'])
-        plt.title('model loss')
-        plt.ylabel('loss')
-        plt.xlabel('epoch')
-        plt.legend(['train', 'val'], loc='upper left')
-        plt.show()
 
 
     def train_networks(self, board_size, num_epochs, batch_size, optimizer, loss, num_episodes, weights_filename, data_filename, save_interval):
@@ -247,3 +249,6 @@ class Strategies:
 
         print("Player 1 won " + str(player1_wins) + " times")
         print("Player 2 won " + str(player2_wins) + " times")
+
+        if show_plot:
+            plt.show()
