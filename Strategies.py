@@ -99,7 +99,7 @@ class Strategies:
 
     def mcts(self, board_size, c, rollouts_per_episode, node_expansion, pause_length, show_plot):
         player0 = Player(0, 'red')
-        player1 = Player(1, 'black')
+        player1 = Player(1, 'blue')
 
         tree = Tree(Node(State(Board(board_size), player0, player1), board_size**2))
         tree.get_top_node().set_c(c)
@@ -206,11 +206,11 @@ class Strategies:
         player2_wins = 0
 
         anet_player1 = ANET()
-        model_player1 = anet_player1.initialize_model(board_size**2+1, board_size**2)
+        model_player1 = anet_player1.initialize_model(board_size**2, board_size**2)
         model_player1.load_weights(player1_weights_loc)
 
         anet_player2 = ANET()
-        model_player2 = anet_player2.initialize_model(board_size**2+1, board_size**2)
+        model_player2 = anet_player2.initialize_model(board_size**2, board_size**2)
         model_player2.load_weights(player2_weights_loc)
 
         for game_number in range(number_of_topp_games):

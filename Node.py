@@ -153,7 +153,7 @@ class Node:
         board = self.get_state().get_board()
 
         board_deepcopy = Board(board.get_board_size(), False)
-        board_deepcopy.board_positions = [x[:] for x in board.get_board()]
+        board_deepcopy.board_positions = [x[:] for x in board.get_board_p1()]
 
         board_deepcopy.place(self.get_state().get_current_turn(), x, y)
 
@@ -217,9 +217,9 @@ class Node:
 
     def anet_policy(self, player, opposing_player, anet):
         # Create the array of the current game board in one dimension and append the id of the current player
-        array = np.append(self.get_state().get_board().get_board_np(), self.get_state().get_current_turn().get_id())
+        array = np.append(self.get_state().get_board().get_board_np_p1(), self.get_state().get_current_turn().get_id())
 
-        array = array.reshape(-1, 50)
+        array = array.reshape(-1, 49)
 
         action_probs = anet(array)[0]
 
@@ -235,9 +235,7 @@ class Node:
 
 
     def get_valid_moves(self, predictions):
-        #size = self.get_state().get_board().get_board_size()
-        #mask = np.zeros((size, size))
-        valid_moves = copy.deepcopy(self.get_state().get_board().get_board_np())
+        valid_moves = copy.deepcopy(self.get_state().get_board().get_board_np_p1())
         for y in range(len(valid_moves)):
             for x in range(len(valid_moves[y])):
                 if valid_moves[y][x] == 0:

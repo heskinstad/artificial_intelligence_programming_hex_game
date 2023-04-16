@@ -22,11 +22,25 @@ class Board:
     def get_board_size(self):
         return self.board_size
 
-    def get_board(self):
+    def get_board_p1(self):
         return self.board_positions
 
-    def get_board_np(self):
-        board = copy.deepcopy(self.get_board())
+    def get_board_p2(self):
+        board = copy.deepcopy(self.board_positions)
+
+        for i in board:
+            for j in i:
+                j += 3
+
+        return board
+
+    def get_board_np_p1(self):
+        board = copy.deepcopy(self.get_board_p1())
+
+        return np.array(board, dtype=np.int)
+
+    def get_board_np_p2(self):
+        board = copy.deepcopy(self.get_board_p2())
 
         return np.array(board, dtype=np.int)
 
@@ -80,19 +94,19 @@ class Board:
             self.board_positions.append([])
             self.board_plot.append([])
             for x in range(self.board_size):
-                if self.get_board()[y][x] == 0:
+                if self.get_board_p1()[y][x] == 0:
                     hex = mpatches.RegularPolygon(((x + y / 2) * 1.15, y), numVertices=6, radius=0.64,
                                                 orientation=np.pi, edgecolor='black', facecolor='white')
-                elif self.get_board()[y][x] == 1:
+                elif self.get_board_p1()[y][x] == 1:
                     hex = mpatches.RegularPolygon(((x + y / 2) * 1.15, y), numVertices=6, radius=0.64,
                                                 orientation=np.pi, edgecolor='black', facecolor='red')
-                elif self.get_board()[y][x] == 2:
+                elif self.get_board_p1()[y][x] == 2:
                     hex = mpatches.RegularPolygon(((x + y / 2) * 1.15, y), numVertices=6, radius=0.64,
                                                 orientation=np.pi, edgecolor='black', facecolor='blue')
 
                 self.ax.add_patch(hex)
 
-                self.board_positions[y].append(self.get_board()[y][x])
+                self.board_positions[y].append(self.get_board_p1()[y][x])
                 self.board_plot[y].append(hex)
 
         plt.xlim(-2, self.board_size * 1.5 * 1.15 + 1)
@@ -171,7 +185,7 @@ class Board:
 
     def get_board_1_dim(self):
         board = []
-        for row in self.get_board():
+        for row in self.get_board_p1():
             board.append(row)
         return board
 

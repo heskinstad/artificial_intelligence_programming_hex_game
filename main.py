@@ -1,9 +1,9 @@
 from Strategies import Strategies
 
-strategy = "topp_tournament_2_players"
+strategy = "mcts"
 # Strategies
     # random - both players select random moves until end
-    # mcts - bpth players select moves based on mcts with mcts parameters
+    # mcts - both players select moves based on mcts with mcts parameters
     # generate_data - run n number of games and save data from every episode to the file data_filename
     # train_network - train data on n number of episodes based on the data_filename, save weights to weights_filename
     # train_networks - train a number of networks (size of save_interval up to num_episodes)
@@ -12,11 +12,11 @@ strategy = "topp_tournament_2_players"
 # Game parameters
 board_size = 7
 show_board = False
-rollouts_per_episode = "x"
+rollouts_per_episode = 1500
 node_expansion = 1  # Determines how much the tree should expand for each "floor". Expands to max_number_of_nodes_left / node_expansion
 min_pause_length = 0.01  # Pause will be longer if time to run each episode > min_pause_length
 c = 0.0  # The higher this value is, the more likely the players are to try less optimal nodes (more exploration)
-number_of_actual_games = "x"  # How many games are to be played
+number_of_actual_games = 50  # How many games are to be played
 
 data_filename = "gamedata/gamedata_" + str(number_of_actual_games) + "_games_" + str(rollouts_per_episode) + "_rollouts_" + str(c) + "c"
 
