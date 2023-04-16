@@ -217,7 +217,11 @@ class Node:
 
     def anet_policy(self, player, opposing_player, anet):
         # Create the array of the current game board in one dimension and append the id of the current player
-        array = np.append(self.get_state().get_board().get_board_np_p1(), self.get_state().get_current_turn().get_id())
+
+        if player.get_direction() == "horizontal":
+            array = self.get_state().get_board().get_board_np_p1()
+        elif player.get_direction() == "vertical":
+            array = self.get_state().get_board().get_board_np_p2()
 
         array = array.reshape(-1, 49)
 
@@ -331,6 +335,9 @@ class Node:
         best_child = self.get_children()[0]
 
         for child in self.get_children():
+            #if child.is_endstate():
+            #    best_child = child
+            #    break
             if child.get_score()[0] > best_child.get_score()[0]:
                 best_child = child
 

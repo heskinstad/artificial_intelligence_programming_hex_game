@@ -28,9 +28,9 @@ class Board:
     def get_board_p2(self):
         board = copy.deepcopy(self.board_positions)
 
-        for i in board:
-            for j in i:
-                j += 3
+        for i in range(len(board)):
+            for j in range(len(board[i])):
+                board[i][j] += 3
 
         return board
 

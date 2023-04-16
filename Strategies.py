@@ -32,6 +32,7 @@ class Strategies:
         loss = anet_parameters[4]
         num_episodes = anet_parameters[5]
         weights_filename = anet_parameters[6]
+        learning_rate = anet_parameters[7]
 
         player1 = topp_parameters[0]
         player2 = topp_parameters[1]
@@ -46,9 +47,9 @@ class Strategies:
         elif game_type == "generate_data":
             self.generate_data(board_size, c, number_of_actual_games, rollouts_per_episode, node_expansion, min_pause_length, show_plot, data_filename)
         elif game_type == "train_network":
-            self.train_network(board_size, num_epochs, batch_size, optimizer, loss, num_episodes, weights_filename, data_filename)
+            self.train_network(board_size, num_epochs, batch_size, optimizer, loss, num_episodes, weights_filename, data_filename, learning_rate)
         elif game_type == "train_networks":
-            self.train_networks(board_size, num_epochs, batch_size, optimizer, loss, num_episodes, weights_filename, data_filename, save_interval)
+            self.train_networks(board_size, num_epochs, batch_size, optimizer, loss, num_episodes, weights_filename, data_filename, save_interval, learning_rate)
         elif game_type == "topp_tournament_2_players":
             self.topp_tournament_2_players(player1, player2, player1_weights_loc, player2_weights_loc, board_size, number_of_topp_games, show_plot, min_pause_length)
 
@@ -131,7 +132,7 @@ class Strategies:
             pickle.dump(RBUF, f)
 
 
-    def train_network(self, board_size, num_epochs, batch_size, optimizer, loss, num_episodes, weights_filename, data_filename):
+    def train_network(self, board_size, num_epochs, batch_size, optimizer, loss, num_episodes, weights_filename, data_filename, learning_rate):
 
         # Each case (current node and children node probabilities) are stored at the end of each episode
         RBUF = []
@@ -139,7 +140,7 @@ class Strategies:
             RBUF = pickle.load(f)
 
         # Randomly initialize parameters (weights and biases) of ANET
-        input_shape = board_size**2 + 1
+        input_shape = board_size**2
         num_of_actions = board_size**2
         anet = ANET()
         model = anet.initialize_model(input_shape, num_of_actions)
@@ -156,10 +157,9 @@ class Strategies:
             y_train = []
 
             for root, D in minibatch:
-                board = root[0]
-                board = np.append(board, root[1])
-
+                board = root.flatten()
                 X_train.append(board)
+                print(root)
 
                 # Extract every normalized probability element from the numerated node lists into its own list
                 node_probabilities = []
@@ -170,7 +170,7 @@ class Strategies:
             X_train = np.array(X_train)
             y_train = np.asarray(y_train)
 
-            history = anet.train_model(model, num_epochs, batch_size, optimizer, loss, X_train, y_train)
+            history = anet.train_model(model, num_epochs, batch_size, optimizer, loss, X_train, y_train, learning_rate)
 
             plt.plot(history.history['accuracy'])
             plt.title('model accuracy')
@@ -190,17 +190,17 @@ class Strategies:
         model.save_weights(weights_filename)
 
 
-    def train_networks(self, board_size, num_epochs, batch_size, optimizer, loss, num_episodes, weights_filename, data_filename, save_interval):
+    def train_networks(self, board_size, num_epochs, batch_size, optimizer, loss, num_episodes, weights_filename, data_filename, save_interval, learning_rate):
 
         for i in range(num_episodes+1):
             if i % save_interval:
-                self.train_network(board_size, num_epochs, batch_size, optimizer, loss, i, weights_filename, data_filename)
+                self.train_network(board_size, num_epochs, batch_size, optimizer, loss, i, weights_filename, data_filename, learning_rate)
 
 
     def topp_tournament_2_players(self, player1, player2, player1_weights_loc, player2_weights_loc, board_size, number_of_topp_games, show_plot, min_pause_length):
 
-        player1 = Player(player1, "red")
-        player2 = Player(player2, "blue")
+        player1 = Player(player1, "red", "horizontal")
+        player2 = Player(player2, "blue", "vertical")
 
         player1_wins = 0
         player2_wins = 0
@@ -221,8 +221,12 @@ class Strategies:
             # Starting player switches each game
             if game_number % 2 == 0:
                 current_node.get_state().set_current_next_turn(player1, player2)
+                player1.set_direction("horizontal")
+                player2.set_direction("vertical")
             else:
                 current_node.get_state().set_current_next_turn(player2, player1)
+                player1.set_direction("vertical")
+                player2.set_direction("horizontal")
 
             while True:
                 if current_node.get_state().get_current_turn() == player1:
@@ -252,3 +256,6 @@ class Strategies:
 
         if show_plot:
             plt.show()
+
+    def topp_tournament(self, player1, player2, player1_weights_loc, player2_weights_loc, board_size, number_of_topp_games, show_plot, min_pause_length, ):
+        pass

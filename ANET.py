@@ -23,7 +23,7 @@ class ANET:
 
         return anet
 
-    def train_model(self, anet, num_epochs, batch_size, optimizer, loss, X_train, y_train):
+    def train_model(self, anet, num_epochs, batch_size, optimizer, loss, X_train, y_train, learning_rate):
         anet.compile(
             optimizer=optimizer,
             loss=loss,
@@ -31,7 +31,7 @@ class ANET:
         )
 
         from keras import backend as K
-        K.set_value(anet.optimizer.learning_rate, 1.5)
+        K.set_value(anet.optimizer.learning_rate, learning_rate)
 
         history = anet.fit(
             X_train,
