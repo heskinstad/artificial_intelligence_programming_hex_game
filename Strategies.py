@@ -307,7 +307,6 @@ class Strategies:
                 node_probabilities = []
                 for e in D:
                     node_probabilities.append(e[1])
-
                 node_probabilities = node_probabilities / np.sum(node_probabilities)  # Normalize probabilites
                 y_train.append(node_probabilities)
 

@@ -405,6 +405,10 @@ class Node:
         action_probs = np.array(action_probs)
 
         random_child_node = None
+        if self.get_max_children() == len(self.get_children()):
+            random_child_node = random.choice(self.get_children())
+            return
+
         while random_child_node == None:
             action_probs = action_probs / np.sum(action_probs)
             action_idx = np.random.choice(len(action_probs), p=action_probs)
@@ -420,9 +424,9 @@ class Node:
         random_child_node.mcts_default_policy2(player, opposing_player, anet)
 
         # Choose a random child node and move to this recursively
-        random_child_node = self.create_random_child_node()
-        if random_child_node == None:  # Is none if there is only a single child left and it has already been created
-            self.get_children()[0].mcts_default_policy(player, opposing_player)
-        else:
-            random_child_node.mcts_default_policy(player, opposing_player)
+        #random_child_node = self.create_random_child_node()
+        #if random_child_node == None:  # Is none if there is only a single child left and it has already been created
+        #    self.get_children()[0].mcts_default_policy(player, opposing_player)
+        #else:
+        #    random_child_node.mcts_default_policy(player, opposing_player)
 
