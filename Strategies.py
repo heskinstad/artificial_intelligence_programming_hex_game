@@ -120,13 +120,17 @@ class Strategies:
         # Also then get rid of the 1/2 at the end of every board.
         # Remember to implement this when it uses the ANET while playing too, not just in training.
 
+        anet_player1 = ANET()
+        model_player1 = anet_player1.initialize_model((board_size, board_size, 1), board_size ** 2)
+        model_player1.load_weights("weights/tete.h5")
+
         for g_a in range(number_of_actual_games):
             # Initialize the actual game board to an empty board
             # Initialize the Monte Carlo Tree to a single root
             tree = Tree(Node(State(Board(board_size), player0, player1), board_size**2))
             tree.get_top_node().set_c(c)
             # While not in a final state
-            tree.mcts_tree_default_until_end3(player0, player1, rollouts_per_episode, RBUF, show_plot, min_pause_length, node_expansion)
+            tree.mcts_tree_default_until_end3(player0, player1, rollouts_per_episode, RBUF, show_plot, min_pause_length, node_expansion, anet_player1)
 
         with open(filename, 'wb') as f:
             pickle.dump(RBUF, f)

@@ -226,7 +226,7 @@ class Node:
         elif player.get_direction() == "vertical":
             array = self.get_state().get_board().get_board_np_p2()
 
-        array = array.reshape(1, 4, 4)
+        array = array.reshape(1, self.get_state().get_board().get_board_size(), self.get_state().get_board().get_board_size())
 
         action_probs = anet(array)[0]
 
@@ -364,3 +364,58 @@ class Node:
             current = current.get_parent()
 
         return path
+
+    def mcts_tree_policy2(self, player, opposing_player, node_expansion=1, anet=None):
+        # If self is a leaf it will have no children and needs to use the default policy
+        if self.is_endstate():
+            return
+        # Expand with default policy if:
+        # Node is leaf or
+        # The current number of nodes on this level is less than half of the maximum number of nodes on this level
+        elif self.is_leaf() or len(self.get_children()) < (self.get_max_children() - 1) / node_expansion:
+            self.set_leaf_status()
+            self.mcts_default_policy2(player, opposing_player, anet)
+            self.remove_leaf_status()
+        else:
+            best_child = self.calc_best_child(player, opposing_player)
+            best_child.mcts_tree_policy2(player, opposing_player, node_expansion, anet)
+
+
+    def mcts_default_policy2(self, player, opposing_player, anet=None):
+        score = self.node_check_win(player, opposing_player)
+
+        # If anyone won in this node
+        if self.is_endstate():
+            self.propagate_score(score)
+            return
+
+        # Create the array of the current game board
+        #if player.get_direction() == "horizontal":
+        array = self.get_state().get_board().get_board_np_p1()
+        #elif player.get_direction() == "vertical":
+        #    array = self.get_state().get_board().get_board_np_p2()
+
+        array = array.reshape(1, self.get_state().get_board().get_board_size(), self.get_state().get_board().get_board_size())
+
+        action_probs = anet(array)[0]
+
+        action_probs = action_probs * self.get_valid_moves(action_probs).flatten()
+        action_probs = action_probs / np.sum(action_probs)
+
+        action_probs = np.array(action_probs)
+
+        random_child_node = None
+        while random_child_node == None:
+            action_probs = action_probs / np.sum(action_probs)
+            action_idx = np.random.choice(len(action_probs), p=action_probs)
+
+            position = [None, None]
+            position[0] = math.floor(action_idx / self.get_state().get_board().get_board_size())
+            position[1] = action_idx % self.get_state().get_board().get_board_size()
+
+            random_child_node = self.create_random_child_node(position)
+
+            action_probs[action_idx] = 0.0
+
+        random_child_node.mcts_default_policy2(player, opposing_player, anet)
+
