@@ -400,7 +400,7 @@ class Node:
         action_probs = anet(array)[0]
 
         action_probs = action_probs * self.get_valid_moves(action_probs).flatten()
-        action_probs = action_probs / np.sum(action_probs)
+        #action_probs = action_probs / np.sum(action_probs)
 
         action_probs = np.array(action_probs)
 
@@ -418,4 +418,11 @@ class Node:
             action_probs[action_idx] = 0.0
 
         random_child_node.mcts_default_policy2(player, opposing_player, anet)
+
+        # Choose a random child node and move to this recursively
+        random_child_node = self.create_random_child_node()
+        if random_child_node == None:  # Is none if there is only a single child left and it has already been created
+            self.get_children()[0].mcts_default_policy(player, opposing_player)
+        else:
+            random_child_node.mcts_default_policy(player, opposing_player)
 

@@ -52,6 +52,8 @@ class Strategies:
             self.train_networks(board_size, num_epochs, batch_size, optimizer, loss, num_episodes, weights_filename, data_filename, save_interval, learning_rate)
         elif game_type == "topp_tournament_2_players":
             self.topp_tournament_2_players(player1, player2, player1_weights_loc, player2_weights_loc, board_size, number_of_topp_games, show_plot, min_pause_length)
+        elif game_type == "topp_tournament":
+            self.topp_tournament(player1, player2, board_size, number_of_topp_games, show_plot, min_pause_length, save_interval, num_epochs, batch_size, optimizer, loss, num_episodes, weights_filename, data_filename, learning_rate, rollouts_per_episode, node_expansion, c)
 
 
     def place_randomly(self, board_size, show_plot, pause_length):
@@ -130,24 +132,27 @@ class Strategies:
             tree = Tree(Node(State(Board(board_size), player0, player1), board_size**2))
             tree.get_top_node().set_c(c)
             # While not in a final state
-            tree.mcts_tree_default_until_end3(player0, player1, rollouts_per_episode, RBUF, show_plot, min_pause_length, node_expansion, anet_player1)
+            tree.mcts_tree_default_until_end(player0, player1, rollouts_per_episode, RBUF, show_plot, min_pause_length, node_expansion)
 
         with open(filename, 'wb') as f:
             pickle.dump(RBUF, f)
 
 
-    def train_network(self, board_size, num_epochs, batch_size, optimizer, loss, num_episodes, weights_filename, data_filename, learning_rate):
+    def train_network(self, board_size, num_epochs, batch_size, optimizer, loss, num_episodes, weights_filename, data_filename, learning_rate, save=False, RBUF=None, anet=None):
 
         # Each case (current node and children node probabilities) are stored at the end of each episode
-        RBUF = []
-        with open(data_filename, 'rb') as f:
-            RBUF = pickle.load(f)
+        if RBUF == None:
+            RBUF = []
+            with open(data_filename, 'rb') as f:
+                RBUF = pickle.load(f)
+
 
         # Randomly initialize parameters (weights and biases) of ANET
         input_shape = (board_size, board_size, 1)
         num_of_actions = board_size**2
-        anet = ANET()
-        model = anet.initialize_model(input_shape, num_of_actions)
+        if anet == None:
+            anet = ANET()
+            model = anet.initialize_model(input_shape, num_of_actions)
 
         #TODO: Edit training board input so that if it's player1's turn the board will be filled with 0's, 1's and 2's
         # and if it's player2's turn the board will be filled with 3's, 4's and 5's.
@@ -156,11 +161,10 @@ class Strategies:
 
         if num_episodes > 0:  # If there are no episodes skip the training
 
-            minibatch = random.sample(RBUF, num_episodes)
             X_train = []
             y_train = []
 
-            for root, D in minibatch:
+            for root, D in RBUF:
                 X_train.append(root)
                 print(root)
 
@@ -193,7 +197,10 @@ class Strategies:
             plt.show()
 
         # Save ANET's current parameters for later use in tournament play
-        model.save_weights(weights_filename)
+        if save:
+            model.save_weights(weights_filename)
+        return model
+
 
 
     def train_networks(self, board_size, num_epochs, batch_size, optimizer, loss, num_episodes, weights_filename, data_filename, save_interval, learning_rate):
@@ -263,5 +270,52 @@ class Strategies:
         if show_plot:
             plt.show()
 
-    def topp_tournament(self, player1, player2, player1_weights_loc, player2_weights_loc, board_size, number_of_topp_games, show_plot, min_pause_length, ):
-        pass
+    def topp_tournament(self, player1, player2, board_size, number_of_topp_games, show_plot, min_pause_length, save_interval, num_epochs, batch_size, optimizer, loss, num_episodes, weights_filename, data_filename, learning_rate, rollouts_per_episode, node_expansion, c):
+
+        player1 = Player(player1, "red", "horizontal")
+        player2 = Player(player2, "blue", "vertical")
+
+        save = False
+
+        # Randomly initialize parameters (weights and biases) of ANET
+        input_shape = (board_size, board_size, 1)
+        num_of_actions = board_size ** 2
+        anet = ANET()
+        model = anet.initialize_model(input_shape, num_of_actions)
+
+
+        for i in range(number_of_topp_games):
+            RBUF = []
+
+            tree = Tree(Node(State(Board(board_size), player1, player2), board_size**2))
+            tree.get_top_node().set_c(c)
+            # While not in a final state
+            tree.mcts_tree_default_until_end3(player1, player2, rollouts_per_episode, RBUF, show_plot, min_pause_length, node_expansion, model)
+
+            if i % save_interval == 0:
+                save = True
+            else:
+                save = False
+
+            X_train = []
+            y_train = []
+
+            for root, D in RBUF:
+                X_train.append(root)
+
+                # Extract every normalized probability element from the numerated node lists into its own list
+                node_probabilities = []
+                for e in D:
+                    node_probabilities.append(e[1])
+
+                node_probabilities = node_probabilities / np.sum(node_probabilities)  # Normalize probabilites
+                y_train.append(node_probabilities)
+
+            X_train = np.array(X_train)
+            y_train = np.asarray(y_train)
+
+            anet.train_model(model, num_epochs, batch_size, optimizer, loss, X_train, y_train, learning_rate)
+
+            # Save ANET's current parameters for later use in tournament play
+            if save:
+                model.save_weights("weights/TOPP_" + str(i) + ".h5")

@@ -1,6 +1,6 @@
 from Strategies import Strategies
 
-strategy = "generate_data"
+strategy = "topp_tournament"
 # Strategies
     # random - both players select random moves until end
     # mcts - both players select moves based on mcts with mcts parameters
@@ -12,7 +12,7 @@ strategy = "generate_data"
 # Game parameters
 board_size = 4
 show_board = False
-rollouts_per_episode = 600
+rollouts_per_episode = 10
 node_expansion = 1  # Determines how much the tree should expand for each "floor". Expands to max_number_of_nodes_left / node_expansion
 min_pause_length = 0.0001  # Pause will be longer if time to run each episode > min_pause_length
 c = 1.42  # The higher this value is, the more likely the players are to try less optimal nodes (more exploration)
@@ -23,7 +23,7 @@ data_filename = "gamedata/gamedata_" + str(board_size) + "x" + str(board_size) +
 game_parameters = [board_size, show_board, rollouts_per_episode, node_expansion, min_pause_length, c, number_of_actual_games, data_filename]
 
 # ANET parameters
-save_interval = 2  # Save for each n number of actual games/episodes
+save_interval = 50  # Save for each n number of actual games/episodes
 num_epochs = 250  # Number of epochs in training
 batch_size = 50  # Training batch size
 optimizer = "adam"
@@ -40,7 +40,7 @@ player1_id = 1
 player2_id = 2
 player1_weights_loc = "weights/weights_0_episodes_250_epochs.h5"
 player2_weights_loc = "weights/weights_1500_episodes_250_epochs.h5"
-number_of_topp_games = 100  # Should be dividable by 2 so that each player start first equal number of times
+number_of_topp_games = 101  # Should be dividable by 2 so that each player start first equal number of times
 
 topp_parameters = [player1_id, player2_id, player1_weights_loc, player2_weights_loc, number_of_topp_games]
 

@@ -70,7 +70,8 @@ class ANET:
             y_train,
             batch_size=batch_size,
             epochs=num_epochs,
-            verbose=1
+            verbose=1,
+            shuffle=True
         )
 
         return history
