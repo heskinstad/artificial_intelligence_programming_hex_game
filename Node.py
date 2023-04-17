@@ -226,12 +226,12 @@ class Node:
         elif player.get_direction() == "vertical":
             array = self.get_state().get_board().get_board_np_p2()
 
-        array = array.reshape(-1, self.get_state().get_board().get_board_size()**2)
+        array = array.reshape(1, 4, 4)
 
         action_probs = anet(array)[0]
 
-        action_probs = action_probs / np.sum(action_probs)
         action_probs = action_probs * self.get_valid_moves(action_probs).flatten()
+        action_probs = action_probs / np.sum(action_probs)
 
         action_probs = np.array(action_probs)
 

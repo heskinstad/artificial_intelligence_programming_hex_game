@@ -140,7 +140,7 @@ class Strategies:
             RBUF = pickle.load(f)
 
         # Randomly initialize parameters (weights and biases) of ANET
-        input_shape = board_size**2
+        input_shape = (board_size, board_size, 1)
         num_of_actions = board_size**2
         anet = ANET()
         model = anet.initialize_model(input_shape, num_of_actions)
@@ -157,15 +157,17 @@ class Strategies:
             y_train = []
 
             for root, D in minibatch:
-                board = root.flatten()
-                X_train.append(board)
+                X_train.append(root)
                 print(root)
 
                 # Extract every normalized probability element from the numerated node lists into its own list
                 node_probabilities = []
                 for e in D:
                     node_probabilities.append(e[1])
+
+                node_probabilities = node_probabilities / np.sum(node_probabilities)  # Normalize probabilites
                 y_train.append(node_probabilities)
+
 
             X_train = np.array(X_train)
             y_train = np.asarray(y_train)
@@ -206,11 +208,11 @@ class Strategies:
         player2_wins = 0
 
         anet_player1 = ANET()
-        model_player1 = anet_player1.initialize_model(board_size**2, board_size**2)
+        model_player1 = anet_player1.initialize_model((board_size, board_size, 1), board_size**2)
         model_player1.load_weights(player1_weights_loc)
 
         anet_player2 = ANET()
-        model_player2 = anet_player2.initialize_model(board_size**2, board_size**2)
+        model_player2 = anet_player2.initialize_model((board_size, board_size, 1), board_size**2)
         model_player2.load_weights(player2_weights_loc)
 
         for game_number in range(number_of_topp_games):
