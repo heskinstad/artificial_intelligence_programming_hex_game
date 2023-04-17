@@ -197,13 +197,16 @@ class Node:
         score = self.node_check_win(player, opposing_player)
 
         # If anyone won in this node
-        if score != 0:
+        if self.is_endstate():
             self.propagate_score(score)
             return
 
         # Choose a random child node and move to this recursively
         random_child_node = self.create_random_child_node()
-        random_child_node.mcts_default_policy(player, opposing_player)
+        if random_child_node == None:  # Is none if there is only a single child left and it has already been created
+            self.get_children()[0].mcts_default_policy(player, opposing_player)
+        else:
+            random_child_node.mcts_default_policy(player, opposing_player)
 
         # If top node in the newly generated default policy tree
         # Remove own children and set itself as a leaf
@@ -223,7 +226,7 @@ class Node:
         elif player.get_direction() == "vertical":
             array = self.get_state().get_board().get_board_np_p2()
 
-        array = array.reshape(-1, 49)
+        array = array.reshape(-1, self.get_state().get_board().get_board_size()**2)
 
         action_probs = anet(array)[0]
 
@@ -303,7 +306,7 @@ class Node:
             best_score = 9999
 
         for child in self.get_children():
-            if self.get_score() == [0, 0]:
+            if child.get_score() == [0, 0]:
                 exploitation_bonus = 0
                 exploration_bonus = 0
             else:
