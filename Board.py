@@ -28,21 +28,25 @@ class Board:
     def get_board_p2(self):
         board = copy.deepcopy(self.board_positions)
 
-        for i in range(len(board)):
-            for j in range(len(board[i])):
-                board[i][j] += 3
+        #for i in range(len(board)):
+        #    for j in range(len(board[i])):
+        #        board[i][j] += 3
 
         return board
 
     def get_board_np_p1(self):
         board = copy.deepcopy(self.get_board_p1())
 
+        tete = np.where(board == 1, 1, 0)
+
         return np.array(board, dtype=np.int)
 
     def get_board_np_p2(self):
         board = copy.deepcopy(self.get_board_p2())
 
-        return np.array(board, dtype=np.int)
+        tete = np.where(board == 2, 1, 0)
+
+        return np.array(tete, dtype=np.int)
 
 
     def create_board(self):
