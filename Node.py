@@ -188,7 +188,7 @@ class Node:
             self.mcts_default_policy(player, opposing_player)
             self.remove_leaf_status()
         else:
-            best_child = self.calc_best_child(player, opposing_player)
+            best_child = self.calc_best_child()
             best_child.mcts_tree_policy(player, opposing_player, node_expansion)
 
 
@@ -302,7 +302,7 @@ class Node:
 
 
     # Return the child with the best score relative to the current player
-    def calc_best_child(self, player, opposing_player, debug=False):
+    def calc_best_child(self, debug=False):
         # Make sure there is at least one child node
         if len(self.get_children()) == 0:
             raise IllegalNumberOfChildrenException("Error: Not enough children!")
@@ -311,9 +311,9 @@ class Node:
         child_score_list = []
         best_child = None
         best_score = None
-        if self.get_state().get_current_turn() == player:
+        if self.get_state().get_current_turn() == self.get_state().get_starting_player():
             best_score = -9999
-        elif self.get_state().get_current_turn() == opposing_player:
+        elif self.get_state().get_current_turn() == self.get_state().get_second_player():
             best_score = 9999
 
         for child in self.get_children():
@@ -324,13 +324,13 @@ class Node:
                 exploitation_bonus = child.get_score()[1] / child.get_score()[0]
                 exploration_bonus = self.calc_u_s_a(child)
 
-            if self.get_state().get_current_turn() == player:
+            if self.get_state().get_current_turn() == self.get_state().get_starting_player():
                 score = exploitation_bonus + exploration_bonus
                 child_score_list.append(score)
                 if score > best_score:
                     best_score = score
                     best_child = child
-            elif self.get_state().get_current_turn() == opposing_player:
+            elif self.get_state().get_current_turn() == self.get_state().get_second_player():
                 score = exploitation_bonus - exploration_bonus
                 child_score_list.append(score)
                 if score < best_score:
@@ -388,7 +388,7 @@ class Node:
             self.mcts_default_policy2(player, opposing_player, anet)
             self.remove_leaf_status()
         else:
-            best_child = self.calc_best_child(player, opposing_player)
+            best_child = self.calc_best_child()
             best_child.mcts_tree_policy2(player, opposing_player, node_expansion, anet)
 
 

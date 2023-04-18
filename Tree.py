@@ -35,7 +35,7 @@ class Tree:
             print(tete)
 
             # Move to best child node
-            current_node = current_node.calc_best_child(player, opposing_player, True)
+            current_node = current_node.calc_best_child(True)
 
             print(current_node.get_state().get_next_turn().get_color() + " chose " + str(current_node.get_score()))
 
@@ -95,7 +95,7 @@ class Tree:
             RBUF.append([current_node, current_root_arcs])
 
             # Move to best child node
-            current_node = current_node.calc_best_child(player, opposing_player, True)
+            current_node = current_node.calc_best_child(True)
 
             print(current_node.get_state().get_next_turn().get_color() + " chose " + str(current_node.get_score()))
 
@@ -164,8 +164,10 @@ class Tree:
 
             if current_node.get_state().get_current_turn() == current_node.get_state().get_starting_player():
                 RBUF.append([current_node.get_state().get_board().get_board_np_p1(), current_root_arcs])
-            elif current_node.get_state().get_current_turn() != current_node.get_state().get_starting_player():
+            elif current_node.get_state().get_current_turn() == current_node.get_state().get_second_player():
                 RBUF.append([current_node.get_state().get_board().get_board_np_p2(), current_root_arcs])
+            else:
+                raise Exception("Could not append to RBUF")
 
             # Move to best child node
             #current_node = current_node.calc_best_child(player, opposing_player, True)
