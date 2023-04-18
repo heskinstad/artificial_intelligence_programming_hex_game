@@ -332,15 +332,14 @@ class Strategies:
 
     def TOPP_mini(self, player1, player2, board_size, number_of_topp_games, show_plot, min_pause_length, save_interval, num_epochs, batch_size, optimizer, loss, learning_rate, rollouts_per_episode, node_expansion, c, save_folder, topp_mini_games):
         # Create data
-        #self.topp_tournament(player1, player2, board_size, number_of_topp_games, show_plot, min_pause_length, save_interval, num_epochs, batch_size, optimizer, loss, learning_rate, rollouts_per_episode, node_expansion, c, save_folder)
+        self.topp_tournament(player1, player2, board_size, number_of_topp_games, show_plot, min_pause_length, save_interval, num_epochs, batch_size, optimizer, loss, learning_rate, rollouts_per_episode, node_expansion, c, save_folder)
 
-        number_of_games = [0, 0, 0, 0, 0, 0]
         players_score = [0, 0, 0, 0, 0, 0]
 
         for i in range(0, 6):
             for j in range(i, 6):
                 if i != j:
-                    score = self.topp_tournament_2_players(player1, player2, save_folder + "/TOPP_" + str(0) + ".h5", save_folder + "/TOPP_" + str(250) + ".h5", board_size, topp_mini_games, show_plot, min_pause_length)
+                    score = self.topp_tournament_2_players(player1, player2, save_folder + "/TOPP_" + str(i*50) + ".h5", save_folder + "/TOPP_" + str(j*50) + ".h5", board_size, topp_mini_games, show_plot, min_pause_length)
 
                     players_score[i] += score[0]
                     players_score[j] += score[1]

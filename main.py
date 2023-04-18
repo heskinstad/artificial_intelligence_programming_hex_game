@@ -43,7 +43,7 @@ player2_id = 2
 player1_weights_loc = "weights/TOPP_0.h5"
 player2_weights_loc = "weights/TOPP_70.h5"
 number_of_topp_games = 250  # Should be dividable by 2 so that each player start first equal number of times
-save_folder = "topp_mini2"
+save_folder = "topp_mini"
 topp_mini_games = 100
 
 topp_parameters = [player1_id, player2_id, player1_weights_loc, player2_weights_loc, number_of_topp_games, save_folder, topp_mini_games]
