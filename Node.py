@@ -241,7 +241,7 @@ class Node:
             #action_idx = np.random.choice(len(action_probs), p=action_probs)
             action_idx = np.argmax(action_probs)
         except:  # If action_probs contains nan (meaning the network only predicted impossible moves)
-            print("AAAAAAAAA")
+            print("Network predicted impossible values. Choosing random node.")
             valid_moves = valid_moves / np.sum(valid_moves)
             action_idx = np.random.choice(len(valid_moves), p=valid_moves)
 
