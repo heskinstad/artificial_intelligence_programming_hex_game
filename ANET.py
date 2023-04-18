@@ -14,7 +14,7 @@ class ANET:
 
         anet.add(
             keras.layers.Conv2D(
-                32,
+                64,
                 (3, 3),
                 input_shape=input_shape,
                 activation='relu',
@@ -24,7 +24,7 @@ class ANET:
 
         anet.add(
             keras.layers.Conv2D(
-                32,
+                64,
                 (3, 3),
                 input_shape=input_shape,
                 activation='relu',
@@ -34,7 +34,7 @@ class ANET:
 
         anet.add(
             keras.layers.Conv2D(
-                32,
+                64,
                 (3, 3),
                 activation='relu',
                 padding='same',
