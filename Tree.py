@@ -121,7 +121,7 @@ class Tree:
             plt.show()
 
 
-    def mcts_tree_default_until_end3(self, player, opposing_player, starting_player, rollouts_per_episode, RBUF, show_plot=False, pause_length=0.001, node_expansion=1, anet=None):
+    def mcts_tree_default_until_end3(self, rollouts_per_episode, RBUF, show_plot=False, pause_length=0.001, node_expansion=1, anet=None):
         start = time.time()
 
         current_node = self.get_top_node()

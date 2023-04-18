@@ -39,6 +39,8 @@ class Strategies:
         player1_weights_loc = topp_parameters[2]
         player2_weights_loc = topp_parameters[3]
         number_of_topp_games = topp_parameters[4]
+        save_folder = topp_parameters[5]
+        topp_mini_games = topp_parameters[6]
 
         if game_type == "random":
             self.place_randomly(board_size, show_plot, min_pause_length)
@@ -53,8 +55,9 @@ class Strategies:
         elif game_type == "topp_tournament_2_players":
             self.topp_tournament_2_players(player1, player2, player1_weights_loc, player2_weights_loc, board_size, number_of_topp_games, show_plot, min_pause_length)
         elif game_type == "topp_tournament":
-            self.topp_tournament(player1, player2, board_size, number_of_topp_games, show_plot, min_pause_length, save_interval, num_epochs, batch_size, optimizer, loss, num_episodes, weights_filename, data_filename, learning_rate, rollouts_per_episode, node_expansion, c)
-
+            self.topp_tournament(player1, player2, board_size, number_of_topp_games, show_plot, min_pause_length, save_interval, num_epochs, batch_size, optimizer, loss, learning_rate, rollouts_per_episode, node_expansion, c, save_folder)
+        elif game_type == "topp_mini":
+            self.TOPP_mini(player1, player2, board_size, number_of_topp_games, show_plot, min_pause_length, save_interval, num_epochs, batch_size, optimizer, loss, learning_rate, rollouts_per_episode, node_expansion, c, save_folder, topp_mini_games)
 
     def place_randomly(self, board_size, show_plot, pause_length):
         gameBoard = Board(board_size)
@@ -257,13 +260,17 @@ class Strategies:
                     player2_wins += 1
                     break
 
-        print("Player 1 won " + str(player1_wins) + " times")
-        print("Player 2 won " + str(player2_wins) + " times")
+        #print("Player 1 won " + str(player1_wins) + " times")
+        #print("Player 2 won " + str(player2_wins) + " times")
 
         if show_plot:
             plt.show()
 
-    def topp_tournament(self, player1, player2, board_size, number_of_topp_games, show_plot, min_pause_length, save_interval, num_epochs, batch_size, optimizer, loss, num_episodes, weights_filename, data_filename, learning_rate, rollouts_per_episode, node_expansion, c):
+        return [player1_wins, player2_wins]
+
+
+
+    def topp_tournament(self, player1, player2, board_size, number_of_topp_games, show_plot, min_pause_length, save_interval, num_epochs, batch_size, optimizer, loss, learning_rate, rollouts_per_episode, node_expansion, c, save_folder):
 
         player1 = Player(player1, "red")
         player2 = Player(player2, "blue")
@@ -274,8 +281,9 @@ class Strategies:
         anet = ANET()
         model = anet.initialize_model(input_shape, num_of_actions)
 
+        model.save_weights(str(save_folder) + "/TOPP_0.h5")
 
-        for game_number in range(number_of_topp_games):
+        for game_number in range(1, number_of_topp_games + 1):
             RBUF = []
 
             if game_number % 2 == 0:
@@ -285,7 +293,7 @@ class Strategies:
 
             tree.get_top_node().set_c(c)
             # While not in a final state
-            tree.mcts_tree_default_until_end3(player1, player2, tree.get_top_node().get_state().get_starting_player(), rollouts_per_episode, RBUF, show_plot, min_pause_length, node_expansion, model)
+            tree.mcts_tree_default_until_end3(rollouts_per_episode, RBUF, show_plot, min_pause_length, node_expansion, model)
 
             if game_number % save_interval == 0:
                 save = True
@@ -303,6 +311,12 @@ class Strategies:
                 for e in D:
                     node_probabilities.append(e[1])
                 node_probabilities = node_probabilities / np.sum(node_probabilities)  # Normalize probabilites
+
+                best = np.argmax(node_probabilities)
+                for i in range(len(node_probabilities)):
+                    node_probabilities[i] = 0
+                node_probabilities[best] = 1.0
+
                 y_train.append(node_probabilities)
 
             X_train = np.array(X_train)
@@ -314,4 +328,21 @@ class Strategies:
 
             # Save ANET's current parameters for later use in tournament play
             if save:
-                model.save_weights("weights/TOPP_" + str(game_number) + ".h5")
+                model.save_weights(str(save_folder) + "/TOPP_" + str(game_number) + ".h5")
+
+    def TOPP_mini(self, player1, player2, board_size, number_of_topp_games, show_plot, min_pause_length, save_interval, num_epochs, batch_size, optimizer, loss, learning_rate, rollouts_per_episode, node_expansion, c, save_folder, topp_mini_games):
+        # Create data
+        #self.topp_tournament(player1, player2, board_size, number_of_topp_games, show_plot, min_pause_length, save_interval, num_epochs, batch_size, optimizer, loss, learning_rate, rollouts_per_episode, node_expansion, c, save_folder)
+
+        number_of_games = [0, 0, 0, 0, 0, 0]
+        players_score = [0, 0, 0, 0, 0, 0]
+
+        for i in range(0, 6):
+            for j in range(i, 6):
+                if i != j:
+                    score = self.topp_tournament_2_players(player1, player2, save_folder + "/TOPP_" + str(0) + ".h5", save_folder + "/TOPP_" + str(250) + ".h5", board_size, topp_mini_games, show_plot, min_pause_length)
+
+                    players_score[i] += score[0]
+                    players_score[j] += score[1]
+
+        print(players_score)
