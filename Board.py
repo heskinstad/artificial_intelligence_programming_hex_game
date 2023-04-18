@@ -189,7 +189,7 @@ class Board:
             board.append(row)
         return board
 
-
+    # TODO: print board as a diamond shape
     def print_board(self):
         print(self.get_board_size() * " " + self.get_board_size() * 2 * "_" + "__")
         for j in range(self.get_board_size()-1, -1, -1):

@@ -98,7 +98,7 @@ class Node:
 
                         board_deepcopy.place(self.get_state().get_current_turn(), x, y)
 
-                        child = Node(State(board_deepcopy, self.get_state().get_next_turn(), self.get_state().get_current_turn()), self.get_max_children() - 1, self)
+                        child = Node(State(board_deepcopy, self.get_state().get_next_turn(), self.get_state().get_current_turn(), self.get_state().get_starting_player()), self.get_max_children() - 1, self)
                         child.set_c(self.get_c())
 
                         self.add_child(child)
@@ -157,7 +157,7 @@ class Node:
 
         board_deepcopy.place(self.get_state().get_current_turn(), x, y)
 
-        child = Node(State(board_deepcopy, self.get_state().get_next_turn(), self.get_state().get_current_turn()),
+        child = Node(State(board_deepcopy, self.get_state().get_next_turn(), self.get_state().get_current_turn(), self.get_state().get_starting_player()),
                      self.get_max_children() - 1, self)
         child.c = self.get_c()
         child.set_node_num(y * board.get_board_size() + x)
@@ -221,9 +221,9 @@ class Node:
     def anet_policy(self, player, opposing_player, anet):
         # Create the array of the current game board in one dimension and append the id of the current player
 
-        if player.get_direction() == "horizontal":
+        if player == self.get_state().get_starting_player():
             array = self.get_state().get_board().get_board_np_p1()
-        elif player.get_direction() == "vertical":
+        elif player != self.get_state().get_starting_player():
             array = self.get_state().get_board().get_board_np_p2()
 
         array = array.reshape(1, self.get_state().get_board().get_board_size(), self.get_state().get_board().get_board_size())
@@ -236,7 +236,14 @@ class Node:
         action_probs = np.array(action_probs)
 
         action_probs = action_probs / np.sum(action_probs)
-        action_idx = np.random.choice(len(action_probs), p=action_probs)
+        #action_idx = np.random.choice(len(action_probs), p=action_probs)
+        action_idx = np.argmax(action_probs)
+
+        #tete = 2.0
+        #for i in range(len(action_probs)):
+        #    if action_probs[i] < tete and action_probs[i] > 0.0:
+        #         tete = action_probs[i]
+        #         action_idx = i
 
         return action_idx
 
@@ -265,6 +272,7 @@ class Node:
         current_node.set_score([current_node.get_score()[0] + score[0], current_node.get_score()[1] + score[1]])
 
 
+    # TODO: TRY TO REPLACE THE PLAYER OPPOSING PLAYER CHECK WITH PLAYER == STARTING_PLAYER OR NOT
     def node_check_win(self, player, opposing_player, return_player=False):
         # If player won this simulation
         if self.get_state().get_board().check_if_player_won(player) == player:
@@ -390,17 +398,16 @@ class Node:
             return
 
         # Create the array of the current game board
-        #if player.get_direction() == "horizontal":
-        array = self.get_state().get_board().get_board_np_p1()
-        #elif player.get_direction() == "vertical":
-        #    array = self.get_state().get_board().get_board_np_p2()
+        if self.get_state().get_current_turn() == self.get_state().get_starting_player():
+            array = self.get_state().get_board().get_board_np_p1()
+        elif self.get_state().get_current_turn() != self.get_state().get_starting_player():
+            array = self.get_state().get_board().get_board_np_p2()
 
         array = array.reshape(1, self.get_state().get_board().get_board_size(), self.get_state().get_board().get_board_size())
 
         action_probs = anet(array)[0]
 
         action_probs = action_probs * self.get_valid_moves(action_probs).flatten()
-        #action_probs = action_probs / np.sum(action_probs)
 
         action_probs = np.array(action_probs)
 
@@ -411,7 +418,8 @@ class Node:
 
         while random_child_node == None:
             action_probs = action_probs / np.sum(action_probs)
-            action_idx = np.random.choice(len(action_probs), p=action_probs)
+            #action_idx = np.random.choice(len(action_probs), p=action_probs)
+            action_idx = np.argmax(action_probs)
 
             position = [None, None]
             position[0] = math.floor(action_idx / self.get_state().get_board().get_board_size())

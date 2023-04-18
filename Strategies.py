@@ -104,7 +104,7 @@ class Strategies:
         player0 = Player(0, 'red')
         player1 = Player(1, 'blue')
 
-        tree = Tree(Node(State(Board(board_size), player0, player1), board_size**2))
+        tree = Tree(Node(State(Board(board_size), player0, player1, player0), board_size**2))
         tree.get_top_node().set_c(c)
         tree.mcts_tree_default_until_end(player0, player1, rollouts_per_episode, show_plot, pause_length, node_expansion)
 
@@ -129,7 +129,7 @@ class Strategies:
         for g_a in range(number_of_actual_games):
             # Initialize the actual game board to an empty board
             # Initialize the Monte Carlo Tree to a single root
-            tree = Tree(Node(State(Board(board_size), player0, player1), board_size**2))
+            tree = Tree(Node(State(Board(board_size), player0, player1, player0), board_size**2))
             tree.get_top_node().set_c(c)
             # While not in a final state
             tree.mcts_tree_default_until_end(player0, player1, rollouts_per_episode, RBUF, show_plot, min_pause_length, node_expansion)
@@ -227,19 +227,14 @@ class Strategies:
         model_player2.load_weights(player2_weights_loc)
 
         for game_number in range(number_of_topp_games):
-            tree = Tree(Node(State(Board(board_size), player1, player2), board_size**2))
-
-            current_node = tree.get_top_node()
 
             # Starting player switches each game
             if game_number % 2 == 0:
-                current_node.get_state().set_current_next_turn(player1, player2)
-                player1.set_direction("horizontal")
-                player2.set_direction("vertical")
+                tree = Tree(Node(State(Board(board_size), player1, player2, player1), board_size ** 2))
             else:
-                current_node.get_state().set_current_next_turn(player2, player1)
-                player1.set_direction("vertical")
-                player2.set_direction("horizontal")
+                tree = Tree(Node(State(Board(board_size), player2, player1, player2), board_size ** 2))
+
+            current_node = tree.get_top_node()
 
             while True:
                 if current_node.get_state().get_current_turn() == player1:
@@ -272,10 +267,8 @@ class Strategies:
 
     def topp_tournament(self, player1, player2, board_size, number_of_topp_games, show_plot, min_pause_length, save_interval, num_epochs, batch_size, optimizer, loss, num_episodes, weights_filename, data_filename, learning_rate, rollouts_per_episode, node_expansion, c):
 
-        player1 = Player(player1, "red", "horizontal")
-        player2 = Player(player2, "blue", "vertical")
-
-        save = False
+        player1 = Player(player1, "red")
+        player2 = Player(player2, "blue")
 
         # Randomly initialize parameters (weights and biases) of ANET
         input_shape = (board_size, board_size, 1)
@@ -284,15 +277,19 @@ class Strategies:
         model = anet.initialize_model(input_shape, num_of_actions)
 
 
-        for i in range(number_of_topp_games):
+        for game_number in range(number_of_topp_games):
             RBUF = []
 
-            tree = Tree(Node(State(Board(board_size), player1, player2), board_size**2))
+            if game_number % 2 == 0:
+                tree = Tree(Node(State(Board(board_size), player1, player2, player1), board_size**2))
+            else:
+                tree = Tree(Node(State(Board(board_size), player2, player1, player2), board_size**2))
+
             tree.get_top_node().set_c(c)
             # While not in a final state
-            tree.mcts_tree_default_until_end3(player1, player2, rollouts_per_episode, RBUF, show_plot, min_pause_length, node_expansion, model)
+            tree.mcts_tree_default_until_end3(player1, player2, tree.get_top_node().get_state().get_starting_player(), rollouts_per_episode, RBUF, show_plot, min_pause_length, node_expansion, model)
 
-            if i % save_interval == 0:
+            if game_number % save_interval == 0:
                 save = True
             else:
                 save = False
@@ -313,8 +310,10 @@ class Strategies:
             X_train = np.array(X_train)
             y_train = np.asarray(y_train)
 
+            # ADD WHICH PLAYER WON TO THE RBUF? SO IT 'LEARNS' WHICH MOVES WERE GOOD AND WHICH WEREN'T DURING THIS GAME?
+
             anet.train_model(model, num_epochs, batch_size, optimizer, loss, X_train, y_train, learning_rate)
 
             # Save ANET's current parameters for later use in tournament play
             if save:
-                model.save_weights("weights/TOPP_" + str(i) + ".h5")
+                model.save_weights("weights/TOPP_" + str(game_number) + ".h5")
