@@ -106,7 +106,7 @@ class Strategies:
 
         tree = Tree(Node(State(Board(board_size), player0, player1, player0, player1), board_size**2))
         tree.get_top_node().set_c(c)
-        tree.mcts_tree_default_until_end(player0, player1, rollouts_per_episode, show_plot, pause_length, node_expansion)
+        tree.mcts_tree_default_until_end(rollouts_per_episode, show_plot, pause_length, node_expansion)
 
 
     def generate_data(self, board_size, c, number_of_actual_games, rollouts_per_episode, node_expansion, min_pause_length, show_plot, filename):
@@ -132,7 +132,7 @@ class Strategies:
             tree = Tree(Node(State(Board(board_size), player0, player1, player0, player1), board_size**2))
             tree.get_top_node().set_c(c)
             # While not in a final state
-            tree.mcts_tree_default_until_end(player0, player1, rollouts_per_episode, RBUF, show_plot, min_pause_length, node_expansion)
+            tree.mcts_tree_default_until_end(rollouts_per_episode, show_plot, min_pause_length, node_expansion)
 
         with open(filename, 'wb') as f:
             pickle.dump(RBUF, f)
@@ -244,13 +244,11 @@ class Strategies:
 
                 current_node = tree.anet_one_turn(
                     current_node,
-                    current_node.get_state().get_current_turn(),
-                    current_node.get_state().get_next_turn(),
                     anet,
                     show_plot,
                     min_pause_length)
 
-                check_win = current_node.node_check_win(current_node.get_state().get_current_turn(), current_node.get_state().get_next_turn(), True)
+                check_win = current_node.node_check_win(True)
 
                 if check_win == player1:
                     player1_wins += 1

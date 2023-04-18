@@ -14,7 +14,7 @@ class Tree:
         for child in self.get_top_node().get_children():
             child.get_state().get_board().print_board()
 
-    def mcts_tree_default_until_end(self, player, opposing_player, rollouts_per_episode, show_plot=False, pause_length=0.001, node_expansion=1):
+    def mcts_tree_default_until_end(self, rollouts_per_episode, show_plot=False, pause_length=0.001, node_expansion=1):
         start = time.time()
 
         current_node = self.get_top_node()
@@ -27,7 +27,7 @@ class Tree:
             current_node.set_leaf_status()
 
             for i in range(rollouts_per_episode):
-                current_node.mcts_tree_policy(player, opposing_player, node_expansion)
+                current_node.mcts_tree_policy(node_expansion)
 
             tete = ""
             for child in current_node.get_children():
@@ -75,7 +75,7 @@ class Tree:
             current_node.set_leaf_status()
 
             for i in range(rollouts_per_episode):
-                current_node.mcts_tree_policy(player, opposing_player, node_expansion)
+                current_node.mcts_tree_policy(node_expansion)
 
             tete = ""
             titi = ""
@@ -136,7 +136,7 @@ class Tree:
             tetete = time.time()
             for i in range(rollouts_per_episode):
                 #current_node.mcts_tree_policy(player, opposing_player, node_expansion)
-                current_node.mcts_tree_policy2(player, opposing_player, node_expansion, anet)
+                current_node.mcts_tree_policy2(node_expansion, anet)
             print(str(((time.time() - tetete) / rollouts_per_episode)) + 's per rollout')
 
             tete = ""
@@ -197,12 +197,12 @@ class Tree:
             plt.show()
 
 
-    def anet_one_turn(self, current_node, player, opposing_player, anet, show_plot, pause_length):
+    def anet_one_turn(self, current_node, anet, show_plot, pause_length):
 
         if show_plot:
             current_node.get_state().get_board().initialize_board_plot()
 
-        next_move = current_node.anet_policy(player, opposing_player, anet)
+        next_move = current_node.anet_policy(anet)
 
         next_move = [math.floor(next_move / current_node.get_state().get_board().get_board_size()), next_move % current_node.get_state().get_board().get_board_size()]
 

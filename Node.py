@@ -176,7 +176,7 @@ class Node:
     and
     u(s, a) is 
     '''
-    def mcts_tree_policy(self, player, opposing_player, node_expansion=1):
+    def mcts_tree_policy(self, node_expansion=1):
         # If self is a leaf it will have no children and needs to use the default policy
         if self.is_endstate():
             return
@@ -185,16 +185,16 @@ class Node:
         # The current number of nodes on this level is less than half of the maximum number of nodes on this level
         elif self.is_leaf() or len(self.get_children()) < (self.get_max_children() - 1) / node_expansion:
             self.set_leaf_status()
-            self.mcts_default_policy(player, opposing_player)
+            self.mcts_default_policy()
             self.remove_leaf_status()
         else:
             best_child = self.calc_best_child()
-            best_child.mcts_tree_policy(player, opposing_player, node_expansion)
+            best_child.mcts_tree_policy(node_expansion)
 
 
     # A run of the default policy is one rollout
-    def mcts_default_policy(self, player, opposing_player):
-        score = self.node_check_win(player, opposing_player)
+    def mcts_default_policy(self):
+        score = self.node_check_win()
 
         # If anyone won in this node
         if self.is_endstate():
@@ -204,9 +204,9 @@ class Node:
         # Choose a random child node and move to this recursively
         random_child_node = self.create_random_child_node()
         if random_child_node == None:  # Is none if there is only a single child left and it has already been created
-            self.get_children()[0].mcts_default_policy(player, opposing_player)
+            self.get_children()[0].mcts_default_policy()
         else:
-            random_child_node.mcts_default_policy(player, opposing_player)
+            random_child_node.mcts_default_policy()
 
         # If top node in the newly generated default policy tree
         # Remove own children and set itself as a leaf
@@ -218,12 +218,11 @@ class Node:
             return
 
 
-    def anet_policy(self, player, opposing_player, anet):
+    def anet_policy(self, anet):
         # Create the array of the current game board in one dimension and append the id of the current player
-
-        if player == self.get_state().get_starting_player():
+        if self.get_state().get_current_turn() == self.get_state().get_starting_player():
             array = self.get_state().get_board().get_board_np_p1()
-        elif player == self.get_state().get_second_player():
+        elif self.get_state().get_current_turn() == self.get_state().get_second_player():
             array = self.get_state().get_board().get_board_np_p2()
 
         array = array.reshape(1, self.get_state().get_board().get_board_size(), self.get_state().get_board().get_board_size())
@@ -272,19 +271,19 @@ class Node:
         current_node.set_score([current_node.get_score()[0] + score[0], current_node.get_score()[1] + score[1]])
 
 
-    def node_check_win(self, player, opposing_player, return_player=False):
+    def node_check_win(self, return_player=False):
         # If player won this simulation
         #if self.get_state().get_board().check_if_player_won(player) == player:
-        if self.get_state().get_board().check_if_player_won(player, self.get_state().get_starting_player(), self.get_state().get_second_player()) == self.get_state().get_starting_player()\
-                or self.get_state().get_board().check_if_player_won(opposing_player, self.get_state().get_starting_player(), self.get_state().get_second_player()) == self.get_state().get_starting_player():
+        if self.get_state().get_board().check_if_player_won(self.get_state().get_current_turn(), self.get_state().get_starting_player(), self.get_state().get_second_player()) == self.get_state().get_starting_player()\
+                or self.get_state().get_board().check_if_player_won(self.get_state().get_next_turn(), self.get_state().get_starting_player(), self.get_state().get_second_player()) == self.get_state().get_starting_player():
             self.make_endstate()
             if return_player:
                 return self.get_state().get_starting_player()
             return [1, 1]
         # If player lost this simulation
         #elif self.get_state().get_board().check_if_player_won(opposing_player) == opposing_player:
-        elif self.get_state().get_board().check_if_player_won(player, self.get_state().get_starting_player(), self.get_state().get_second_player()) == self.get_state().get_second_player()\
-                or self.get_state().get_board().check_if_player_won(opposing_player, self.get_state().get_starting_player(), self.get_state().get_second_player()) == self.get_state().get_second_player():
+        elif self.get_state().get_board().check_if_player_won(self.get_state().get_current_turn(), self.get_state().get_starting_player(), self.get_state().get_second_player()) == self.get_state().get_second_player()\
+                or self.get_state().get_board().check_if_player_won(self.get_state().get_next_turn(), self.get_state().get_starting_player(), self.get_state().get_second_player()) == self.get_state().get_second_player():
             self.make_endstate()
             if return_player:
                 return self.get_state().get_second_player()
@@ -376,7 +375,7 @@ class Node:
 
         return path
 
-    def mcts_tree_policy2(self, player, opposing_player, node_expansion=1, anet=None):
+    def mcts_tree_policy2(self, node_expansion=1, anet=None):
         # If self is a leaf it will have no children and needs to use the default policy
         if self.is_endstate():
             return
@@ -385,15 +384,15 @@ class Node:
         # The current number of nodes on this level is less than half of the maximum number of nodes on this level
         elif self.is_leaf() or len(self.get_children()) < (self.get_max_children() - 1) / node_expansion:
             self.set_leaf_status()
-            self.mcts_default_policy2(player, opposing_player, anet)
+            self.mcts_default_policy2(anet)
             self.remove_leaf_status()
         else:
             best_child = self.calc_best_child()
-            best_child.mcts_tree_policy2(player, opposing_player, node_expansion, anet)
+            best_child.mcts_tree_policy2(node_expansion, anet)
 
 
-    def mcts_default_policy2(self, player, opposing_player, anet=None):
-        score = self.node_check_win(self.get_state().get_current_turn(), self.get_state().get_next_turn())
+    def mcts_default_policy2(self, anet=None):
+        score = self.node_check_win()
 
         # If anyone won in this node
         if self.is_endstate():
@@ -432,7 +431,7 @@ class Node:
 
             action_probs[action_idx] = 0.0
 
-        random_child_node.mcts_default_policy2(player, opposing_player, anet)
+        random_child_node.mcts_default_policy2(anet)
 
         # Choose a random child node and move to this recursively
         #random_child_node = self.create_random_child_node()

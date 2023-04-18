@@ -1,6 +1,6 @@
 from Strategies import Strategies
 
-strategy = "topp_tournament"
+strategy = "topp_tournament_2_players"
 # Strategies
     # random - both players select random moves until end
     # mcts - both players select moves based on mcts with mcts parameters
@@ -40,8 +40,8 @@ anet_parameters = [save_interval, num_epochs, batch_size, optimizer, loss, num_e
 player1_id = 1
 player2_id = 2
 player1_weights_loc = "weights/TOPP_0.h5"
-player2_weights_loc = "weights/TOPP_250.h5"
-number_of_topp_games = 1000  # Should be dividable by 2 so that each player start first equal number of times
+player2_weights_loc = "weights/TOPP_50.h5"
+number_of_topp_games = 100  # Should be dividable by 2 so that each player start first equal number of times
 
 topp_parameters = [player1_id, player2_id, player1_weights_loc, player2_weights_loc, number_of_topp_games]
 
