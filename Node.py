@@ -98,7 +98,7 @@ class Node:
 
                         board_deepcopy.place(self.get_state().get_current_turn(), x, y)
 
-                        child = Node(State(board_deepcopy, self.get_state().get_next_turn(), self.get_state().get_current_turn(), self.get_state().get_starting_player()), self.get_max_children() - 1, self)
+                        child = Node(State(board_deepcopy, self.get_state().get_next_turn(), self.get_state().get_current_turn(), self.get_state().get_starting_player(), self.get_state().get_second_player()), self.get_max_children() - 1, self)
                         child.set_c(self.get_c())
 
                         self.add_child(child)
@@ -157,7 +157,7 @@ class Node:
 
         board_deepcopy.place(self.get_state().get_current_turn(), x, y)
 
-        child = Node(State(board_deepcopy, self.get_state().get_next_turn(), self.get_state().get_current_turn(), self.get_state().get_starting_player()),
+        child = Node(State(board_deepcopy, self.get_state().get_next_turn(), self.get_state().get_current_turn(), self.get_state().get_starting_player(), self.get_state().get_second_player()),
                      self.get_max_children() - 1, self)
         child.c = self.get_c()
         child.set_node_num(y * board.get_board_size() + x)
@@ -223,7 +223,7 @@ class Node:
 
         if player == self.get_state().get_starting_player():
             array = self.get_state().get_board().get_board_np_p1()
-        elif player != self.get_state().get_starting_player():
+        elif player == self.get_state().get_second_player():
             array = self.get_state().get_board().get_board_np_p2()
 
         array = array.reshape(1, self.get_state().get_board().get_board_size(), self.get_state().get_board().get_board_size())
@@ -272,19 +272,20 @@ class Node:
         current_node.set_score([current_node.get_score()[0] + score[0], current_node.get_score()[1] + score[1]])
 
 
-    # TODO: TRY TO REPLACE THE PLAYER OPPOSING PLAYER CHECK WITH PLAYER == STARTING_PLAYER OR NOT
     def node_check_win(self, player, opposing_player, return_player=False):
         # If player won this simulation
-        if self.get_state().get_board().check_if_player_won(player) == player:
+        #if self.get_state().get_board().check_if_player_won(player) == player:
+        if self.get_state().get_board().check_if_player_won(player) == self.get_state().get_starting_player():
             self.make_endstate()
             if return_player:
                 return player
             return [1, 1]
         # If player lost this simulation
-        elif self.get_state().get_board().check_if_player_won(opposing_player) == opposing_player:
+        #elif self.get_state().get_board().check_if_player_won(opposing_player) == opposing_player:
+        elif self.get_state().get_board().check_if_player_won(player) == self.get_state().get_second_player():
             self.make_endstate()
             if return_player:
-                return opposing_player
+                return player
             return [1, -1]
         else:
             return 0
@@ -390,7 +391,7 @@ class Node:
 
 
     def mcts_default_policy2(self, player, opposing_player, anet=None):
-        score = self.node_check_win(player, opposing_player)
+        score = self.node_check_win(self.get_state().get_current_turn(), self.get_state().get_current_turn())
 
         # If anyone won in this node
         if self.is_endstate():
@@ -400,7 +401,7 @@ class Node:
         # Create the array of the current game board
         if self.get_state().get_current_turn() == self.get_state().get_starting_player():
             array = self.get_state().get_board().get_board_np_p1()
-        elif self.get_state().get_current_turn() != self.get_state().get_starting_player():
+        elif self.get_state().get_current_turn() == self.get_state().get_second_player():
             array = self.get_state().get_board().get_board_np_p2()
 
         array = array.reshape(1, self.get_state().get_board().get_board_size(), self.get_state().get_board().get_board_size())

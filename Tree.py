@@ -121,7 +121,7 @@ class Tree:
             plt.show()
 
 
-    def mcts_tree_default_until_end3(self, player, opposing_player, rollouts_per_episode, RBUF, show_plot=False, pause_length=0.001, node_expansion=1, anet=None):
+    def mcts_tree_default_until_end3(self, player, opposing_player, starting_player, rollouts_per_episode, RBUF, show_plot=False, pause_length=0.001, node_expansion=1, anet=None):
         start = time.time()
 
         current_node = self.get_top_node()
@@ -162,14 +162,14 @@ class Tree:
             for child in current_node.get_children():
                 current_root_arcs[child.get_node_num()][1] = child.get_score()[0] / current_node.get_score()[0]
 
-            if current_node.get_state().get_current_turn() == player:
+            if current_node.get_state().get_current_turn() == current_node.get_state().get_starting_player():
                 RBUF.append([current_node.get_state().get_board().get_board_np_p1(), current_root_arcs])
-            elif current_node.get_state().get_current_turn() == opposing_player:
+            elif current_node.get_state().get_current_turn() != current_node.get_state().get_starting_player():
                 RBUF.append([current_node.get_state().get_board().get_board_np_p2(), current_root_arcs])
 
             # Move to best child node
-            current_node = current_node.calc_best_child(player, opposing_player, True)
-            #current_node = current_node.get_child_with_highest_visit_count()
+            #current_node = current_node.calc_best_child(player, opposing_player, True)
+            current_node = current_node.get_child_with_highest_visit_count()
 
             print(current_node.get_state().get_next_turn().get_color() + " chose " + str(current_node.get_score()))
 

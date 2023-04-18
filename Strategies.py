@@ -104,7 +104,7 @@ class Strategies:
         player0 = Player(0, 'red')
         player1 = Player(1, 'blue')
 
-        tree = Tree(Node(State(Board(board_size), player0, player1, player0), board_size**2))
+        tree = Tree(Node(State(Board(board_size), player0, player1, player0, player1), board_size**2))
         tree.get_top_node().set_c(c)
         tree.mcts_tree_default_until_end(player0, player1, rollouts_per_episode, show_plot, pause_length, node_expansion)
 
@@ -129,7 +129,7 @@ class Strategies:
         for g_a in range(number_of_actual_games):
             # Initialize the actual game board to an empty board
             # Initialize the Monte Carlo Tree to a single root
-            tree = Tree(Node(State(Board(board_size), player0, player1, player0), board_size**2))
+            tree = Tree(Node(State(Board(board_size), player0, player1, player0, player1), board_size**2))
             tree.get_top_node().set_c(c)
             # While not in a final state
             tree.mcts_tree_default_until_end(player0, player1, rollouts_per_episode, RBUF, show_plot, min_pause_length, node_expansion)
@@ -230,9 +230,9 @@ class Strategies:
 
             # Starting player switches each game
             if game_number % 2 == 0:
-                tree = Tree(Node(State(Board(board_size), player1, player2, player1), board_size ** 2))
+                tree = Tree(Node(State(Board(board_size), player1, player2, player1, player2), board_size ** 2))
             else:
-                tree = Tree(Node(State(Board(board_size), player2, player1, player2), board_size ** 2))
+                tree = Tree(Node(State(Board(board_size), player2, player1, player2, player1), board_size ** 2))
 
             current_node = tree.get_top_node()
 
@@ -250,7 +250,7 @@ class Strategies:
                     show_plot,
                     min_pause_length)
 
-                check_win = current_node.node_check_win(player1, player2, True)
+                check_win = current_node.node_check_win(current_node.get_state().get_current_turn(), current_node.get_state().get_next_turn(), True)
 
                 if check_win == player1:
                     player1_wins += 1
@@ -281,9 +281,9 @@ class Strategies:
             RBUF = []
 
             if game_number % 2 == 0:
-                tree = Tree(Node(State(Board(board_size), player1, player2, player1), board_size**2))
+                tree = Tree(Node(State(Board(board_size), player1, player2, player1, player2), board_size**2))
             else:
-                tree = Tree(Node(State(Board(board_size), player2, player1, player2), board_size**2))
+                tree = Tree(Node(State(Board(board_size), player2, player1, player2, player1), board_size**2))
 
             tree.get_top_node().set_c(c)
             # While not in a final state
