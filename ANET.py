@@ -1,6 +1,5 @@
 from tensorflow import keras
 
-
 class ANET:
 
     def initialize_model(self, input_shape, num_actions):
@@ -70,7 +69,7 @@ class ANET:
             y_train,
             batch_size=batch_size,
             epochs=num_epochs,
-            verbose=1,
+            verbose=0,
             shuffle=True
         )
 

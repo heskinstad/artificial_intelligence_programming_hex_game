@@ -280,11 +280,16 @@ class Strategies:
         num_of_actions = board_size ** 2
         anet = ANET()
         model = anet.initialize_model(input_shape, num_of_actions)
+        #model.load_weights((save_folder) + "/TOPP_970.h5")
 
         model.save_weights(str(save_folder) + "/TOPP_0.h5")
 
+
+
         for game_number in range(1, number_of_topp_games + 1):
+
             RBUF = []
+
 
             if game_number % 2 == 0:
                 tree = Tree(Node(State(Board(board_size), player1, player2, player1, player2), board_size**2))
@@ -322,9 +327,9 @@ class Strategies:
             X_train = np.array(X_train)
             y_train = np.asarray(y_train)
 
-            # ADD WHICH PLAYER WON TO THE RBUF? SO IT 'LEARNS' WHICH MOVES WERE GOOD AND WHICH WEREN'T DURING THIS GAME?
+            history = anet.train_model(model, num_epochs, batch_size, optimizer, loss, X_train, y_train, learning_rate)
 
-            anet.train_model(model, num_epochs, batch_size, optimizer, loss, X_train, y_train, learning_rate)
+            print("Episode " + str(game_number) + " trained. Accuracy: " + str(history.history['accuracy'][-1]) + ". Loss: " + str(history.history['loss'][-1]))
 
             # Save ANET's current parameters for later use in tournament play
             if save:
@@ -336,10 +341,10 @@ class Strategies:
 
         players_score = [0, 0, 0, 0, 0, 0]
 
-        for i in range(0, 6):
-            for j in range(i, 6):
+        for i in range(0, len(players_score)):
+            for j in range(i, len(players_score)):
                 if i != j:
-                    score = self.topp_tournament_2_players(player1, player2, save_folder + "/TOPP_" + str(i*50) + ".h5", save_folder + "/TOPP_" + str(j*50) + ".h5", board_size, topp_mini_games, show_plot, min_pause_length)
+                    score = self.topp_tournament_2_players(player1, player2, save_folder + "/TOPP_" + str(i*20) + ".h5", save_folder + "/TOPP_" + str(j*20) + ".h5", board_size, topp_mini_games, show_plot, min_pause_length)
 
                     players_score[i] += score[0]
                     players_score[j] += score[1]

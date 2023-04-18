@@ -229,14 +229,23 @@ class Node:
 
         action_probs = anet(array)[0]
 
-        action_probs = action_probs * self.get_valid_moves(action_probs).flatten()
+        valid_moves = self.get_valid_moves(action_probs).flatten()
+
+        action_probs = action_probs * valid_moves
         action_probs = action_probs / np.sum(action_probs)
 
         action_probs = np.array(action_probs)
 
         action_probs = action_probs / np.sum(action_probs)
-        #action_idx = np.random.choice(len(action_probs), p=action_probs)
-        action_idx = np.argmax(action_probs)
+        try:
+            #action_idx = np.random.choice(len(action_probs), p=action_probs)
+            action_idx = np.argmax(action_probs)
+        except:  # If action_probs contains nan (meaning the network only predicted impossible moves)
+            print("AAAAAAAAA")
+            valid_moves = valid_moves / np.sum(valid_moves)
+            action_idx = np.random.choice(len(valid_moves), p=valid_moves)
+
+
 
         #tete = 2.0
         #for i in range(len(action_probs)):
@@ -419,6 +428,8 @@ class Node:
             return
 
         while random_child_node == None:
+            if np.isnan(action_probs[5]) or np.isnan(action_probs[2]):
+                return
             action_probs = action_probs / np.sum(action_probs)
             #action_idx = np.random.choice(len(action_probs), p=action_probs)
             action_idx = np.argmax(action_probs)

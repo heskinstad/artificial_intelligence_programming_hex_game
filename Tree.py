@@ -137,15 +137,15 @@ class Tree:
             for i in range(rollouts_per_episode):
                 #current_node.mcts_tree_policy(player, opposing_player, node_expansion)
                 current_node.mcts_tree_policy2(node_expansion, anet)
-            print(str(((time.time() - tetete) / rollouts_per_episode)) + 's per rollout')
+            #print(str(((time.time() - tetete) / rollouts_per_episode)) + 's per rollout')
 
             tete = ""
             titi = ""
             for child in current_node.get_children():
                 tete += str(child.get_score()) + "  "
                 titi += str(child.get_node_num()) + "  "
-            print(tete)
-            print(titi)
+            #print(tete)
+            #print(titi)
 
             current_root_arcs = []
             for i in range(0, current_node.get_state().get_board().get_board_size()**2):
@@ -173,7 +173,7 @@ class Tree:
             #current_node = current_node.calc_best_child(player, opposing_player, True)
             current_node = current_node.get_child_with_highest_visit_count()
 
-            print(current_node.get_state().get_next_turn().get_color() + " chose " + str(current_node.get_score()))
+            #print(current_node.get_state().get_next_turn().get_color() + " chose " + str(current_node.get_score()))
 
             # Remove parent
             current_node.set_parent(None)
@@ -182,25 +182,22 @@ class Tree:
                 current_node.get_state().get_board().create_board_plot(self.get_top_node().get_state().get_board().get_fig(), self.get_top_node().get_state().get_board().get_ax())
                 plt.pause(pause_length)
 
-            current_node.get_state().get_board().print_board()
+            #current_node.get_state().get_board().print_board()
 
-            print("-----------------------------------")
+            #print("-----------------------------------")
 
 
-        print()
-        print(str(current_node.get_state().get_next_turn().get_color()) + " won!")
+        #print()
+        #print(str(current_node.get_state().get_next_turn().get_color()) + " won!")
 
         end = time.time()
-        print("Time elapsed: " + str(end - start) + "s")
+        #print("Time elapsed: " + str(end - start) + "s")
 
         if show_plot:
             plt.show()
 
 
     def anet_one_turn(self, current_node, anet, show_plot, pause_length):
-
-        if show_plot:
-            current_node.get_state().get_board().initialize_board_plot()
 
         next_move = current_node.anet_policy(anet)
 
@@ -216,7 +213,8 @@ class Tree:
                 self.get_top_node().get_state().get_board().get_ax())
             plt.pause(pause_length)
 
-        current_node.get_state().get_board().print_board()
-        print()
+        if show_plot:
+            current_node.get_state().get_board().print_board()
+            print()
 
         return current_node
