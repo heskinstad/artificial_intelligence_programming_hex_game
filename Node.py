@@ -275,17 +275,19 @@ class Node:
     def node_check_win(self, player, opposing_player, return_player=False):
         # If player won this simulation
         #if self.get_state().get_board().check_if_player_won(player) == player:
-        if self.get_state().get_board().check_if_player_won(player) == self.get_state().get_starting_player():
+        if self.get_state().get_board().check_if_player_won(player, self.get_state().get_starting_player(), self.get_state().get_second_player()) == self.get_state().get_starting_player()\
+                or self.get_state().get_board().check_if_player_won(opposing_player, self.get_state().get_starting_player(), self.get_state().get_second_player()) == self.get_state().get_starting_player():
             self.make_endstate()
             if return_player:
-                return player
+                return self.get_state().get_starting_player()
             return [1, 1]
         # If player lost this simulation
         #elif self.get_state().get_board().check_if_player_won(opposing_player) == opposing_player:
-        elif self.get_state().get_board().check_if_player_won(player) == self.get_state().get_second_player():
+        elif self.get_state().get_board().check_if_player_won(player, self.get_state().get_starting_player(), self.get_state().get_second_player()) == self.get_state().get_second_player()\
+                or self.get_state().get_board().check_if_player_won(opposing_player, self.get_state().get_starting_player(), self.get_state().get_second_player()) == self.get_state().get_second_player():
             self.make_endstate()
             if return_player:
-                return player
+                return self.get_state().get_second_player()
             return [1, -1]
         else:
             return 0
@@ -391,7 +393,7 @@ class Node:
 
 
     def mcts_default_policy2(self, player, opposing_player, anet=None):
-        score = self.node_check_win(self.get_state().get_current_turn(), self.get_state().get_current_turn())
+        score = self.node_check_win(self.get_state().get_current_turn(), self.get_state().get_next_turn())
 
         # If anyone won in this node
         if self.is_endstate():

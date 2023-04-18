@@ -114,17 +114,17 @@ class Board:
 
         plt.plot()
 
-    def check_if_player_won(self, player):
+    def check_if_player_won(self, player, starting_player, second_player):
         unchecked_hexes = []
         checked_hexes = []
 
         # Check if player has placed any at their 'start edge' - left for red (0), bottom for blue (1)
         # If so, add them to the unchecked_hexes array
         for i in range(self.board_size):
-            if player.get_id() == 1:
+            if player.get_id() == starting_player.get_id():
                 if self.get_hex_by_x_y(0, i) == player.get_id(): # id 0 move left/right
                     unchecked_hexes.append([0, i])
-            elif player.get_id() == 2:
+            elif player.get_id() == second_player.get_id():
                 if self.get_hex_by_x_y(i, 0) == player.get_id(): # id 1 move top/bottom
                     unchecked_hexes.append([i, 0])
 
@@ -133,10 +133,10 @@ class Board:
             current = unchecked_hexes.pop()
             checked_hexes.append(current)
 
-            if player.get_id() == 1:
+            if player.get_id() == starting_player.get_id():
                 if current[0] == self.board_size - 1:
                     return player
-            elif player.get_id() == 2:
+            elif player.get_id() == second_player.get_id():
                 if current[1] == self.board_size - 1:
                     return player
 

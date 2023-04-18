@@ -1,6 +1,6 @@
 from Strategies import Strategies
 
-strategy = "topp_tournament_2_players"
+strategy = "topp_tournament"
 # Strategies
     # random - both players select random moves until end
     # mcts - both players select moves based on mcts with mcts parameters
@@ -11,12 +11,12 @@ strategy = "topp_tournament_2_players"
     # topp_tournament
 
 # Game parameters
-board_size = 7
+board_size = 4
 show_board = False
-rollouts_per_episode = 500
+rollouts_per_episode = 250
 node_expansion = 1  # Determines how much the tree should expand for each "floor". Expands to max_number_of_nodes_left / node_expansion
-min_pause_length = 0.0006  # Pause will be longer if time to run each episode > min_pause_length - 0.0006 for 7x7, 0.001 for 4x4
-c = 0.5  # The higher this value is, the more likely the players are to try less optimal nodes (more exploration)
+min_pause_length = 0.0001  # Pause will be longer if time to run each episode > min_pause_length - 0.0006 for 7x7, 0.001 for 4x4
+c = 3.0  # The higher this value is, the more likely the players are to try less optimal nodes (more exploration)
 number_of_actual_games = 200  # How many games are to be played
 
 data_filename = "gamedata/gamedata_" + str(board_size) + "x" + str(board_size) + "_board_" + str(number_of_actual_games) + "_games_" + str(rollouts_per_episode) + "_rollouts_" + str(c) + "c"
@@ -40,8 +40,8 @@ anet_parameters = [save_interval, num_epochs, batch_size, optimizer, loss, num_e
 player1_id = 1
 player2_id = 2
 player1_weights_loc = "weights/TOPP_0.h5"
-player2_weights_loc = "weights/TOPP_40.h5"
-number_of_topp_games = 100  # Should be dividable by 2 so that each player start first equal number of times
+player2_weights_loc = "weights/TOPP_250.h5"
+number_of_topp_games = 1000  # Should be dividable by 2 so that each player start first equal number of times
 
 topp_parameters = [player1_id, player2_id, player1_weights_loc, player2_weights_loc, number_of_topp_games]
 
