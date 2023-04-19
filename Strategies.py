@@ -10,7 +10,7 @@ from Tree import Tree
 
 
 class Strategies:
-    def __init__(self, game_parameters, anet_parameters, topp_parameters):
+    def __init__(self, strategy, game_parameters, anet_parameters, topp_parameters, duel_extra_parameters):
 
         self.board_size = game_parameters[0]
         self.visualize = game_parameters[1]
@@ -34,8 +34,10 @@ class Strategies:
         self.anet_models_folder = topp_parameters[4]
         self.weights_episodes_multiplier = topp_parameters[5]
 
-
-        self.topp_tournament()
+        if strategy == "TOPP":
+            self.topp_tournament()
+        elif strategy == "Play2":
+            print(self.topp_tournament_2_players(duel_extra_parameters[0], duel_extra_parameters[1]))
 
 
     def topp_tournament_2_players(self, episode_number_p1, episode_number_p2):

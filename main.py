@@ -24,7 +24,7 @@ anet_parameters = [save_interval, num_epochs, batch_size, optimizer, loss, num_e
 # TOPP parameters
 player1_id = 1
 player2_id = 2
-M = 6  # Number of ANET models to save and play agains each other
+M = 6  # Number of ANET models to save and play against each other
 topp_games_per_M = 50  # Number of games between every ANET model
 anet_models_folder = "anet_models"
 weights_episodes_multiplier = 10  # In TOPP tournament, player every weight trained on
@@ -32,5 +32,11 @@ weights_episodes_multiplier = 10  # In TOPP tournament, player every weight trai
 topp_parameters = [player1_id, player2_id, M, topp_games_per_M, anet_models_folder, weights_episodes_multiplier]
 
 
-Strategies(game_parameters, anet_parameters, topp_parameters)
+duel1 = 0
+duel2 = 250
+duel_extra_parameters = [duel1, duel2]
 
+# Strategies: TOPP or Play2
+strategy = "TOPP"
+
+Strategies(strategy, game_parameters, anet_parameters, topp_parameters, duel_extra_parameters)
