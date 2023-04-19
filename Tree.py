@@ -163,9 +163,9 @@ class Tree:
                 current_root_arcs[child.get_node_num()][1] = child.get_score()[0] / current_node.get_score()[0]
 
             if current_node.get_state().get_current_turn() == current_node.get_state().get_starting_player():
-                RBUF.append([current_node.get_state().get_board().get_board_np_p1(), current_root_arcs])
+                RBUF.append([[current_node.get_state().get_board().get_board_np_p1(), current_node.get_state().get_board().get_board_np_p2()], current_root_arcs])
             elif current_node.get_state().get_current_turn() == current_node.get_state().get_second_player():
-                RBUF.append([current_node.get_state().get_board().get_board_np_p2(), current_root_arcs])
+                RBUF.append([[current_node.get_state().get_board().get_board_np_p2(), current_node.get_state().get_board().get_board_np_p1()], current_root_arcs])
             else:
                 raise Exception("Could not append to RBUF")
 

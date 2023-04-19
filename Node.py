@@ -152,6 +152,10 @@ class Node:
 
         board = self.get_state().get_board()
 
+        if board.get_board_p1()[y][x] != 0:
+            print("AAAAAAAAAAAAAAAA")
+            1 / 0
+
         board_deepcopy = Board(board.get_board_size(), False)
         board_deepcopy.board_positions = [x[:] for x in board.get_board_p1()]
 
@@ -219,45 +223,40 @@ class Node:
 
 
     def anet_policy(self, anet):
-        # Create the array of the current game board in one dimension and append the id of the current player
         if self.get_state().get_current_turn() == self.get_state().get_starting_player():
-            array = self.get_state().get_board().get_board_np_p1()
+            array = np.array(
+                (self.get_state().get_board().get_board_np_p1(), self.get_state().get_board().get_board_np_p2()))
         elif self.get_state().get_current_turn() == self.get_state().get_second_player():
-            array = self.get_state().get_board().get_board_np_p2()
+            array = np.array(
+                (self.get_state().get_board().get_board_np_p2(), self.get_state().get_board().get_board_np_p1()))
 
-        array = array.reshape(1, self.get_state().get_board().get_board_size(), self.get_state().get_board().get_board_size())
+        array = array.reshape(1, 2, self.get_state().get_board().get_board_size(), self.get_state().get_board().get_board_size())
 
         action_probs = anet(array)[0]
 
-        valid_moves = self.get_valid_moves(action_probs).flatten()
+        valid_moves = self.get_valid_moves().flatten()
 
         action_probs = action_probs * valid_moves
+        #print(valid_moves)
         action_probs = action_probs / np.sum(action_probs)
 
         action_probs = np.array(action_probs)
 
         action_probs = action_probs / np.sum(action_probs)
+
         try:
-            #action_idx = np.random.choice(len(action_probs), p=action_probs)
-            action_idx = np.argmax(action_probs)
+            action_idx = np.random.choice(len(action_probs), p=action_probs)
+            #action_idx = np.argmax(action_probs)
         except:  # If action_probs contains nan (meaning the network only predicted impossible moves)
             print("Network predicted impossible values. Choosing random node.")
             valid_moves = valid_moves / np.sum(valid_moves)
             action_idx = np.random.choice(len(valid_moves), p=valid_moves)
 
-
-
-        #tete = 2.0
-        #for i in range(len(action_probs)):
-        #    if action_probs[i] < tete and action_probs[i] > 0.0:
-        #         tete = action_probs[i]
-        #         action_idx = i
-
         return action_idx
 
 
-    def get_valid_moves(self, predictions):
-        valid_moves = copy.deepcopy(self.get_state().get_board().get_board_np_p1())
+    def get_valid_moves(self):
+        valid_moves = copy.deepcopy(self.get_state().get_board().get_board_np())
         for y in range(len(valid_moves)):
             for x in range(len(valid_moves[y])):
                 if valid_moves[y][x] == 0:
@@ -410,15 +409,15 @@ class Node:
 
         # Create the array of the current game board
         if self.get_state().get_current_turn() == self.get_state().get_starting_player():
-            array = self.get_state().get_board().get_board_np_p1()
+            array = np.array((self.get_state().get_board().get_board_np_p1(), self.get_state().get_board().get_board_np_p2()))
         elif self.get_state().get_current_turn() == self.get_state().get_second_player():
-            array = self.get_state().get_board().get_board_np_p2()
+            array = np.array((self.get_state().get_board().get_board_np_p2(), self.get_state().get_board().get_board_np_p1()))
 
-        array = array.reshape(1, self.get_state().get_board().get_board_size(), self.get_state().get_board().get_board_size())
+        array = array.reshape(1, 2, self.get_state().get_board().get_board_size(), self.get_state().get_board().get_board_size())
 
         action_probs = anet(array)[0]
 
-        action_probs = action_probs * self.get_valid_moves(action_probs).flatten()
+        action_probs = action_probs * self.get_valid_moves().flatten()
 
         action_probs = np.array(action_probs)
 
@@ -443,11 +442,4 @@ class Node:
             action_probs[action_idx] = 0.0
 
         random_child_node.mcts_default_policy2(anet)
-
-        # Choose a random child node and move to this recursively
-        #random_child_node = self.create_random_child_node()
-        #if random_child_node == None:  # Is none if there is only a single child left and it has already been created
-        #    self.get_children()[0].mcts_default_policy(player, opposing_player)
-        #else:
-        #    random_child_node.mcts_default_policy(player, opposing_player)
 

@@ -126,7 +126,7 @@ class Strategies:
         # Remember to implement this when it uses the ANET while playing too, not just in training.
 
         anet_player1 = ANET()
-        model_player1 = anet_player1.initialize_model((board_size, board_size, 1), board_size ** 2)
+        model_player1 = anet_player1.initialize_model((2, board_size, board_size), board_size ** 2)
         model_player1.load_weights("weights/tete.h5")
 
         for g_a in range(number_of_actual_games):
@@ -151,7 +151,7 @@ class Strategies:
 
 
         # Randomly initialize parameters (weights and biases) of ANET
-        input_shape = (board_size, board_size, 1)
+        input_shape = (2, board_size, board_size)
         num_of_actions = board_size**2
         if anet == None:
             anet = ANET()
@@ -222,11 +222,11 @@ class Strategies:
         player2_wins = 0
 
         anet_player1 = ANET()
-        model_player1 = anet_player1.initialize_model((board_size, board_size, 1), board_size**2, optimizer, loss)
+        model_player1 = anet_player1.initialize_model((2, board_size, board_size), board_size**2, optimizer, loss)
         model_player1.load_weights(player1_weights_loc)
 
         anet_player2 = ANET()
-        model_player2 = anet_player2.initialize_model((board_size, board_size, 1), board_size**2, optimizer, loss)
+        model_player2 = anet_player2.initialize_model((2, board_size, board_size), board_size**2, optimizer, loss)
         model_player2.load_weights(player2_weights_loc)
 
         for game_number in range(number_of_topp_games):
@@ -253,6 +253,8 @@ class Strategies:
 
                 check_win = current_node.node_check_win(True)
 
+                #current_node.get_state().get_board().print_board()
+
                 if check_win == player1:
                     player1_wins += 1
                     break
@@ -276,7 +278,7 @@ class Strategies:
         player2 = Player(player2, "blue")
 
         # Randomly initialize parameters (weights and biases) of ANET
-        input_shape = (board_size, board_size, 1)
+        input_shape = (2, board_size, board_size)
         num_of_actions = board_size ** 2
         anet = ANET()
         model = anet.initialize_model(input_shape, num_of_actions, optimizer, loss)
@@ -337,14 +339,14 @@ class Strategies:
 
     def TOPP_mini(self, player1, player2, board_size, number_of_topp_games, show_plot, min_pause_length, save_interval, num_epochs, batch_size, optimizer, loss, learning_rate, rollouts_per_episode, node_expansion, c, save_folder, topp_mini_games):
         # Create data
-        #self.topp_tournament(player1, player2, board_size, number_of_topp_games, show_plot, min_pause_length, save_interval, num_epochs, batch_size, optimizer, loss, learning_rate, rollouts_per_episode, node_expansion, c, save_folder)
+        self.topp_tournament(player1, player2, board_size, number_of_topp_games, show_plot, min_pause_length, save_interval, num_epochs, batch_size, optimizer, loss, learning_rate, rollouts_per_episode, node_expansion, c, save_folder)
 
         players_score = [0, 0, 0, 0, 0, 0]
 
         for i in range(0, len(players_score)):
             for j in range(i, len(players_score)):
                 if i != j:
-                    score = self.topp_tournament_2_players(player1, player2, save_folder + "/TOPP_" + str(i*50) + ".h5", save_folder + "/TOPP_" + str(j*50) + ".h5", board_size, topp_mini_games, show_plot, min_pause_length, optimizer, loss)
+                    score = self.topp_tournament_2_players(player1, player2, save_folder + "/TOPP_" + str(i * 10) + ".h5", save_folder + "/TOPP_" + str(j * 10) + ".h5", board_size, topp_mini_games, show_plot, min_pause_length, optimizer, loss)
 
                     players_score[i] += score[0]
                     players_score[j] += score[1]
