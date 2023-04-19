@@ -59,14 +59,14 @@ class Tree:
                     if current_node.get_state().get_current_turn() == current_node.get_state().get_starting_player():
                         ohe[i, j] = [p1_board[i, j], p2_board[i, j]]
                     elif current_node.get_state().get_current_turn() == current_node.get_state().get_second_player():
-                        ohe[i, j] = [p2_board.T[i, j], p1_board.T[i, j]]
+                        ohe[i, j] = [p2_board[i, j], p1_board[i, j]]
 
             new = np.reshape(current_root_arcs, (board_size, board_size, 2))
 
             if current_node.get_state().get_current_turn() == current_node.get_state().get_starting_player():
                 RBUF.append([ohe, new])
             elif current_node.get_state().get_current_turn() == current_node.get_state().get_second_player():
-                RBUF.append([ohe, new.T])
+                RBUF.append([ohe, new])
             else:
                 raise Exception("Could not append to RBUF")
 

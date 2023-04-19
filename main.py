@@ -33,10 +33,10 @@ topp_parameters = [player1_id, player2_id, M, topp_games_per_M, anet_models_fold
 
 
 duel1 = 0
-duel2 = 250
+duel2 = 40
 duel_extra_parameters = [duel1, duel2]
 
-# Strategies: TOPP (TOPP tournament) or Duel (have two models play against each other)
+# Strategies: TOPP (TOPP tournament) or DUEL (have two models play against each other)
 strategy = "TOPP"
 
 Strategies(strategy, game_parameters, anet_parameters, topp_parameters, duel_extra_parameters)

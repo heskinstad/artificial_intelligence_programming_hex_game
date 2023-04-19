@@ -26,13 +26,7 @@ class Board:
         return self.board_positions
 
     def get_board_p2(self):
-        board = copy.deepcopy(self.board_positions)
-
-        #for i in range(len(board)):
-        #    for j in range(len(board[i])):
-        #        board[i][j] += 3
-
-        return board
+        return self.board_positions
 
     def get_board_np(self):
         board = np.array(copy.deepcopy(self.board_positions))

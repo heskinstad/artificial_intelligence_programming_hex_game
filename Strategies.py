@@ -36,7 +36,7 @@ class Strategies:
 
         if strategy == "TOPP":
             self.topp_tournament()
-        elif strategy == "Duel":
+        elif strategy == "DUEL":
             print(self.topp_tournament_2_players(duel_extra_parameters[0], duel_extra_parameters[1]))
 
 
