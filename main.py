@@ -14,7 +14,7 @@ strategy = "topp_mini"
 # Game parameters
 board_size = 4
 show_board = False
-rollouts_per_episode = 40
+rollouts_per_episode = 4
 node_expansion = 1  # Determines how much the tree should expand for each "floor". Expands to max_number_of_nodes_left / node_expansion
 min_pause_length = 0.00001  # Pause will be longer if time to run each episode > min_pause_length - 0.0006 for 7x7, 0.001 for 4x4
 c = 1.42  # The higher this value is, the more likely the players are to try less optimal nodes (more exploration)
@@ -26,12 +26,12 @@ game_parameters = [board_size, show_board, rollouts_per_episode, node_expansion,
 
 # ANET parameters
 save_interval = 10  # Save for each n number of actual games/episodes
-num_epochs = 250  # Number of epochs in training
+num_epochs = 10  # Number of epochs in training
 batch_size = 50  # Training batch size
 optimizer = "adam"
 loss = "categorical_crossentropy"
 num_episodes = 1500  # Maximum number of episodes for the network to train on
-learning_rate = 0.001  # Should be 0.001 for 4x4 with adam
+learning_rate = 0.01  # Should be 0.001 for 4x4 with adam
 
 weights_filename = "weights/weights_" + str(num_episodes) + "_episodes_" + str(num_epochs) + "_epochs.h5"
 

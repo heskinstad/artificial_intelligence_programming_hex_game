@@ -168,20 +168,17 @@ class Tree:
             p1_board = current_node.get_state().get_board().get_board_np_p1()
             p2_board = current_node.get_state().get_board().get_board_np_p2()
             board_size = current_node.get_state().get_board().get_board_size()
-            ohe = np.zeros(shape=(board_size, board_size, 2))
-            for i in range(board_size):
-                for j in range(board_size):
-                    if current_node.get_state().get_current_turn() == current_node.get_state().get_starting_player():
-                        ohe[i, j] = [p1_board[i, j], p2_board[i, j]]
-                    elif current_node.get_state().get_current_turn() == current_node.get_state().get_second_player():
-                        ohe[i, j] = [p2_board[i, j].T, p1_board[i, j].T]
+            if current_node.get_state().get_current_turn() == current_node.get_state().get_starting_player():
+                ohe = [p1_board, p2_board]
+            elif current_node.get_state().get_current_turn() == current_node.get_state().get_second_player():
+                ohe = [p2_board, p1_board]
 
             new = np.reshape(current_root_arcs, (board_size, board_size, 2))
 
             if current_node.get_state().get_current_turn() == current_node.get_state().get_starting_player():
                 RBUF.append([ohe, new])
             elif current_node.get_state().get_current_turn() == current_node.get_state().get_second_player():
-                RBUF.append([ohe, new.T])
+                RBUF.append([ohe, new])
             else:
                 raise Exception("Could not append to RBUF")
 
