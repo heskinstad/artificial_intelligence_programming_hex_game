@@ -37,14 +37,14 @@ class Board:
     def get_board_np_p1(self):
         board = copy.deepcopy(self.get_board_p1())
 
-        tete = np.where(board == 1, 1, 0)
+        tete = np.where(np.array(board) == 1, 1, 0)
 
-        return np.array(board, dtype=np.int)
+        return np.array(tete, dtype=np.int)
 
     def get_board_np_p2(self):
         board = copy.deepcopy(self.get_board_p2())
 
-        tete = np.where(board == 2, 1, 0)
+        tete = np.where(np.array(board) == 2, 1, 0)
 
         return np.array(tete, dtype=np.int)
 

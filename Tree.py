@@ -166,7 +166,7 @@ class Tree:
 
 
             p1_board = current_node.get_state().get_board().get_board_np_p1()
-            p2_board = current_node.get_state().get_board().get_board_np_p1()
+            p2_board = current_node.get_state().get_board().get_board_np_p2()
             board_size = current_node.get_state().get_board().get_board_size()
             ohe = np.zeros(shape=(board_size, board_size, 2))
             for i in range(board_size):
