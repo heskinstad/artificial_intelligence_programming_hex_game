@@ -15,138 +15,20 @@ class Tree:
         for child in self.get_top_node().get_children():
             child.get_state().get_board().print_board()
 
-    def mcts_tree_default_until_end(self, rollouts_per_episode, show_plot=False, pause_length=0.001, node_expansion=1):
-        start = time.time()
 
+    def mcts_tree_default_until_end(self, rollouts_per_episode, RBUF, visualize, pause_length=0.001, node_expansion=1, anet=None):
         current_node = self.get_top_node()
 
-        if show_plot:
+        if visualize[1]:
             current_node.get_state().get_board().initialize_board_plot()
 
         while not current_node.is_endstate():
             current_node.set_as_top_node()
             current_node.set_leaf_status()
 
-            for i in range(rollouts_per_episode):
-                current_node.mcts_tree_policy(node_expansion)
-
-            tete = ""
-            for child in current_node.get_children():
-                tete += str(child.get_score()) + "  "
-            print(tete)
-
-            # Move to best child node
-            current_node = current_node.calc_best_child(True)
-
-            print(current_node.get_state().get_next_turn().get_color() + " chose " + str(current_node.get_score()))
-
-            # Remove parent
-            current_node.set_parent(None)
-
-            if show_plot:
-                current_node.get_state().get_board().create_board_plot(self.get_top_node().get_state().get_board().get_fig(), self.get_top_node().get_state().get_board().get_ax())
-                plt.pause(pause_length)
-
-            current_node.get_state().get_board().print_board()
-
-            print("-----------------------------------")
-
-
-        print()
-        print(str(current_node.get_state().get_next_turn().get_color()) + " won!")
-
-        end = time.time()
-        print("Time elapsed: " + str(end - start) + "s")
-
-        if show_plot:
-            plt.show()
-
-
-    # Added the RBUF
-    def mcts_tree_default_until_end2(self, player, opposing_player, rollouts_per_episode, RBUF, show_plot=False, pause_length=0.001, node_expansion=1):
-        start = time.time()
-
-        current_node = self.get_top_node()
-
-        if show_plot:
-            current_node.get_state().get_board().initialize_board_plot()
-
-        while not current_node.is_endstate():
-            current_node.set_as_top_node()
-            current_node.set_leaf_status()
-
-            for i in range(rollouts_per_episode):
-                current_node.mcts_tree_policy(node_expansion)
-
-            tete = ""
-            titi = ""
-            for child in current_node.get_children():
-                tete += str(child.get_score()) + "  "
-                titi += str(child.get_node_num()) + "  "
-            print(tete)
-            print(titi)
-
-            current_root_arcs = []
-            for i in range(0, current_node.get_state().get_board().get_board_size()**2):
-                current_root_arcs.append([i, 0.0])
-
-            for child in current_node.get_children():
-                current_root_arcs[child.get_node_num()][1] = child.get_score()[0] / current_node.get_score()[0]
-
-            RBUF.append([current_node, current_root_arcs])
-
-            # Move to best child node
-            current_node = current_node.calc_best_child(True)
-
-            print(current_node.get_state().get_next_turn().get_color() + " chose " + str(current_node.get_score()))
-
-            # Remove parent
-            current_node.set_parent(None)
-
-            if show_plot:
-                current_node.get_state().get_board().create_board_plot(self.get_top_node().get_state().get_board().get_fig(), self.get_top_node().get_state().get_board().get_ax())
-                plt.pause(pause_length)
-
-            current_node.get_state().get_board().print_board()
-
-            print("-----------------------------------")
-
-
-        print()
-        print(str(current_node.get_state().get_next_turn().get_color()) + " won!")
-
-        end = time.time()
-        print("Time elapsed: " + str(end - start) + "s")
-
-        if show_plot:
-            plt.show()
-
-
-    def mcts_tree_default_until_end3(self, rollouts_per_episode, RBUF, show_plot=False, pause_length=0.001, node_expansion=1, anet=None):
-        start = time.time()
-
-        current_node = self.get_top_node()
-
-        if show_plot:
-            current_node.get_state().get_board().initialize_board_plot()
-
-        while not current_node.is_endstate():
-            current_node.set_as_top_node()
-            current_node.set_leaf_status()
-
-            tetete = time.time()
             for i in range(rollouts_per_episode):
                 #current_node.mcts_tree_policy(player, opposing_player, node_expansion)
                 current_node.mcts_tree_policy2(node_expansion, anet)
-            #print(str(((time.time() - tetete) / rollouts_per_episode)) + 's per rollout')
-
-            tete = ""
-            titi = ""
-            for child in current_node.get_children():
-                tete += str(child.get_score()) + "  "
-                titi += str(child.get_node_num()) + "  "
-            #print(tete)
-            #print(titi)
 
             current_root_arcs = []
             for i in range(0, current_node.get_state().get_board().get_board_size()**2):
@@ -162,7 +44,6 @@ class Tree:
 
             for child in current_node.get_children():
                 if child.is_endstate():
-                    print("AAAA")
                     current_root_arcs[child.get_node_num()][1] = 1.0  # If a winning move is a direct child it won't have a lot of visits because it is an endnode. Give it a high score to prioritize this above others
                 elif current_node.get_score()[0] == 0:
                     print("Empty child selected. Set to 0.")
@@ -194,31 +75,24 @@ class Tree:
             #current_node = current_node.calc_best_child(player, opposing_player, True)
             current_node = current_node.get_child_with_highest_visit_count()
 
-            #print(current_node.get_state().get_next_turn().get_color() + " chose " + str(current_node.get_score()))
-
             # Remove parent
             current_node.set_parent(None)
 
-            if show_plot:
+            if visualize[1]:
                 current_node.get_state().get_board().create_board_plot(self.get_top_node().get_state().get_board().get_fig(), self.get_top_node().get_state().get_board().get_ax())
                 plt.pause(pause_length)
 
-            #current_node.get_state().get_board().print_board()
+            if visualize[0]:
+                current_node.get_state().get_board().print_board()
 
-            #print("-----------------------------------")
+        if visualize[0] or visualize[1]:
+            print(str(current_node.get_state().get_next_turn().get_color()) + " won!")
 
-
-        #print()
-        #print(str(current_node.get_state().get_next_turn().get_color()) + " won!")
-
-        end = time.time()
-        #print("Time elapsed: " + str(end - start) + "s")
-
-        if show_plot:
+        if visualize[1]:
             plt.show()
 
 
-    def anet_one_turn(self, current_node, anet, show_plot, pause_length):
+    def anet_one_turn(self, current_node, anet, visualize, pause_length):
 
         next_move = current_node.anet_policy(anet)
 
@@ -228,13 +102,13 @@ class Tree:
 
         current_node = current_node.get_children()[0]
 
-        if show_plot:
+        if visualize[1]:
             current_node.get_state().get_board().create_board_plot(
                 self.get_top_node().get_state().get_board().get_fig(),
                 self.get_top_node().get_state().get_board().get_ax())
             plt.pause(pause_length)
 
-        if show_plot:
+        if visualize[0]:
             current_node.get_state().get_board().print_board()
             print()
 

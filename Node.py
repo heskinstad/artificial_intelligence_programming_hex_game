@@ -152,10 +152,6 @@ class Node:
 
         board = self.get_state().get_board()
 
-        if board.get_board_p1()[y][x] != 0:
-            print("AAAAAAAAAAAAAAAA")
-            1 / 0
-
         board_deepcopy = Board(board.get_board_size(), False)
         board_deepcopy.board_positions = [x[:] for x in board.get_board_p1()]
 
@@ -234,12 +230,6 @@ class Node:
                 elif self.get_state().get_current_turn() == self.get_state().get_second_player():
                     ohe[i, j] = [p2_board.T[i, j], p1_board.T[i, j]]
 
-        # Create the array of the current game board
-        # if self.get_state().get_current_turn() == self.get_state().get_starting_player():
-        #    array = self.get_state().get_board().get_board_np_p1()
-        # elif self.get_state().get_current_turn() == self.get_state().get_second_player():
-        #    array = self.get_state().get_board().get_board_np_p2()
-
         array = ohe.reshape(1, self.get_state().get_board().get_board_size(),
                               self.get_state().get_board().get_board_size(), 2)
 
@@ -253,7 +243,7 @@ class Node:
         valid_moves = self.get_valid_moves().flatten()
 
         action_probs = action_probs * valid_moves
-        #print(valid_moves)
+
         action_probs = action_probs / np.sum(action_probs)
 
         action_probs = np.array(action_probs)
@@ -297,7 +287,6 @@ class Node:
 
     def node_check_win(self, return_player=False):
         # If player won this simulation
-        #if self.get_state().get_board().check_if_player_won(player) == player:
         if self.get_state().get_board().check_if_player_won(
                 self.get_state().get_current_turn(),
                 self.get_state().get_starting_player(),
@@ -312,7 +301,6 @@ class Node:
             return [1, 1]
 
         # If player lost this simulation
-        #elif self.get_state().get_board().check_if_player_won(opposing_player) == opposing_player:
         elif self.get_state().get_board().check_if_player_won(self.get_state().get_current_turn(),
                 self.get_state().get_starting_player(),
                 self.get_state().get_second_player()) == self.get_state().get_second_player()\
@@ -386,9 +374,6 @@ class Node:
         best_child = self.get_children()[0]
 
         for child in self.get_children():
-            #if child.is_endstate():
-            #    best_child = child
-            #    break
             if child.get_score()[0] > best_child.get_score()[0]:
                 best_child = child
 
@@ -426,7 +411,12 @@ class Node:
             self.remove_leaf_status()
         else:
             best_child = self.calc_best_child()
-            best_child.mcts_tree_policy2(node_expansion, anet)
+            if len(best_child.get_children()) > 0:
+                best_child.mcts_tree_policy2(node_expansion, anet)
+            elif best_child.get_max_children() > 0:
+                self.set_leaf_status()
+                self.mcts_default_policy2(anet)
+                self.remove_leaf_status()
 
 
     def mcts_default_policy2(self, anet=None):
@@ -447,11 +437,6 @@ class Node:
                     ohe[i, j] = [p1_board[i, j], p2_board[i, j]]
                 elif self.get_state().get_current_turn() == self.get_state().get_second_player():
                     ohe[i, j] = [p2_board.T[i, j], p1_board.T[i, j]]
-        # Create the array of the current game board
-        # if self.get_state().get_current_turn() == self.get_state().get_starting_player():
-        #    array = self.get_state().get_board().get_board_np_p1()
-        # elif self.get_state().get_current_turn() == self.get_state().get_second_player():
-        #    array = self.get_state().get_board().get_board_np_p2()
 
         array = ohe.reshape(1, self.get_state().get_board().get_board_size(),
                             self.get_state().get_board().get_board_size(), 2)
@@ -488,4 +473,3 @@ class Node:
             action_probs[action_idx] = 0.0
 
         random_child_node.mcts_default_policy2(anet)
-

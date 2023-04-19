@@ -123,6 +123,7 @@ class Board:
 
         plt.plot()
 
+    # Check if the player sent in as the first argument has won
     def check_if_player_won(self, player, starting_player, second_player):
         unchecked_hexes = []
         checked_hexes = []
@@ -154,6 +155,7 @@ class Board:
                     if self.get_hex_by_x_y(neighbor[0], neighbor[1]) == player.get_id():
                         unchecked_hexes.append([neighbor[0], neighbor[1]])
 
+
     def place(self, player, x, y):
         self.set_hex_by_x_y(x, y, player.get_id())
 
@@ -181,6 +183,7 @@ class Board:
 
         return neighbors
 
+
     def get_neighbors_x_y(self, x, y):
         neighbors = self.get_neighbors(x, y)
 
@@ -192,13 +195,7 @@ class Board:
         return neighbors
 
 
-    def get_board_1_dim(self):
-        board = []
-        for row in self.get_board_p1():
-            board.append(row)
-        return board
-
-    # TODO: print board as a diamond shape
+    # Print the board to the console
     def print_board(self):
         print(self.get_board_size() * " " + self.get_board_size() * 2 * "_" + "__")
         for j in range(self.get_board_size()-1, -1, -1):
