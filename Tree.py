@@ -1,6 +1,7 @@
 import math
 import time
 
+import numpy as np
 from matplotlib import pyplot as plt
 
 class Tree:
@@ -160,12 +161,29 @@ class Tree:
                     break
 
             for child in current_node.get_children():
-                current_root_arcs[child.get_node_num()][1] = child.get_score()[0] / current_node.get_score()[0]
+                if current_node.get_score()[0] == 0:
+                    print("???")
+                    current_root_arcs[child.get_node_num()][1] = 0.0
+                else:
+                    current_root_arcs[child.get_node_num()][1] = child.get_score()[0] / current_node.get_score()[0]
+
+            p1_board = current_node.get_state().get_board().get_board_np_p1()
+            p2_board = current_node.get_state().get_board().get_board_np_p2()
+            board_size = current_node.get_state().get_board().get_board_size()
+            ohe = np.zeros(shape=(board_size, board_size, 2))
+            for i in range(board_size):
+                for j in range(board_size):
+                    if current_node.get_state().get_current_turn() == current_node.get_state().get_starting_player():
+                        ohe[i, j] = [p1_board[i, j], p2_board[i, j]]
+                    elif current_node.get_state().get_current_turn() == current_node.get_state().get_second_player():
+                        ohe[i, j] = [p2_board.T[i, j], p1_board.T[i, j]]
+
+            new = np.reshape(current_root_arcs, (board_size, board_size, 2))
 
             if current_node.get_state().get_current_turn() == current_node.get_state().get_starting_player():
-                RBUF.append([[current_node.get_state().get_board().get_board_np_p1(), current_node.get_state().get_board().get_board_np_p2()], current_root_arcs])
+                RBUF.append([ohe, new])
             elif current_node.get_state().get_current_turn() == current_node.get_state().get_second_player():
-                RBUF.append([[current_node.get_state().get_board().get_board_np_p2(), current_node.get_state().get_board().get_board_np_p1()], current_root_arcs])
+                RBUF.append([ohe, new.T])
             else:
                 raise Exception("Could not append to RBUF")
 
