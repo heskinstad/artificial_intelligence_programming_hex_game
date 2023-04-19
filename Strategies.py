@@ -327,6 +327,13 @@ class Strategies:
             X_train = np.array(X_train)
             y_train = np.array(y_train)
 
+            #print("X_train:")
+            #print(X_train)
+            #print()
+            #print()
+            #print()
+            #print()
+
             history = anet.train_model(model, num_epochs, batch_size, np.stack(X_train), np.stack(y_train), learning_rate)
 
             print("Episode " + str(game_number) + " trained. Accuracy: " + str(history.history['accuracy'][-1]) + ". Loss: " + str(history.history['loss'][-1]))
@@ -344,7 +351,7 @@ class Strategies:
         for i in range(0, len(players_score)):
             for j in range(i, len(players_score)):
                 if i != j:
-                    score = self.topp_tournament_2_players(player1, player2, save_folder + "/TOPP_" + str(i*20) + ".h5", save_folder + "/TOPP_" + str(j*20) + ".h5", board_size, topp_mini_games, show_plot, min_pause_length, optimizer, loss)
+                    score = self.topp_tournament_2_players(player1, player2, save_folder + "/TOPP_" + str(i*10) + ".h5", save_folder + "/TOPP_" + str(j*10) + ".h5", board_size, topp_mini_games, show_plot, min_pause_length, optimizer, loss)
 
                     players_score[i] += score[0]
                     players_score[j] += score[1]

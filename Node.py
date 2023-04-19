@@ -234,20 +234,22 @@ class Node:
                 elif self.get_state().get_current_turn() == self.get_state().get_second_player():
                     ohe[i, j] = [p2_board[i, j], p1_board[i, j]]
 
-        array = ohe
-
         # Create the array of the current game board
-        # if self.get_state().get_current_turn() == self.get_state().get_starting_player():
+        #if self.get_state().get_current_turn() == self.get_state().get_starting_player():
         #    array = self.get_state().get_board().get_board_np_p1()
-        # elif self.get_state().get_current_turn() == self.get_state().get_second_player():
+        #elif self.get_state().get_current_turn() == self.get_state().get_second_player():
         #    array = self.get_state().get_board().get_board_np_p2()
 
-        array = array.reshape(1, self.get_state().get_board().get_board_size(), self.get_state().get_board().get_board_size(), 2)
+        array = ohe.reshape(-1, self.get_state().get_board().get_board_size(), self.get_state().get_board().get_board_size(), 2)
 
         action_probs = anet(array)[0]
 
+
         if self.get_state().get_current_turn() == self.get_state().get_second_player():
-            action_probs = action_probs.T
+            new = np.reshape(action_probs, (board_size, board_size, 1))
+            action_probs = new.T
+            action_probs = np.reshape(action_probs, board_size ** 2)
+
 
         valid_moves = self.get_valid_moves(action_probs).flatten()
 
@@ -439,7 +441,6 @@ class Node:
                 elif self.get_state().get_current_turn() == self.get_state().get_second_player():
                     ohe[i, j] = [p2_board[i, j], p1_board[i, j]]
 
-        array = ohe
 
         # Create the array of the current game board
         #if self.get_state().get_current_turn() == self.get_state().get_starting_player():
@@ -447,12 +448,14 @@ class Node:
         #elif self.get_state().get_current_turn() == self.get_state().get_second_player():
         #    array = self.get_state().get_board().get_board_np_p2()
 
-        array = array.reshape(1, self.get_state().get_board().get_board_size(), self.get_state().get_board().get_board_size(), 2)
-
+        array = ohe.reshape(-1, self.get_state().get_board().get_board_size(), self.get_state().get_board().get_board_size(), 2)
+        #print(array)
         action_probs = anet(array)[0]
 
         if self.get_state().get_current_turn() == self.get_state().get_second_player():
-            action_probs = action_probs.T
+            new = np.reshape(action_probs, (board_size, board_size, 1))
+            action_probs = new.T
+            action_probs = np.reshape(action_probs, board_size ** 2)
 
         action_probs = action_probs * self.get_valid_moves(action_probs).flatten()
 

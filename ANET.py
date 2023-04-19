@@ -3,15 +3,15 @@ from tensorflow import keras
 class ANET:
 
     def initialize_model(self, input_shape, num_actions, optimizer, loss):
-        self.lr_schedule = keras.optimizers.schedules.ExponentialDecay(
+        '''self.lr_schedule = keras.optimizers.schedules.ExponentialDecay(
             initial_learning_rate=1e-2,
             decay_steps=10000,
             decay_rate=0.9)
-        self.optimizer = keras.optimizers.SGD(learning_rate=self.lr_schedule)
+        self.optimizer = keras.optimizers.SGD(learning_rate=self.lr_schedule)'''
 
         anet = keras.models.Sequential()
 
-        anet.add(
+        '''anet.add(
             keras.layers.Conv2D(
                 32,
                 (3, 3),
@@ -63,10 +63,57 @@ class ANET:
                 num_actions,
                 activation='softmax'
             )
+        )'''
+
+        anet.add(
+            keras.layers.InputLayer(
+                input_shape=input_shape
+            )
+        )
+
+        anet.add(
+            keras.layers.Conv2D(
+                64,
+                (3, 3),
+                input_shape=input_shape,
+                activation='relu',
+                padding='same',
+            )
+        )
+
+        anet.add(
+            keras.layers.Conv2D(
+                64,
+                (3, 3),
+                input_shape=input_shape,
+                activation='relu',
+                padding='same',
+            )
+        )
+
+        anet.add(
+            keras.layers.Conv2D(
+                64,
+                (3, 3),
+                activation='relu',
+                padding='same',
+                kernel_regularizer=keras.regularizers.l2()
+            )
+        )
+
+        anet.add(
+            keras.layers.Flatten()
+        )
+
+        anet.add(
+            keras.layers.Dense(
+                num_actions,
+                activation='softmax'
+            )
         )
 
         anet.compile(
-            optimizer=self.optimizer,
+            optimizer=optimizer,
             loss=loss,
             metrics=['accuracy']
         )
