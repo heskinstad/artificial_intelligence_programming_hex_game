@@ -161,8 +161,11 @@ class Tree:
                     break
 
             for child in current_node.get_children():
-                if current_node.get_score()[0] == 0:
-                    print("???")
+                if child.is_endstate():
+                    print("AAAA")
+                    current_root_arcs[child.get_node_num()][1] = 1.0  # If a winning move is a direct child it won't have a lot of visits because it is an endnode. Give it a high score to prioritize this above others
+                elif current_node.get_score()[0] == 0:
+                    print("Empty child selected. Set to 0.")
                     current_root_arcs[child.get_node_num()][1] = 0.0
                 else:
                     current_root_arcs[child.get_node_num()][1] = child.get_score()[0] / current_node.get_score()[0]

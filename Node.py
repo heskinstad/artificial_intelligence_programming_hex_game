@@ -298,20 +298,34 @@ class Node:
     def node_check_win(self, return_player=False):
         # If player won this simulation
         #if self.get_state().get_board().check_if_player_won(player) == player:
-        if self.get_state().get_board().check_if_player_won(self.get_state().get_current_turn(), self.get_state().get_starting_player(), self.get_state().get_second_player()) == self.get_state().get_starting_player()\
-                or self.get_state().get_board().check_if_player_won(self.get_state().get_next_turn(), self.get_state().get_starting_player(), self.get_state().get_second_player()) == self.get_state().get_starting_player():
+        if self.get_state().get_board().check_if_player_won(
+                self.get_state().get_current_turn(),
+                self.get_state().get_starting_player(),
+                self.get_state().get_second_player()) == self.get_state().get_starting_player()\
+             or self.get_state().get_board().check_if_player_won(self.get_state().get_next_turn(),
+                self.get_state().get_starting_player(),
+                self.get_state().get_second_player()) == self.get_state().get_starting_player():
+
             self.make_endstate()
             if return_player:
                 return self.get_state().get_starting_player()
             return [1, 1]
+
         # If player lost this simulation
         #elif self.get_state().get_board().check_if_player_won(opposing_player) == opposing_player:
-        elif self.get_state().get_board().check_if_player_won(self.get_state().get_current_turn(), self.get_state().get_starting_player(), self.get_state().get_second_player()) == self.get_state().get_second_player()\
-                or self.get_state().get_board().check_if_player_won(self.get_state().get_next_turn(), self.get_state().get_starting_player(), self.get_state().get_second_player()) == self.get_state().get_second_player():
+        elif self.get_state().get_board().check_if_player_won(self.get_state().get_current_turn(),
+                self.get_state().get_starting_player(),
+                self.get_state().get_second_player()) == self.get_state().get_second_player()\
+             or  self.get_state().get_board().check_if_player_won(self.get_state().get_next_turn(),
+                self.get_state().get_starting_player(),
+                self.get_state().get_second_player()) == self.get_state().get_second_player():
+
             self.make_endstate()
             if return_player:
                 return self.get_state().get_second_player()
             return [1, -1]
+
+        # If no one won
         else:
             return 0
 
