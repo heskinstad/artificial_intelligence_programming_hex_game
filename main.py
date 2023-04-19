@@ -16,7 +16,7 @@ num_epochs = 250  # Number of epochs in training
 batch_size = 1024  # Training batch size
 optimizer = "adam"
 loss = "categorical_crossentropy"
-num_episodes = 250  # Should be dividable by 2 so that each player start first equal number of times
+num_episodes = 40  # Should be dividable by 2 so that each player start first equal number of times
 learning_rate = 0.001  # Should be 0.001 for 4x4
 
 anet_parameters = [save_interval, num_epochs, batch_size, optimizer, loss, num_episodes, learning_rate]
@@ -24,19 +24,19 @@ anet_parameters = [save_interval, num_epochs, batch_size, optimizer, loss, num_e
 # TOPP parameters
 player1_id = 1
 player2_id = 2
-M = 6  # Number of ANET models to save and play against each other
-topp_games_per_M = 50  # Number of games between every ANET model
+M = 3  # Number of ANET models to save and play against each other
+topp_games_per_M = 1000  # Number of games between every ANET model
+model_episodes_multiplier = 20  # In TOPP tournament, player every weight trained on
 anet_models_folder = "anet_models"
-weights_episodes_multiplier = 10  # In TOPP tournament, player every weight trained on
 
-topp_parameters = [player1_id, player2_id, M, topp_games_per_M, anet_models_folder, weights_episodes_multiplier]
+topp_parameters = [player1_id, player2_id, M, topp_games_per_M, anet_models_folder, model_episodes_multiplier]
 
 
 duel1 = 0
 duel2 = 250
 duel_extra_parameters = [duel1, duel2]
 
-# Strategies: TOPP or Play2
+# Strategies: TOPP (TOPP tournament) or Duel (have two models play against each other)
 strategy = "TOPP"
 
 Strategies(strategy, game_parameters, anet_parameters, topp_parameters, duel_extra_parameters)

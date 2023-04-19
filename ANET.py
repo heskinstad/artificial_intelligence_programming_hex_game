@@ -6,8 +6,14 @@ class ANET:
         anet = keras.models.Sequential()
 
         anet.add(
+            keras.layers.InputLayer(
+                input_shape=input_shape
+            )
+        )
+
+        anet.add(
             keras.layers.Conv2D(
-                32,
+                64,
                 (3, 3),
                 input_shape=input_shape,
                 activation='relu',
@@ -18,7 +24,7 @@ class ANET:
         anet.add(
             keras.layers.Conv2D(
                 64,
-                (2, 2),
+                (3, 3),
                 input_shape=input_shape,
                 activation='relu',
                 padding='same',
@@ -28,28 +34,15 @@ class ANET:
         anet.add(
             keras.layers.Conv2D(
                 64,
-                (1, 1),
+                (3, 3),
                 activation='relu',
                 padding='same',
+                kernel_regularizer=keras.regularizers.l2()
             )
         )
 
         anet.add(
             keras.layers.Flatten()
-        )
-
-        anet.add(
-            keras.layers.Dense(
-                15,
-                activation='relu'
-            )
-        )
-
-        anet.add(
-            keras.layers.Dense(
-                30,
-                activation='relu'
-            )
         )
 
         anet.add(
