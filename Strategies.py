@@ -344,7 +344,7 @@ class Strategies:
 
     def TOPP_mini(self, player1, player2, board_size, number_of_topp_games, show_plot, min_pause_length, save_interval, num_epochs, batch_size, optimizer, loss, learning_rate, rollouts_per_episode, node_expansion, c, save_folder, topp_mini_games):
         # Create data
-        self.topp_tournament(player1, player2, board_size, number_of_topp_games, show_plot, min_pause_length, save_interval, num_epochs, batch_size, optimizer, loss, learning_rate, rollouts_per_episode, node_expansion, c, save_folder)
+        #self.topp_tournament(player1, player2, board_size, number_of_topp_games, show_plot, min_pause_length, save_interval, num_epochs, batch_size, optimizer, loss, learning_rate, rollouts_per_episode, node_expansion, c, save_folder)
 
         players_score = [0, 0, 0, 0, 0, 0]
 

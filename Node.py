@@ -232,7 +232,7 @@ class Node:
                 if self.get_state().get_current_turn() == self.get_state().get_starting_player():
                     ohe[i, j] = [p1_board[i, j], p2_board[i, j]]
                 elif self.get_state().get_current_turn() == self.get_state().get_second_player():
-                    ohe[i, j] = [p2_board[i, j], p1_board[i, j]]
+                    ohe[i, j] = [p2_board[i, j].T, p1_board[i, j].T]
 
         # Create the array of the current game board
         #if self.get_state().get_current_turn() == self.get_state().get_starting_player():
@@ -240,7 +240,7 @@ class Node:
         #elif self.get_state().get_current_turn() == self.get_state().get_second_player():
         #    array = self.get_state().get_board().get_board_np_p2()
 
-        array = ohe.reshape(-1, self.get_state().get_board().get_board_size(), self.get_state().get_board().get_board_size(), 2)
+        array = ohe.reshape(1, self.get_state().get_board().get_board_size(), self.get_state().get_board().get_board_size(), 2)
 
         action_probs = anet(array)[0]
 
@@ -439,7 +439,7 @@ class Node:
                 if self.get_state().get_current_turn() == self.get_state().get_starting_player():
                     ohe[i, j] = [p1_board[i, j], p2_board[i, j]]
                 elif self.get_state().get_current_turn() == self.get_state().get_second_player():
-                    ohe[i, j] = [p2_board[i, j], p1_board[i, j]]
+                    ohe[i, j] = [p2_board[i, j].T, p1_board[i, j].T]
 
 
         # Create the array of the current game board
@@ -448,7 +448,7 @@ class Node:
         #elif self.get_state().get_current_turn() == self.get_state().get_second_player():
         #    array = self.get_state().get_board().get_board_np_p2()
 
-        array = ohe.reshape(-1, self.get_state().get_board().get_board_size(), self.get_state().get_board().get_board_size(), 2)
+        array = ohe.reshape(1, self.get_state().get_board().get_board_size(), self.get_state().get_board().get_board_size(), 2)
         #print(array)
         action_probs = anet(array)[0]
 
