@@ -9,6 +9,9 @@ from Board import Board
 from Exceptions.IllegalNumberOfChildrenException import IllegalNumberOfChildrenException
 from State import State
 
+from tensorflow.python.ops.numpy_ops import np_config
+np_config.enable_numpy_behavior()
+
 class Node:
     def __init__(self, state, max_children, parent=None, score=None, endstate=False):
         if score is None:
@@ -229,7 +232,7 @@ class Node:
                 if self.get_state().get_current_turn() == self.get_state().get_starting_player():
                     ohe[i, j] = [p1_board[i, j], p2_board[i, j]]
                 elif self.get_state().get_current_turn() == self.get_state().get_second_player():
-                    ohe[i, j] = [p2_board.T[i, j], p1_board.T[i, j]]
+                    ohe[i, j] = [p2_board[i, j], p1_board[i, j]]
 
         array = ohe
 
@@ -242,6 +245,9 @@ class Node:
         array = array.reshape(1, self.get_state().get_board().get_board_size(), self.get_state().get_board().get_board_size(), 2)
 
         action_probs = anet(array)[0]
+
+        if self.get_state().get_current_turn() == self.get_state().get_second_player():
+            action_probs = action_probs.T
 
         valid_moves = self.get_valid_moves(action_probs).flatten()
 
@@ -431,7 +437,7 @@ class Node:
                 if self.get_state().get_current_turn() == self.get_state().get_starting_player():
                     ohe[i, j] = [p1_board[i, j], p2_board[i, j]]
                 elif self.get_state().get_current_turn() == self.get_state().get_second_player():
-                    ohe[i, j] = [p2_board.T[i, j], p1_board.T[i, j]]
+                    ohe[i, j] = [p2_board[i, j], p1_board[i, j]]
 
         array = ohe
 
@@ -444,6 +450,9 @@ class Node:
         array = array.reshape(1, self.get_state().get_board().get_board_size(), self.get_state().get_board().get_board_size(), 2)
 
         action_probs = anet(array)[0]
+
+        if self.get_state().get_current_turn() == self.get_state().get_second_player():
+            action_probs = action_probs.T
 
         action_probs = action_probs * self.get_valid_moves(action_probs).flatten()
 
