@@ -1,3 +1,5 @@
+import pickle
+
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -41,6 +43,8 @@ class Strategies:
             self.topp_tournament_custom(anets)
         elif strategy == "DUEL":
             print(self.duel_2_players(duel_extra_parameters[0], duel_extra_parameters[1]))
+        elif strategy == "GEN":
+            self.gen_data()
 
     # Set two players up against each other. Who's beginning switches after every game played
     def duel_2_players(self, episode_number_p1, episode_number_p2):
@@ -106,6 +110,59 @@ class Strategies:
             plt.show()
 
         return [player1_wins, player2_wins]
+
+
+    def gen_data(self):
+
+        RBUF = []
+        with open("gamedata_4x4_board_200_games_600_rollouts_1.42c", 'rb') as f:
+            RBUF = pickle.load(f)
+
+        anet = ANET()
+        model = anet.initialize_model((self.board_size, self.board_size, 2), self.board_size ** 2, self.optimizer,
+                                      self.loss, self.num_of_hidden_layers, self.num_of_neurons_per_layer)
+
+        # Prepare the training data
+        X_train = []
+        y_train = []
+
+        for boards, probabilities in RBUF:
+            # Append the merged Player1 and Player2 boards to X_train
+            X_train.append(boards)
+
+            # Extract every probability element from the numerated node lists into its own list
+            node_probabilities = []
+            probabilities = np.reshape(probabilities, (self.board_size ** 2, 2))
+            for element in probabilities:
+                node_probabilities.append(element[1])
+
+            # Find the index of the highest probability, set this to the value 1.0, and the rest to 0.0
+            # This is done because of the categorical cross entropy loss function of the network
+            node_probabilities = np.array(node_probabilities)
+            best = np.argmax(node_probabilities)
+            for i in range(len(node_probabilities)):
+                node_probabilities[i] = 0
+            node_probabilities[best] = 1.0
+
+            # Flatten the probability data and add to y_train
+            y_train.append(node_probabilities.flatten())
+
+        # Make both numpy_arrays
+        X_train = np.array(X_train)
+        y_train = np.array(y_train)
+
+        # Train model
+        history = anet.train_model(model, self.num_epochs, self.batch_size, X_train, y_train, self.learning_rate)
+
+        # Print accuracy and loss for the training session
+        print("Episode " + str(200) + " trained. Accuracy: " + str(
+            history.history['accuracy'][-1]) + ". Loss: " + str(history.history['loss'][-1]))
+
+        # Save ANET's current parameters for later use in tournament play
+
+        model.save_weights(self.generate_filename(200))
+
+
 
 
     # Generate data to be used in a TOPP Tournament
