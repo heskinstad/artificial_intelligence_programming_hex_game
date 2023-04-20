@@ -12,11 +12,11 @@ game_parameters = [board_size, visualize, rollouts_per_simulation, node_expansio
 
 # ANET parameters
 save_interval = 10  # Save for each n number of actual games/episodes
-num_epochs = 250  # Number of epochs in training
-batch_size = 1024  # Training batch size
+num_epochs = 100  # Number of epochs in training - an article stated 11 is a good starting point.
+batch_size = 4  # Training batch size
 optimizer = "adam"
 loss = "categorical_crossentropy"
-num_episodes = 40  # Should be dividable by 2 so that each player start first equal number of times
+num_episodes = 1000  # Number of episodes to generate data for
 learning_rate = 0.001  # Should be 0.001 for 4x4
 
 anet_parameters = [save_interval, num_epochs, batch_size, optimizer, loss, num_episodes, learning_rate]
@@ -24,19 +24,21 @@ anet_parameters = [save_interval, num_epochs, batch_size, optimizer, loss, num_e
 # TOPP parameters
 player1_id = 1
 player2_id = 2
-M = 3  # Number of ANET models to save and play against each other
-topp_games_per_M = 1000  # Number of games between every ANET model
+M = 6  # Number of ANET models to play against each other
+topp_games_per_M = 100  # Number of games between every ANET model. Should be dividable by 2 so that each player start first equal number of times
 model_episodes_multiplier = 20  # In TOPP tournament, player every weight trained on
 anet_models_folder = "anet_models"
 
 topp_parameters = [player1_id, player2_id, M, topp_games_per_M, anet_models_folder, model_episodes_multiplier]
 
 
-duel1 = 0
-duel2 = 40
+duel1 = 250
+duel2 = 150
 duel_extra_parameters = [duel1, duel2]
 
-# Strategies: TOPP (TOPP tournament) or DUEL (have two models play against each other)
+anets = [0, 10, 40, 60]  # Designate the anet models to compete in the TOPP_CUSTOM with the number of episodes they've been trained on
+
+# Strategies: TOPP (TOPP tournament), TOPP_CUSTOM (TOPP between pre-trained anet models) or DUEL (have two models play against each other)
 strategy = "TOPP"
 
-Strategies(strategy, game_parameters, anet_parameters, topp_parameters, duel_extra_parameters)
+Strategies(strategy, game_parameters, anet_parameters, topp_parameters, duel_extra_parameters, anets)

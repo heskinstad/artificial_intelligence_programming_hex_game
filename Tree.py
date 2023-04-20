@@ -3,6 +3,7 @@ import math
 import numpy as np
 from matplotlib import pyplot as plt
 
+# A tree is constructed per game. All nodes must be part of a tree
 class Tree:
     def __init__(self, top_node):
         self.top = top_node
@@ -14,7 +15,7 @@ class Tree:
         for child in self.get_top_node().get_children():
             child.get_state().get_board().print_board()
 
-
+    # Perform Monte Carlo tree search until one of the players win and add data to the RBUF
     def mcts_tree_default_until_end(self, rollouts_per_episode, RBUF, visualize, pause_length=0.001, node_expansion=1, anet=None):
         current_node = self.get_top_node()
 
@@ -27,8 +28,9 @@ class Tree:
 
             for i in range(rollouts_per_episode):
                 #current_node.mcts_tree_policy(player, opposing_player, node_expansion)
-                current_node.mcts_tree_policy2(node_expansion, anet)
+                current_node.mcts_tree_policy(node_expansion, anet)
 
+            # Since every child of a node rarely have been generated, create an array with board_size**2 elements of type [node_number, probability]
             current_root_arcs = []
             for i in range(0, current_node.get_state().get_board().get_board_size()**2):
                 current_root_arcs.append([i, 0.0])
@@ -41,6 +43,7 @@ class Tree:
                             child2.set_score([0, 0])
                     break
 
+            # Add each child's visit count to their fixed position in the board_grid
             for child in current_node.get_children():
                 if child.is_endstate():
                     current_root_arcs[child.get_node_num()][1] = 1.0  # If a winning move is a direct child it won't have a lot of visits because it is an endnode. Give it a high score to prioritize this above others
@@ -50,25 +53,10 @@ class Tree:
                 else:
                     current_root_arcs[child.get_node_num()][1] = child.get_score()[0] / current_node.get_score()[0]
 
-            p1_board = current_node.get_state().get_board().get_board_np_p1()
-            p2_board = current_node.get_state().get_board().get_board_np_p2()
             board_size = current_node.get_state().get_board().get_board_size()
-            ohe = np.zeros(shape=(board_size, board_size, 2))
-            for i in range(board_size):
-                for j in range(board_size):
-                    if current_node.get_state().get_current_turn() == current_node.get_state().get_starting_player():
-                        ohe[i, j] = [p1_board[i, j], p2_board[i, j]]
-                    elif current_node.get_state().get_current_turn() == current_node.get_state().get_second_player():
-                        ohe[i, j] = [p2_board[i, j], p1_board[i, j]]
+            current_root_arcs = np.reshape(current_root_arcs, (board_size, board_size, 2))
 
-            new = np.reshape(current_root_arcs, (board_size, board_size, 2))
-
-            if current_node.get_state().get_current_turn() == current_node.get_state().get_starting_player():
-                RBUF.append([ohe, new])
-            elif current_node.get_state().get_current_turn() == current_node.get_state().get_second_player():
-                RBUF.append([ohe, new])
-            else:
-                raise Exception("Could not append to RBUF")
+            RBUF.append([current_node.merge_boards_to_anet(), current_root_arcs])
 
             # Move to best child node
             #current_node = current_node.calc_best_child(player, opposing_player, True)
@@ -91,6 +79,7 @@ class Tree:
             plt.show()
 
 
+    # Make a single move based on the anet's predictions
     def anet_one_turn(self, current_node, anet, visualize, pause_length):
 
         next_move = current_node.anet_policy(anet)

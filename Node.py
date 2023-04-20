@@ -5,9 +5,10 @@ import random
 import numpy as np
 
 from Board import Board
-from Exceptions.IllegalNumberOfChildrenException import IllegalNumberOfChildrenException
 from State import State
+from Exceptions.IllegalNumberOfChildrenException import IllegalNumberOfChildrenException
 
+# The Node class keep info about the individual nodes that make up a tree
 class Node:
     def __init__(self, state, max_children, parent=None, score=None, endstate=False):
         if score is None:
@@ -15,7 +16,7 @@ class Node:
         self.state = state
         self.parent = parent
         self.children = []
-        self.score = score # Holds the accumulated [number_of_visits, score]
+        self.score = score  # Holds the accumulated [number_of_visits, score]
         self.endstate = endstate
         self.c = None
         self.leaf = False
@@ -83,30 +84,8 @@ class Node:
     def get_node_num(self):
         return self.node_num
 
-    def create_child_nodes(self, depth):
-        if depth > 0:
 
-            board = self.get_state().get_board()
-
-            for x in range(board.get_board_size()):
-                for y in range(board.get_board_size()):
-                    if board.get_hex_by_x_y(x, y) == 0:
-
-                        board_deepcopy = Board(board.get_board_size(), False)
-                        board_deepcopy.board_positions = [x[:] for x in board.get_board()]
-
-                        board_deepcopy.place(self.get_state().get_current_turn(), x, y)
-
-                        child = Node(State(board_deepcopy, self.get_state().get_next_turn(), self.get_state().get_current_turn(), self.get_state().get_starting_player(), self.get_state().get_second_player()), self.get_max_children() - 1, self)
-                        child.set_c(self.get_c())
-
-                        self.add_child(child)
-                        child.set_parent(self)
-
-                        child.create_child_nodes(depth - 1)
-
-
-    # Create a single, randomized child node
+    # Create a single, randomized child node, unless a position argument is included
     def create_random_child_node(self, position=None):
         board = self.get_state().get_board()
 
@@ -171,28 +150,38 @@ class Node:
     Q(s, a) + u(s, a)
     where
     Q(s, a) is the value of the final expected result of doing action a from node s (updated after each rollout)
-    - can be considered the score of a child node?
+    - can be considered the score of a child node
     and
-    u(s, a) is 
+    u(s, a) is the exploration bonus
     '''
-    def mcts_tree_policy(self, node_expansion=1):
-        # If self is a leaf it will have no children and needs to use the default policy
+
+    # Tree policy. Traverses already existing nodes and can create new leaf nodes
+    def mcts_tree_policy(self, node_expansion, anet):
+        # If self is an endstate, then propagate the score and return because there are no possible child states
+        score = self.node_check_win()
         if self.is_endstate():
+            self.propagate_score(score)
             return
+
         # Expand with default policy if:
         # Node is leaf or
         # The current number of nodes on this level is less than half of the maximum number of nodes on this level
         elif self.is_leaf() or len(self.get_children()) < (self.get_max_children() - 1) / node_expansion:
             self.set_leaf_status()
-            self.mcts_default_policy()
+            self.mcts_default_policy(anet)
             self.remove_leaf_status()
         else:
             best_child = self.calc_best_child()
-            best_child.mcts_tree_policy(node_expansion)
+            if len(best_child.get_children()) > 0:
+                best_child.mcts_tree_policy2(node_expansion, anet)
+            elif best_child.get_max_children() > 0:
+                self.set_leaf_status()
+                self.mcts_default_policy(anet)
+                self.remove_leaf_status()
 
 
     # A run of the default policy is one rollout
-    def mcts_default_policy(self):
+    def mcts_default_policy(self, anet):
         score = self.node_check_win()
 
         # If anyone won in this node
@@ -200,12 +189,29 @@ class Node:
             self.propagate_score(score)
             return
 
-        # Choose a random child node and move to this recursively
-        random_child_node = self.create_random_child_node()
-        if random_child_node == None:  # Is none if there is only a single child left and it has already been created
-            self.get_children()[0].mcts_default_policy()
-        else:
-            random_child_node.mcts_default_policy()
+        action_probs = self.get_anet_position_prediction(anet)
+
+        child_node = None
+        if self.get_max_children() == len(self.get_children()):
+            child_node = random.choice(self.get_children())
+
+        while child_node == None:
+            if np.isnan(action_probs[5]) or np.isnan(action_probs[2]):
+                return
+            action_probs = action_probs / np.sum(action_probs)
+            #action_idx = np.random.choice(len(action_probs), p=action_probs)
+            action_idx = np.argmax(action_probs)
+
+            # Convert position to 2D coordinates
+            position = [None, None]
+            position[0] = math.floor(action_idx / self.get_state().get_board().get_board_size())
+            position[1] = action_idx % self.get_state().get_board().get_board_size()
+
+            child_node = self.create_random_child_node(position)
+
+            action_probs[action_idx] = 0.0
+
+        child_node.mcts_default_policy(anet)
 
         # If top node in the newly generated default policy tree
         # Remove own children and set itself as a leaf
@@ -217,36 +223,16 @@ class Node:
             return
 
 
+    # Sends the current state of the board to the anet and returns the position of the predicted best next move
     def anet_policy(self, anet):
-        p1_board = self.get_state().get_board().get_board_np_p1()
-        p2_board = self.get_state().get_board().get_board_np_p2()
-        board_size = self.get_state().get_board().get_board_size()
-        ohe = np.zeros(shape=(board_size, board_size, 2))
-        for i in range(board_size):
-            for j in range(board_size):
-                if self.get_state().get_current_turn() == self.get_state().get_starting_player():
-                    ohe[i, j] = [p1_board[i, j], p2_board[i, j]]
-                elif self.get_state().get_current_turn() == self.get_state().get_second_player():
-                    ohe[i, j] = [p2_board[i, j], p1_board[i, j]]
+        # Convert board to anet-readable format
+        action_probs = self.get_anet_position_prediction(anet)
 
-        array = ohe.reshape(1, self.get_state().get_board().get_board_size(),
-                              self.get_state().get_board().get_board_size(), 2)
-
-        action_probs = anet(array)[0]
-
-        if self.get_state().get_current_turn() == self.get_state().get_second_player():
-            new = np.reshape(action_probs, (board_size, board_size, 1))
-            action_probs = new
-            action_probs = np.reshape(action_probs, board_size ** 2)
-
+        # Add a mask (valid_moves) to give all 'illegal' moves a probability of zero
         valid_moves = self.get_valid_moves().flatten()
-
         action_probs = action_probs * valid_moves
-
         action_probs = action_probs / np.sum(action_probs)
-
         action_probs = np.array(action_probs)
-
         action_probs = action_probs / np.sum(action_probs)
 
         try:
@@ -259,7 +245,7 @@ class Node:
 
         return action_idx
 
-
+    # Return an array of valid moves. Dimensions same as game board where 0 = occupied and 1 = free
     def get_valid_moves(self):
         valid_moves = copy.deepcopy(self.get_state().get_board().get_board_np())
         for y in range(len(valid_moves)):
@@ -366,6 +352,8 @@ class Node:
 
         return best_child
 
+
+    # Alternative to calc_best_child
     def get_child_with_highest_visit_count(self):
         if len(self.get_children()) == 0:
             raise IllegalNumberOfChildrenException("Error: Not enough children!")
@@ -379,96 +367,33 @@ class Node:
         return best_child
 
 
-    # Print the path (index number of every node down to the current node)
-    def get_path(self):
-        path = ""
-        current = self
+    # Choose child node based on anet's predictions
+    def get_anet_position_prediction(self, anet):
+        # Get the anet_compatible board format
+        board_p1_p2 = self.merge_boards_to_anet()
 
-        while current.get_parent() != None:
-            index = 0
-            for i in range(len(current.get_parent().get_children())):
-                if current.get_parent().get_children()[i] == current:
-                    index = i
-                    break
-
-            path = str(index) + " " + path
-
-            current = current.get_parent()
-
-        return path
-
-    def mcts_tree_policy2(self, node_expansion=1, anet=None):
-        # If self is a leaf it will have no children and needs to use the default policy
-        if self.is_endstate():
-            return
-        # Expand with default policy if:
-        # Node is leaf or
-        # The current number of nodes on this level is less than half of the maximum number of nodes on this level
-        elif self.is_leaf() or len(self.get_children()) < (self.get_max_children() - 1) / node_expansion:
-            self.set_leaf_status()
-            self.mcts_default_policy2(anet)
-            self.remove_leaf_status()
-        else:
-            best_child = self.calc_best_child()
-            if len(best_child.get_children()) > 0:
-                best_child.mcts_tree_policy2(node_expansion, anet)
-            elif best_child.get_max_children() > 0:
-                self.set_leaf_status()
-                self.mcts_default_policy2(anet)
-                self.remove_leaf_status()
-
-
-    def mcts_default_policy2(self, anet=None):
-        score = self.node_check_win()
-
-        # If anyone won in this node
-        if self.is_endstate():
-            self.propagate_score(score)
-            return
-
-        p1_board = self.get_state().get_board().get_board_np_p1()
-        p2_board = self.get_state().get_board().get_board_np_p2()
-        board_size = self.get_state().get_board().get_board_size()
-        ohe = np.zeros(shape=(board_size, board_size, 2))
-        for i in range(board_size):
-            for j in range(board_size):
-                if self.get_state().get_current_turn() == self.get_state().get_starting_player():
-                    ohe[i, j] = [p1_board[i, j], p2_board[i, j]]
-                elif self.get_state().get_current_turn() == self.get_state().get_second_player():
-                    ohe[i, j] = [p2_board[i, j], p1_board[i, j]]
-
-        array = ohe.reshape(1, self.get_state().get_board().get_board_size(),
+        board_p1_p2 = board_p1_p2.reshape(1, self.get_state().get_board().get_board_size(),
                             self.get_state().get_board().get_board_size(), 2)
 
-        action_probs = anet(array)[0]
+        action_probs = anet(board_p1_p2)[0]
 
-        if self.get_state().get_current_turn() == self.get_state().get_second_player():
-            new = np.reshape(action_probs, (board_size, board_size, 1))
-            action_probs = new
-            action_probs = np.reshape(action_probs, board_size ** 2)
-
+        # Set value of occupied moves to 0 (zero probability to pick these)
         action_probs = action_probs * self.get_valid_moves().flatten()
 
-        action_probs = np.array(action_probs)
+        return np.array(action_probs)
 
-        random_child_node = None
-        if self.get_max_children() == len(self.get_children()):
-            random_child_node = random.choice(self.get_children())
-            return
 
-        while random_child_node == None:
-            if np.isnan(action_probs[5]) or np.isnan(action_probs[2]):
-                return
-            action_probs = action_probs / np.sum(action_probs)
-            #action_idx = np.random.choice(len(action_probs), p=action_probs)
-            action_idx = np.argmax(action_probs)
+    # 'Merge' the boards to a single array to make them compatible to be read by the anet
+    def merge_boards_to_anet(self):
+        board_p1 = self.get_state().get_board().get_board_np_p1()
+        board_p2 = self.get_state().get_board().get_board_np_p2()
+        board_size = self.get_state().get_board().get_board_size()
+        board_p1_p2 = np.zeros(shape=(board_size, board_size, 2))
+        for y in range(board_size):
+            for x in range(board_size):
+                if self.get_state().get_current_turn() == self.get_state().get_starting_player():
+                    board_p1_p2[y, x] = [board_p1[y, x], board_p2[y, x]]
+                elif self.get_state().get_current_turn() == self.get_state().get_second_player():
+                    board_p1_p2[y, x] = [board_p2[y, x], board_p1[y, x]]
 
-            position = [None, None]
-            position[0] = math.floor(action_idx / self.get_state().get_board().get_board_size())
-            position[1] = action_idx % self.get_state().get_board().get_board_size()
-
-            random_child_node = self.create_random_child_node(position)
-
-            action_probs[action_idx] = 0.0
-
-        random_child_node.mcts_default_policy2(anet)
+        return board_p1_p2

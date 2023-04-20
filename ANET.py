@@ -1,7 +1,6 @@
 from tensorflow import keras
 
 class ANET:
-
     def initialize_model(self, input_shape, num_actions, optimizer, loss):
         anet = keras.models.Sequential()
 
@@ -60,12 +59,13 @@ class ANET:
 
         return anet
 
+
     def train_model(self, anet, num_epochs, batch_size, X_train, y_train, learning_rate):
 
+        # Set learnign rate
+        keras.backend.set_value(anet.optimizer.learning_rate, learning_rate)
 
-        from keras import backend as K
-        K.set_value(anet.optimizer.learning_rate, learning_rate)
-
+        # Train network
         history = anet.fit(
             X_train,
             y_train,
@@ -75,4 +75,5 @@ class ANET:
             shuffle=True
         )
 
+        # return history for accuracy and loss data
         return history

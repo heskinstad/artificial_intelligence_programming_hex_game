@@ -34,14 +34,14 @@ class Board:
         return np.array(board)
 
     def get_board_np_p1(self):
-        board = np.array(copy.deepcopy(self.get_board_p1()))
+        board = np.array(self.get_board_p1())
 
         p1_board = np.where(board == 1, 1, 0)
 
         return np.array(p1_board, dtype=np.int)
 
     def get_board_np_p2(self):
-        board = np.array(copy.deepcopy(self.get_board_p2()))
+        board = np.array(self.get_board_p2())
 
         p2_board = np.where(board == 2, 1, 0)
 
@@ -61,7 +61,7 @@ class Board:
         return self.ax
 
     def initialize_board_plot(self):
-        self.fig, self.ax = plt.subplots(figsize=(7, 7))
+        self.fig, self.ax = plt.subplots(figsize=(self.get_board_size(), self.get_board_size()))
 
     def create_board_plot(self, fig, ax):
         self.fig = fig

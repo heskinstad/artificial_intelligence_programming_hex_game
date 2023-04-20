@@ -1,5 +1,6 @@
 from Board import Board
 
+# The State class keeps information about the current board and which player's turn it is
 class State:
     def __init__(self, board, current_turn, next_turn, start_turn, second_turn):
         self.board = board
