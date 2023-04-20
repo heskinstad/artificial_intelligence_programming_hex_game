@@ -144,6 +144,10 @@ class Node:
 
         return child
 
+    ####################
+    # POLICY FUNCTIONS #
+    ####################
+
     '''
     Tree policy:
     Choose the branch with the highest combination of exploitation + exploration
@@ -261,6 +265,10 @@ class Node:
         return valid_moves
 
 
+    #####################################
+    # CHECK WIN AND PROPAGATE FUNCTIONS #
+    #####################################
+
     # Propagates the score given as a parameter to the node self and every parent up throughout the tree
     def propagate_score(self, score):
         current_node = self
@@ -301,13 +309,9 @@ class Node:
             return 0
 
 
-    # Calculate exploration bonus. Parameter child can be viewed as the action
-    def calc_u_s_a(self, child):
-        N_s_a = child.get_score()[0]
-        N_s = self.get_score()[0]
-
-        return self.c * math.sqrt(math.log(N_s, 10) / (1 + N_s_a))
-
+    #########################################
+    # RETURN MOST PROMISING CHILD FUNCTIONS #
+    #########################################
 
     # Return the child with the best score relative to the current player
     def calc_best_child(self, debug=False):
@@ -364,6 +368,18 @@ class Node:
 
         return best_child
 
+
+    # Calculate exploration bonus. Parameter child can be viewed as the action
+    def calc_u_s_a(self, child):
+        N_s_a = child.get_score()[0]
+        N_s = self.get_score()[0]
+
+        return self.c * math.sqrt(math.log(N_s, 10) / (1 + N_s_a))
+
+
+    #############################
+    # ANET CONVERSION FUNCTIONS #
+    #############################
 
     # Choose child node based on anet's predictions
     def get_anet_position_prediction(self, anet):
