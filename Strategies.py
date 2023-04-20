@@ -1,8 +1,7 @@
-import pickle
-import time
-
 import matplotlib.pyplot as plt
 import numpy as np
+
+import tensorflow as tf
 
 from ANET import ANET
 from Board import Board
@@ -60,9 +59,15 @@ class Strategies:
         model_player1 = anet_player1.initialize_model((self.board_size, self.board_size, 2), self.board_size**2, self.optimizer, self.loss, self.num_of_hidden_layers, self.num_of_neurons_per_layer)
         model_player1.load_weights(self.generate_filename(episode_number_p1))
 
+        converter_p1 = tf.lite.TFLiteConverter.from_keras_model(model_player1)
+        model_lite_p1 = converter_p1.convert()
+
         anet_player2 = ANET()
         model_player2 = anet_player2.initialize_model((self.board_size, self.board_size, 2), self.board_size**2, self.optimizer, self.loss, self.num_of_hidden_layers, self.num_of_neurons_per_layer)
         model_player2.load_weights(self.generate_filename(episode_number_p2))
+
+        converter_p2 = tf.lite.TFLiteConverter.from_keras_model(model_player2)
+        model_lite_p2 = converter_p2.convert()
 
         # Play topp_games_per_M number duel rounds
         for game_number in range(self.topp_games_per_M):
@@ -83,9 +88,9 @@ class Strategies:
             while True:
                 # Choose which anet to use based on which player's turn it is
                 if current_node.get_state().get_current_turn() == player1:
-                    anet = model_player1
+                    anet = model_lite_p1
                 else:
-                    anet = model_player2
+                    anet = model_lite_p2
 
                 # Update the current_node with the child_node that the anet proposes
                 current_node = tree.anet_one_turn(
@@ -119,9 +124,12 @@ class Strategies:
         # Initialize random parameters (weights and biases) of ANET
         anet = ANET()
         model = anet.initialize_model((self.board_size, self.board_size, 2), self.board_size ** 2, self.optimizer, self.loss, self.num_of_hidden_layers, self.num_of_neurons_per_layer)
+        converter = tf.lite.TFLiteConverter.from_keras_model(model)
+        model_lite = converter.convert()
+
+        model.save_weights(self.generate_filename(0))
 
         # Save untrained/randomly weighted model before training begins
-        model.save_weights(self.generate_filename(0))
 
         # Play num_episodes number of games and train network after game
         for episode_number in range(1, self.num_episodes + 1):
@@ -139,7 +147,7 @@ class Strategies:
             tree.get_top_node().set_c(self.c)
 
             # While not in a final state, run MCTS to generate children and corresponding data
-            tree.mcts_tree_default_until_end(self.rollouts_per_simulation, RBUF, self.visualize, self.min_pause_length, self.node_expansion, model)
+            tree.mcts_tree_default_until_end(self.rollouts_per_simulation, RBUF, self.visualize, self.min_pause_length, self.node_expansion, model_lite)
 
             # Save current model if episode_number is dividable with save_interval
             if episode_number % self.save_interval == 0:

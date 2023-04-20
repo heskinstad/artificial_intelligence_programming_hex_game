@@ -43,7 +43,7 @@ class ANET:
 
     def train_model(self, anet, num_epochs, batch_size, X_train, y_train, learning_rate):
 
-        # Set learnign rate
+        # Set learning rate
         keras.backend.set_value(anet.optimizer.learning_rate, learning_rate)
 
         # Train network

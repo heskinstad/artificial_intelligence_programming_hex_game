@@ -3,6 +3,7 @@ import math
 import random
 
 import numpy as np
+import tensorflow as tf
 
 from Board import Board
 from State import State
@@ -184,6 +185,7 @@ class Node:
                 self.remove_leaf_status()
 
 
+    # TODO: FIX DEFAULT POLICY, SOMETHING'S WRONG!
     # A run of the default policy is one rollout
     def mcts_default_policy(self, anet):
         score = self.node_check_win()
@@ -389,7 +391,7 @@ class Node:
         board_p1_p2 = board_p1_p2.reshape(1, self.get_state().get_board().get_board_size(),
                             self.get_state().get_board().get_board_size(), 2)
 
-        action_probs = anet(board_p1_p2)[0]
+        action_probs = self.tf_test(anet, board_p1_p2)
 
         # Set value of occupied moves to 0 (zero probability to pick these)
         action_probs = action_probs * self.get_valid_moves().flatten()
@@ -411,3 +413,31 @@ class Node:
                     board_p1_p2[y, x] = [board_p2[y, x], board_p1[y, x]]
 
         return board_p1_p2
+
+
+    def tf_test(self, anet, input):
+
+        # Load TFLite model and allocate tensors.
+        interpreter = tf.lite.Interpreter(model_content=anet)
+        interpreter.allocate_tensors()
+
+        # get input and output tensors
+        input_details = interpreter.get_input_details()
+        output_details = interpreter.get_output_details()
+
+        # Preprocess the image to required size and cast
+        input_shape = input_details[0]['shape']
+        input_tensor = input
+        input_tensor = np.array(input, dtype=np.float32)
+
+        # set the tensor to point to the input data to be inferred
+        input_index = interpreter.get_input_details()[0]["index"]
+        interpreter.set_tensor(input_index, input_tensor)
+
+        # Run the inference
+        interpreter.invoke()
+        output_index = interpreter.get_output_details()[0]["index"]
+        output_tensor = interpreter.get_tensor(output_index)
+        output_array = np.squeeze(output_tensor)
+
+        return output_array
