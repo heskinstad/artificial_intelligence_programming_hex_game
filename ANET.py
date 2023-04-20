@@ -1,7 +1,7 @@
 from tensorflow import keras
 
 class ANET:
-    def initialize_model(self, input_shape, num_actions, optimizer, loss):
+    def initialize_model(self, input_shape, num_actions, optimizer, loss, num_of_hidden_layers, num_of_neurons_per_layer):
         anet = keras.models.Sequential()
 
         anet.add(
@@ -10,35 +10,16 @@ class ANET:
             )
         )
 
-        anet.add(
-            keras.layers.Conv2D(
-                64,
-                (3, 3),
-                input_shape=input_shape,
-                activation='relu',
-                padding='same',
+        for i in range(num_of_hidden_layers):
+            anet.add(
+                keras.layers.Conv2D(
+                    num_of_neurons_per_layer,
+                    (3, 3),
+                    input_shape=input_shape,
+                    activation='relu',
+                    padding='same',
+                )
             )
-        )
-
-        anet.add(
-            keras.layers.Conv2D(
-                64,
-                (3, 3),
-                input_shape=input_shape,
-                activation='relu',
-                padding='same',
-            )
-        )
-
-        anet.add(
-            keras.layers.Conv2D(
-                64,
-                (3, 3),
-                activation='relu',
-                padding='same',
-                kernel_regularizer=keras.regularizers.l2()
-            )
-        )
 
         anet.add(
             keras.layers.Flatten()

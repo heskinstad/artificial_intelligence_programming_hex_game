@@ -25,6 +25,8 @@ class Strategies:
         self.loss = anet_parameters[4]
         self.num_episodes = anet_parameters[5]
         self.learning_rate = anet_parameters[6]
+        self.num_of_hidden_layers = anet_parameters[7]
+        self.num_of_neurons_per_layer = anet_parameters[8]
 
         self.player1_id = topp_parameters[0]
         self.player2_id = topp_parameters[1]
@@ -52,11 +54,11 @@ class Strategies:
 
         # Set up anets and load weights
         anet_player1 = ANET()
-        model_player1 = anet_player1.initialize_model((self.board_size, self.board_size, 2), self.board_size**2, self.optimizer, self.loss)
+        model_player1 = anet_player1.initialize_model((self.board_size, self.board_size, 2), self.board_size**2, self.optimizer, self.loss, self.num_of_hidden_layers, self.num_of_neurons_per_layer)
         model_player1.load_weights(self.generate_filename(episode_number_p1))
 
         anet_player2 = ANET()
-        model_player2 = anet_player2.initialize_model((self.board_size, self.board_size, 2), self.board_size**2, self.optimizer, self.loss)
+        model_player2 = anet_player2.initialize_model((self.board_size, self.board_size, 2), self.board_size**2, self.optimizer, self.loss, self.num_of_hidden_layers, self.num_of_neurons_per_layer)
         model_player2.load_weights(self.generate_filename(episode_number_p2))
 
         # Play topp_games_per_M number duel rounds
@@ -70,6 +72,9 @@ class Strategies:
 
             # The first node is the node at the very top of the "future" tree
             current_node = tree.get_top_node()
+
+            if self.visualize[1]:
+                current_node.get_state().get_board().initialize_board_plot()
 
             # While the current game is not in an endstate (no winner)
             while True:
@@ -111,7 +116,7 @@ class Strategies:
 
         # Initialize random parameters (weights and biases) of ANET
         anet = ANET()
-        model = anet.initialize_model((self.board_size, self.board_size, 2), self.board_size ** 2, self.optimizer, self.loss)
+        model = anet.initialize_model((self.board_size, self.board_size, 2), self.board_size ** 2, self.optimizer, self.loss, self.num_of_hidden_layers, self.num_of_neurons_per_layer)
 
         # Save untrained/randomly weighted model before training begins
         model.save_weights(self.generate_filename(0))
@@ -222,6 +227,8 @@ class Strategies:
     # Generate a filename for the saved anet_model
     def generate_filename(self, episode_number):
         data_filename = str(self.board_size) + "x" + str(self.board_size) + "board_" + str(
-            self.rollouts_per_simulation) + "rollouts_" + str(self.c) + "c_" + str(episode_number) + "episodes.h5"
+            self.rollouts_per_simulation) + "rollouts_" + str(self.c) + "c_" + str(
+            self.num_of_hidden_layers) + "layers_" + str(self.num_of_neurons_per_layer) + "neurons_" + str(
+            episode_number) + "episodes.h5"
 
         return self.anet_models_folder + "/" + data_filename

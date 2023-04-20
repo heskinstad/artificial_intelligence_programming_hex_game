@@ -35,6 +35,8 @@ class Tree:
             for i in range(0, current_node.get_state().get_board().get_board_size()**2):
                 current_root_arcs.append([i, 0.0])
 
+            # If a winning move is a direct child it won't have a lot of visits because it is an endnode
+            # If any of the children is an endstate, give this a score of 1 and all others a score of 0
             for child in current_node.get_children():
                 if child.is_endstate():
                     child.set_score([1, 1])
@@ -45,9 +47,7 @@ class Tree:
 
             # Add each child's visit count to their fixed position in the board_grid
             for child in current_node.get_children():
-                if child.is_endstate():
-                    current_root_arcs[child.get_node_num()][1] = 1.0  # If a winning move is a direct child it won't have a lot of visits because it is an endnode. Give it a high score to prioritize this above others
-                elif current_node.get_score()[0] == 0:
+                if current_node.get_score()[0] == 0:
                     print("Empty child selected. Set to 0.")
                     current_root_arcs[child.get_node_num()][1] = 0.0
                 else:

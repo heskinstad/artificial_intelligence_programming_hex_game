@@ -196,10 +196,13 @@ class Node:
             child_node = random.choice(self.get_children())
 
         while child_node == None:
+
+            # Make sure there are no nan's in the prediction, the network sometimes outputs no legal
             if np.isnan(action_probs[5]) or np.isnan(action_probs[2]):
                 return
             action_probs = action_probs / np.sum(action_probs)
-            #action_idx = np.random.choice(len(action_probs), p=action_probs)
+
+            # Choose move with highest probability
             action_idx = np.argmax(action_probs)
 
             # Convert position to 2D coordinates
@@ -271,28 +274,23 @@ class Node:
 
 
     def node_check_win(self, return_player=False):
-        # If player won this simulation
-        if self.get_state().get_board().check_if_player_won(
-                self.get_state().get_current_turn(),
-                self.get_state().get_starting_player(),
-                self.get_state().get_second_player()) == self.get_state().get_starting_player()\
-             or self.get_state().get_board().check_if_player_won(self.get_state().get_next_turn(),
-                self.get_state().get_starting_player(),
-                self.get_state().get_second_player()) == self.get_state().get_starting_player():
 
+        current_player = self.get_state().get_current_turn()
+        next_turn_player = self.get_state().get_next_turn()
+        starting_player = self.get_state().get_starting_player()
+        second_player = self.get_state().get_second_player()
+
+        # If player won this simulation
+        if self.get_state().get_board().check_if_player_won(current_player, starting_player, second_player) == starting_player\
+             or self.get_state().get_board().check_if_player_won(next_turn_player, starting_player, second_player) == starting_player:
             self.make_endstate()
             if return_player:
                 return self.get_state().get_starting_player()
             return [1, 1]
 
         # If player lost this simulation
-        elif self.get_state().get_board().check_if_player_won(self.get_state().get_current_turn(),
-                self.get_state().get_starting_player(),
-                self.get_state().get_second_player()) == self.get_state().get_second_player()\
-             or  self.get_state().get_board().check_if_player_won(self.get_state().get_next_turn(),
-                self.get_state().get_starting_player(),
-                self.get_state().get_second_player()) == self.get_state().get_second_player():
-
+        elif self.get_state().get_board().check_if_player_won(current_player, starting_player, second_player) == second_player\
+             or self.get_state().get_board().check_if_player_won(next_turn_player, starting_player, second_player) == second_player:
             self.make_endstate()
             if return_player:
                 return self.get_state().get_second_player()
