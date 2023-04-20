@@ -1,4 +1,5 @@
 import math
+import time
 
 import numpy as np
 from matplotlib import pyplot as plt
@@ -16,13 +17,16 @@ class Tree:
             child.get_state().get_board().print_board()
 
     # Perform Monte Carlo tree search until one of the players win and add data to the RBUF
-    def mcts_tree_default_until_end(self, rollouts_per_episode, RBUF, visualize, pause_length=0.001, node_expansion=1, anet=None):
+    def mcts_tree_default_until_end(self, rollouts_per_episode, RBUF, visualize, min_pause_length, node_expansion=1, anet=None):
         current_node = self.get_top_node()
 
         if visualize[1]:
             current_node.get_state().get_board().initialize_board_plot()
 
         while not current_node.is_endstate():
+
+            time_start = time.time()
+
             current_node.set_as_top_node()
             current_node.set_leaf_status()
 
@@ -66,11 +70,16 @@ class Tree:
             current_node.set_parent(None)
 
             if visualize[1]:
-                current_node.get_state().get_board().create_board_plot(self.get_top_node().get_state().get_board().get_fig(), self.get_top_node().get_state().get_board().get_ax())
-                plt.pause(pause_length)
+                current_node.get_state().get_board().create_board_plot(
+                    self.get_top_node().get_state().get_board().get_fig(),
+                    self.get_top_node().get_state().get_board().get_ax())
+                plt.pause(0.5)
 
             if visualize[0]:
                 current_node.get_state().get_board().print_board()
+
+            if (time.time() < time_start + min_pause_length):
+                time.sleep(time.time() - time_start + min_pause_length)
 
         if visualize[0] or visualize[1]:
             print(str(current_node.get_state().get_next_turn().get_color()) + " won!")
@@ -80,7 +89,9 @@ class Tree:
 
 
     # Make a single move based on the anet's predictions
-    def anet_one_turn(self, current_node, anet, visualize, pause_length):
+    def anet_one_turn(self, current_node, anet, visualize, min_pause_length):
+
+        time_start = time.time()
 
         next_move = current_node.anet_policy(anet)
 
@@ -94,10 +105,13 @@ class Tree:
             current_node.get_state().get_board().create_board_plot(
                 self.get_top_node().get_state().get_board().get_fig(),
                 self.get_top_node().get_state().get_board().get_ax())
-            plt.pause(pause_length)
+            plt.pause(0.5)
 
         if visualize[0]:
             current_node.get_state().get_board().print_board()
             print()
+
+        if (time.time() < time_start + min_pause_length):
+            time.sleep(time.time() - time_start + min_pause_length)
 
         return current_node
