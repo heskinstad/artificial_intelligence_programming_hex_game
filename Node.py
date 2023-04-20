@@ -23,6 +23,8 @@ class Node:
         self.top_node = False
         self.max_children = max_children
         self.node_num = None
+        self.starting_player = None
+        self.second_player = None
 
     def get_state(self):
         return self.state
@@ -83,6 +85,18 @@ class Node:
 
     def get_node_num(self):
         return self.node_num
+
+    def set_starting_player(self, starting_player):
+        self.starting_player = starting_player
+
+    def set_second_player(self, second_player):
+        self.second_player = second_player
+
+    def get_starting_player(self):
+        return self.starting_player
+
+    def get_second_player(self):
+        return self.second_player
 
     def create_child_nodes(self, depth):
         if depth > 0:
@@ -161,6 +175,8 @@ class Node:
                      self.get_max_children() - 1, self)
         child.c = self.get_c()
         child.set_node_num(y * board.get_board_size() + x)
+        child.set_starting_player = self.get_starting_player()
+        child.set_second_player = self.get_second_player()
 
         self.add_child(child)
 

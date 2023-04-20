@@ -126,7 +126,10 @@ class Strategies:
             tree = Tree(Node(State(Board(board_size), player0, player1), board_size**2))
             tree.get_top_node().set_c(c)
             # While not in a final state
-            tree.mcts_tree_default_until_end3(player0, player1, rollouts_per_episode, RBUF, show_plot, min_pause_length, node_expansion)
+            if g_a % 2 == 0:
+                tree.mcts_tree_default_until_end4(player0, player1, rollouts_per_episode, RBUF, show_plot, min_pause_length, node_expansion)
+            else:
+                tree.mcts_tree_default_until_end4(player1, player0, rollouts_per_episode, RBUF, show_plot, min_pause_length, node_expansion)
 
         with open(filename, 'wb') as f:
             pickle.dump(RBUF, f)

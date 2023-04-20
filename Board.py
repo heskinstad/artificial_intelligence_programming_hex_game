@@ -44,6 +44,20 @@ class Board:
 
         return np.array(board, dtype=np.int)
 
+    def get_board2_np_p1(self):
+        board = np.array(self.get_board_p1())
+
+        p1_board = np.where(board == 1, 1, 0)
+
+        return np.array(p1_board, dtype=np.int)
+
+    def get_board2_np_p2(self):
+        board = np.array(self.get_board_p1())
+
+        p2_board = np.where(board == 2, 1, 0)
+
+        return np.array(p2_board, dtype=np.int)
+
 
     def create_board(self):
         for y in range(self.board_size):
