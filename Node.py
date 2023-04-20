@@ -204,43 +204,16 @@ class Node:
 
         action_probs = self.get_anet_position_prediction(anet)
 
-        # Set value of occupied moves to 0 (zero probability to pick these)
-        action_probs = np.array(action_probs * self.get_free_moves(self.get_state().get_current_turn()).flatten())
-
-        # Make sure there are no nan's in the prediction, the network sometimes outputs no legal
-        if np.isnan(action_probs[5]) or np.isnan(action_probs[2]):
-            return
-        #action_probs = action_probs / np.sum(action_probs)
-
-        # Choose move with highest probability
-        action_idx = np.argmax(action_probs)
-
-        # Convert position to 2D coordinates
-        position = [None, None]
-        position[0] = math.floor(action_idx / self.get_state().get_board().get_board_size())
-        position[1] = action_idx % self.get_state().get_board().get_board_size()
-
         child_node = None
+        if self.get_max_children() == len(self.get_children()):
+            child_node = random.choice(self.get_children())
 
-        if self.get_state().get_board().get_hex_by_x_y(position[1], position[0]) == self.get_state().get_current_turn().get_id():
-            if len(self.get_children()) > 0:
-                for child in self.get_children():
-                    if child.get_node_num() == action_idx:
-                        print("AAAAAAAAAAAAAAAAA")
-                        child_node = child
-                    break
-
-
-        if child_node == None:
-            action_probs = self.get_anet_position_prediction(anet)
-
-            # Set value of occupied moves to 0 (zero probability to pick these)
-            action_probs = np.array(action_probs * self.get_valid_moves().flatten())
+        while child_node == None:
 
             # Make sure there are no nan's in the prediction, the network sometimes outputs no legal
             if np.isnan(action_probs[5]) or np.isnan(action_probs[2]):
                 return
-            # action_probs = action_probs / np.sum(action_probs)
+            action_probs = action_probs / np.sum(action_probs)
 
             # Choose move with highest probability
             action_idx = np.argmax(action_probs)
@@ -250,24 +223,9 @@ class Node:
             position[0] = math.floor(action_idx / self.get_state().get_board().get_board_size())
             position[1] = action_idx % self.get_state().get_board().get_board_size()
 
-            while child_node == None:
+            child_node = self.create_random_child_node(position)
 
-                # Make sure there are no nan's in the prediction, the network sometimes outputs no legal
-                if np.isnan(action_probs[5]) or np.isnan(action_probs[2]):
-                    return
-                action_probs = action_probs / np.sum(action_probs)
-
-                # Choose move with highest probability
-                action_idx = np.argmax(action_probs)
-
-                # Convert position to 2D coordinates
-                position = [None, None]
-                position[0] = math.floor(action_idx / self.get_state().get_board().get_board_size())
-                position[1] = action_idx % self.get_state().get_board().get_board_size()
-
-                child_node = self.create_random_child_node(position)
-
-                action_probs[action_idx] = 0.0
+            action_probs[action_idx] = 0.0
 
         child_node.mcts_default_policy(anet)
 
@@ -316,18 +274,6 @@ class Node:
 
         return valid_moves
 
-
-    # Return an array of valid moves. Dimensions same as game board where 0 = occupied and 1 = free
-    def get_free_moves(self, player):
-        free_moves = copy.deepcopy(self.get_state().get_board().get_board_np())
-        for y in range(len(free_moves)):
-            for x in range(len(free_moves[y])):
-                if free_moves[y][x] == 0 or free_moves[y][x] == player.get_id():
-                    free_moves[y][x] = 1
-                else:
-                    free_moves[y][x] = 0
-
-        return free_moves
 
 
     #####################################
@@ -453,11 +399,14 @@ class Node:
         board_p1_p2 = self.merge_boards_to_anet()
 
         board_p1_p2 = board_p1_p2.reshape(1, self.get_state().get_board().get_board_size(),
-                            self.get_state().get_board().get_board_size(), 2)
+                                          self.get_state().get_board().get_board_size(), 2)
 
         action_probs = anet(board_p1_p2)[0]
 
-        return action_probs
+        # Set value of occupied moves to 0 (zero probability to pick these)
+        action_probs = action_probs * self.get_valid_moves().flatten()
+
+        return np.array(action_probs)
 
 
     # 'Merge' the boards to a single array to make them compatible to be read by the anet
