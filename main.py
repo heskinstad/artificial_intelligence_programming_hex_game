@@ -35,10 +35,10 @@ topp_parameters = [player1_id, player2_id, M, topp_games_per_M, anet_models_fold
 
 
 duel1 = 0
-duel2 = 1000
+duel2 = 40
 duel_extra_parameters = [duel1, duel2]
 
-anets = [0, 20, 40]  # Designate the anet models to compete in the TOPP_CUSTOM with the number of episodes they've been trained on
+anets = [0, 50, 100, 150, 200, 250]  # Designate the anet models to compete in the TOPP_CUSTOM with the number of episodes they've been trained on
 
 # Strategies: TOPP (TOPP tournament), TOPP_CUSTOM (TOPP between pre-trained anet models) or DUEL (have two models play against each other)
 strategy = "TOPP"
