@@ -404,13 +404,13 @@ class Node:
         board_p1 = self.get_state().get_board().get_board_np_p1()
         board_p2 = self.get_state().get_board().get_board_np_p2()
         board_size = self.get_state().get_board().get_board_size()
-        board_p1_p2 = np.zeros(shape=(board_size, board_size, 2))
+        board_p1_p2 = np.zeros(shape=(board_size, board_size, 2), dtype=bool)
         for y in range(board_size):
             for x in range(board_size):
                 if self.get_state().get_current_turn() == self.get_state().get_starting_player():
-                    board_p1_p2[y, x] = [board_p1[y, x], board_p2[y, x]]
+                    board_p1_p2[y, x] = [board_p1[y, x], False]
                 elif self.get_state().get_current_turn() == self.get_state().get_second_player():
-                    board_p1_p2[y, x] = [board_p2[y, x], board_p1[y, x]]
+                    board_p1_p2[y, x] = [board_p2[y, x], True]
 
         return board_p1_p2
 
