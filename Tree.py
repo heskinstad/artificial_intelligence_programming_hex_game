@@ -33,6 +33,7 @@ class Tree:
             for i in range(rollouts_per_episode):
                 #current_node.mcts_tree_policy(player, opposing_player, node_expansion)
                 current_node.mcts_tree_policy(node_expansion, anet)
+                #print(current_node.get_score())
 
             # Since every child of a node rarely have been generated, create an array with board_size**2 elements of type [node_number, probability]
             current_root_arcs = []

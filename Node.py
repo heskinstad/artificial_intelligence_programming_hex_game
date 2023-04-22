@@ -177,12 +177,10 @@ class Node:
             self.remove_leaf_status()
         else:
             best_child = self.calc_best_child()
-            if len(best_child.get_children()) > 0:
-                best_child.mcts_tree_policy2(node_expansion, anet)
-            elif best_child.get_max_children() > 0:
-                self.set_leaf_status()
-                self.mcts_default_policy(anet)
-                self.remove_leaf_status()
+            if best_child.get_max_children() > 0:
+                best_child.set_leaf_status()
+                best_child.mcts_default_policy(anet)
+                best_child.remove_leaf_status()
 
 
     # TODO: FIX DEFAULT POLICY, SOMETHING'S WRONG!
