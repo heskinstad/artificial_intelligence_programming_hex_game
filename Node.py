@@ -197,9 +197,11 @@ class Node:
 
         action_probs = self.get_anet_position_prediction(anet)
 
+
+
         child_node = None
-        if self.get_max_children() == len(self.get_children()):
-            child_node = random.choice(self.get_children())
+        #if self.get_max_children() == len(self.get_children()):
+        #    child_node = random.choice(self.get_children())
 
         while child_node == None:
 
@@ -244,13 +246,11 @@ class Node:
         action_probs = np.array(action_probs)
         action_probs = action_probs / np.sum(action_probs)
 
-        try:
+        # If the network produces no possible moves, choose a random, valid move
+        if np.isnan(action_probs[5]) or np.isnan(action_probs[2]):
+            action_idx = np.random.choice(len(action_probs), p=self.get_valid_moves().flatten() / np.sum(self.get_valid_moves().flatten()))
+        else:
             action_idx = np.random.choice(len(action_probs), p=action_probs)
-            #action_idx = np.argmax(action_probs)
-        except:  # If action_probs contains nan (meaning the network only predicted impossible moves)
-            print("Network predicted impossible values. Choosing random node.")
-            valid_moves = valid_moves / np.sum(valid_moves)
-            action_idx = np.random.choice(len(valid_moves), p=valid_moves)
 
         return action_idx
 
@@ -395,6 +395,8 @@ class Node:
 
         # Set value of occupied moves to 0 (zero probability to pick these)
         action_probs = action_probs * self.get_valid_moves().flatten()
+
+        action_probs = action_probs / np.sum(action_probs)
 
         return np.array(action_probs)
 

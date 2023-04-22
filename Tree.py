@@ -62,6 +62,7 @@ class Tree:
 
             RBUF.append([current_node.merge_boards_to_anet(), current_root_arcs])
 
+
             # Move to best child node
             #current_node = current_node.calc_best_child(player, opposing_player, True)
             current_node = current_node.get_child_with_highest_visit_count()
