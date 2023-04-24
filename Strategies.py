@@ -1,3 +1,5 @@
+import random
+
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -159,7 +161,9 @@ class Strategies:
             X_train = []
             y_train = []
 
-            for boards, probabilities in RBUF:
+            minibatch = random.sample(RBUF, self.board_size*2-1)
+
+            for boards, probabilities in minibatch:
                 # Append the merged Player1 and Player2 boards to X_train
                 X_train.append(boards)
 

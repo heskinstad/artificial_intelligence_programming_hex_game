@@ -10,16 +10,36 @@ class ANET:
             )
         )
 
-        for i in range(num_of_hidden_layers):
-            anet.add(
-                keras.layers.Conv2D(
-                    num_of_neurons_per_layer,
-                    (3, 3),
-                    input_shape=input_shape,
-                    activation='relu',
-                    padding='same',
-                )
+        anet.add(
+            keras.layers.Conv2D(
+                num_of_neurons_per_layer,
+                (3, 3),
+                input_shape=input_shape,
+                activation='relu',
+                padding='same',
             )
+        )
+
+        anet.add(
+            keras.layers.Conv2D(
+                num_of_neurons_per_layer,
+                (3, 3),
+                input_shape=input_shape,
+                activation='relu',
+                padding='same',
+            )
+        )
+
+        anet.add(
+            keras.layers.Conv2D(
+                num_of_neurons_per_layer,
+                (3, 3),
+                input_shape=input_shape,
+                activation='relu',
+                padding='same',
+                kernel_regularizer='l1'
+            )
+        )
 
         anet.add(
             keras.layers.Flatten()
