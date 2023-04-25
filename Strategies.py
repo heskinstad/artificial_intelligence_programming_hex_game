@@ -1,4 +1,5 @@
 import math
+import pickle
 import random
 
 import matplotlib.pyplot as plt
@@ -284,3 +285,34 @@ class Strategies:
         tree = Tree(Node(State(board_this, player1, player2, player1, player2), 7 ** 2))
 
         return tree.anet_make_move(tree.get_top_node(), self.get_actor(self.path), self.visualize)
+
+
+    def gen_to_file(self):
+
+        player1 = Player(self.player1_id, "red")
+        player2 = Player(self.player2_id, "blue")
+
+        RBUF = []
+
+        # Play num_episodes number of games and train network after game
+        for episode_number in range(1, self.num_episodes + 1):
+
+            # Starting player switches every game. Initialize each tree with this in mind
+            if episode_number % 2 == 0:
+                tree = Tree(Node(State(Board(self.board_size), player1, player2, player1, player2), self.board_size**2))
+            else:
+                tree = Tree(Node(State(Board(self.board_size), player2, player1, player2, player1), self.board_size**2))
+
+            # Set the c value to the top node. This value will be copied to every generated node in the tree
+            tree.get_top_node().set_c(self.c)
+
+            # While not in a final state, run MCTS to generate children and corresponding data
+            tree.mcts_tree_default_until_end(self.rollouts_per_simulation, RBUF, self.visualize, self.min_pause_length, self.node_expansion)
+
+            # Backup
+            if episode_number % 100 == 0:
+                with open("bkp" + str(episode_number) + "episodes", 'wb') as f:
+                    pickle.dump(RBUF, f)
+
+        with open("finished_" + str(self.num_episodes) + "episodes", 'wb') as f:
+            pickle.dump(RBUF, f)

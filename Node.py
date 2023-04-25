@@ -272,10 +272,11 @@ class Node:
         if np.isnan(action_probs[5]) or np.isnan(action_probs[2]):
             action_idx = np.random.choice(len(action_probs), p=self.get_valid_moves().flatten() / np.sum(self.get_valid_moves().flatten()))
         else:
-            for i in range(len(action_probs)):
-                action_probs[i] = action_probs[i]**2
-            action_probs = action_probs / np.sum(action_probs)
-            action_idx = np.random.choice(len(action_probs), p=action_probs)
+            #for i in range(len(action_probs)):
+            #    action_probs[i] = action_probs[i]**2
+            #action_probs = action_probs / np.sum(action_probs)
+            #action_idx = np.random.choice(len(action_probs), p=action_probs)
+            action_idx = np.argmax(action_probs)
 
         return action_idx
 
