@@ -5,7 +5,7 @@ board_size = 7  # Size of board = board_size x board_size
 visualize = [True, False]  # First is printing to the console, second is to its own cool window
 rollouts_per_simulation = 200  # Rollouts per simulation in the MCTS during training
 node_expansion = 1  # Determines how much the tree should expand for each "floor". Expands to max_number_of_nodes_left / node_expansion
-min_pause_length = 0.0  # Pause will be longer if time to run each episode > min_pause_length - 0.0006 for 7x7, 0.001 for 4x4
+min_pause_length = 1.0  # Pause will be longer if time to run each episode > min_pause_length - 0.0006 for 7x7, 0.001 for 4x4
 c = 1.42  # The higher this value is, the more likely the players are to try less optimal nodes (more exploration)
 
 game_parameters = [board_size, visualize, rollouts_per_simulation, node_expansion, min_pause_length, c]
@@ -43,4 +43,17 @@ anets = [0, 50, 100, 150, 200, 250]  # Designate the anet models to compete in t
 # Strategies: TOPP (TOPP tournament), TOPP_CUSTOM (TOPP between pre-trained anet models) or DUEL (have two models play against each other)
 strategy = "TOPP"
 
-Strategies(strategy, game_parameters, anet_parameters, topp_parameters, duel_extra_parameters, anets)
+tete = Strategies(strategy, game_parameters, anet_parameters, topp_parameters, duel_extra_parameters, anets, "tete.h5")
+
+
+b = []
+b.append(1)
+for i in range(7*7):
+    b.append(0)
+
+b[4] = 1
+b[49] = 2
+
+col, row = tete.get_action(b)
+
+print([col, row])

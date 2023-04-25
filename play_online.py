@@ -1,7 +1,7 @@
 from Strategies import Strategies
 
 # Game parameters
-board_size = 5  # Size of board = board_size x board_size
+board_size = 7  # Size of board = board_size x board_size
 visualize = [True, False]  # First is printing to the console, second is to its own cool window
 rollouts_per_simulation = 200  # Rollouts per simulation in the MCTS during training
 node_expansion = 1  # Determines how much the tree should expand for each "floor". Expands to max_number_of_nodes_left / node_expansion
@@ -57,10 +57,10 @@ actor = Strategies(strategy, game_parameters, anet_parameters, topp_parameters, 
 from client.ActorClient import ActorClient
 class MyClient(ActorClient):
     def handle_get_action(self, state):
-        row, col = actor.get_action(state) # Your logic
-        return row, col
+        [col, row] = actor.get_action(state) # Your logic
+        return int(col), int(row)
 
 # Initialize and run your overridden client when the script is executed
 if __name__ == '__main__':
-    client = MyClient()
+    client = MyClient(auth="b7ba0fe7fa984c8f824970753ac58131", qualify=False)
     client.run()

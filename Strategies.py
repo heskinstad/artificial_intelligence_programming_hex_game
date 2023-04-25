@@ -1,3 +1,4 @@
+import math
 import random
 
 import matplotlib.pyplot as plt
@@ -13,7 +14,7 @@ from State import State
 from Tree import Tree
 
 class Strategies:
-    def __init__(self, strategy, game_parameters, anet_parameters, topp_parameters, duel_extra_parameters, anets, path="None"):
+    def __init__(self, strategy, game_parameters, anet_parameters, topp_parameters, duel_extra_parameters, anets, path):
 
         self.board_size = game_parameters[0]
         self.visualize = game_parameters[1]
@@ -266,16 +267,14 @@ class Strategies:
 
     def get_action(self, board):
 
+        player_id = board.pop(0)
+
         board_this = Board(7)
 
-        placed_num = 0
-        for i in range(7):
-            for j in range(7):
-                board_this.board_positions[i][j] = board[i][j]
-                if board[i][j] != 0:
-                    placed_num += 1
+        for i in range(7*7):
+                board_this.board_positions[math.floor(i/7)][i%7] = board[i]
 
-        if placed_num % 2 == 0:
+        if player_id == 1:
             player1 = Player(self.player1_id, "red")
             player2 = Player(self.player2_id, "blue")
         else:
@@ -284,4 +283,4 @@ class Strategies:
 
         tree = Tree(Node(State(board_this, player1, player2, player1, player2), 7 ** 2))
 
-        return tree.anet_make_move(tree.get_top_node(), self.get_actor(self.path), False)
+        return tree.anet_make_move(tree.get_top_node(), self.get_actor(self.path), self.visualize)
