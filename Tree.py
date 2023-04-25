@@ -117,3 +117,16 @@ class Tree:
             time.sleep(time.time() - time_start + min_pause_length)
 
         return current_node
+
+
+    def anet_make_move(self, current_node, anet, visualize):
+        next_move = current_node.anet_policy(anet)
+
+        next_move = [math.floor(next_move / current_node.get_state().get_board().get_board_size()),
+                     next_move % current_node.get_state().get_board().get_board_size()]
+
+        if visualize[0]:
+            current_node.get_state().get_board().print_board()
+            print()
+
+        return next_move

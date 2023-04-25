@@ -13,7 +13,7 @@ from State import State
 from Tree import Tree
 
 class Strategies:
-    def __init__(self, strategy, game_parameters, anet_parameters, topp_parameters, duel_extra_parameters, anets):
+    def __init__(self, strategy, game_parameters, anet_parameters, topp_parameters, duel_extra_parameters, anets, path="None"):
 
         self.board_size = game_parameters[0]
         self.visualize = game_parameters[1]
@@ -38,6 +38,8 @@ class Strategies:
         self.topp_games_per_M = topp_parameters[3]
         self.anet_models_folder = topp_parameters[4]
         self.weights_episodes_multiplier = topp_parameters[5]
+
+        self.path = path
 
         if strategy == "TOPP":
             self.topp_tournament()
@@ -246,3 +248,40 @@ class Strategies:
             episode_number) + "episodes.h5"
 
         return self.anet_models_folder + "/" + data_filename
+
+
+    def get_actor(self, path):
+
+        anet_player = ANET()
+        model_player = anet_player.initialize_model((self.board_size, self.board_size, 2), self.board_size ** 2,
+                                                      self.optimizer, self.loss, self.num_of_hidden_layers,
+                                                      self.num_of_neurons_per_layer)
+        model_player.load_weights(path)
+
+        converter = tf.lite.TFLiteConverter.from_keras_model(model_player)
+        model_lite = converter.convert()
+
+        return model_lite
+
+
+    def get_action(self, board):
+
+        board_this = Board(7)
+
+        placed_num = 0
+        for i in range(7):
+            for j in range(7):
+                board_this.board_positions[i][j] = board[i][j]
+                if board[i][j] != 0:
+                    placed_num += 1
+
+        if placed_num % 2 == 0:
+            player1 = Player(self.player1_id, "red")
+            player2 = Player(self.player2_id, "blue")
+        else:
+            player2 = Player(self.player1_id, "red")
+            player1 = Player(self.player2_id, "blue")
+
+        tree = Tree(Node(State(board_this, player1, player2, player1, player2), 7 ** 2))
+
+        return tree.anet_make_move(tree.get_top_node(), self.get_actor(self.path), False)

@@ -1,7 +1,7 @@
 from Strategies import Strategies
 
 # Game parameters
-board_size = 7  # Size of board = board_size x board_size
+board_size = 5  # Size of board = board_size x board_size
 visualize = [True, False]  # First is printing to the console, second is to its own cool window
 rollouts_per_simulation = 200  # Rollouts per simulation in the MCTS during training
 node_expansion = 1  # Determines how much the tree should expand for each "floor". Expands to max_number_of_nodes_left / node_expansion
@@ -41,6 +41,26 @@ duel_extra_parameters = [duel1, duel2]
 anets = [0, 50, 100, 150, 200, 250]  # Designate the anet models to compete in the TOPP_CUSTOM with the number of episodes they've been trained on
 
 # Strategies: TOPP (TOPP tournament), TOPP_CUSTOM (TOPP between pre-trained anet models) or DUEL (have two models play against each other)
-strategy = "TOPP"
+strategy = "None"
 
-Strategies(strategy, game_parameters, anet_parameters, topp_parameters, duel_extra_parameters, anets)
+#Strategies(strategy, game_parameters, anet_parameters, topp_parameters, duel_extra_parameters, anets)
+
+
+
+path = "tete.h5"
+
+
+# Import and initialize your own actor
+actor = Strategies(strategy, game_parameters, anet_parameters, topp_parameters, duel_extra_parameters, anets, path)
+
+# Import and override the `handle_get_action` hook in ActorClient
+from client.ActorClient import ActorClient
+class MyClient(ActorClient):
+    def handle_get_action(self, state):
+        row, col = actor.get_action(state) # Your logic
+        return row, col
+
+# Initialize and run your overridden client when the script is executed
+if __name__ == '__main__':
+    client = MyClient()
+    client.run()
