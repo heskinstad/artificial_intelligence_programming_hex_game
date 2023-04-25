@@ -134,7 +134,8 @@ class Node:
         board_deepcopy = Board(board.get_board_size(), False)
         board_deepcopy.board_positions = [x[:] for x in board.get_board_p1()]
 
-        board_deepcopy.place(self.get_state().get_current_turn(), x, y)
+        #board_deepcopy.place(self.get_state().get_current_turn(), x, y)
+        board_deepcopy.board_positions[y][x] = self.get_state().get_current_turn().get_id()
 
         child = Node(State(board_deepcopy, self.get_state().get_next_turn(), self.get_state().get_current_turn(), self.get_state().get_starting_player(), self.get_state().get_second_player()),
                      self.get_max_children() - 1, self)
@@ -161,7 +162,7 @@ class Node:
     '''
 
     # Tree policy. Traverses already existing nodes and can create new leaf nodes
-    def mcts_tree_policy(self, node_expansion, anet):
+    def mcts_tree_policy(self, node_expansion, anet=None):
         # If self is an endstate, then propagate the score and return because there are no possible child states
         score = self.node_check_win()
         if self.is_endstate():
@@ -173,16 +174,39 @@ class Node:
         # The current number of nodes on this level is less than half of the maximum number of nodes on this level
         elif self.is_leaf() or len(self.get_children()) < (self.get_max_children() - 1) / node_expansion:
             self.set_leaf_status()
-            self.mcts_default_policy(anet)
+            self.mcts_default_policy()
             self.remove_leaf_status()
         else:
             best_child = self.calc_best_child()
-            best_child.mcts_default_policy(anet)
+            best_child.mcts_default_policy()
 
 
     # A run of the default policy is one rollout
-    def mcts_default_policy(self, anet):
+    def mcts_default_policy(self):
         score = self.node_check_win()
+
+        # If anyone won in this node
+        if self.is_endstate():
+            self.propagate_score(score)
+            return
+
+        # Choose a random child node and move to this recursively
+        random_child_node = self.create_random_child_node()
+        if random_child_node == None:  # Is none if there is only a single child left and it has already been created
+            self.get_children()[0].mcts_default_policy()
+        else:
+            random_child_node.mcts_default_policy()
+
+        # If top node in the newly generated default policy tree
+        # Remove own children and set itself as a leaf
+        if self.get_parent() != None:
+            if self.get_parent().is_leaf():
+                self.remove_all_children()
+                self.set_leaf_status()
+        else:
+            return
+
+        '''score = self.node_check_win()
 
         # If anyone won in this node
         if self.is_endstate():
@@ -229,7 +253,7 @@ class Node:
                 self.remove_all_children()
                 self.set_leaf_status()
         else:
-            return
+            return'''
 
 
     # Sends the current state of the board to the anet and returns the position of the predicted best next move
@@ -410,10 +434,10 @@ class Node:
         board_p1_p2 = np.zeros(shape=(board_size, board_size, 2), dtype=int)
         for y in range(board_size):
             for x in range(board_size):
-                if self.get_state().get_current_turn() == self.get_state().get_starting_player():
-                    board_p1_p2[y, x] = [board_p1[y, x], 0]
-                elif self.get_state().get_current_turn() == self.get_state().get_second_player():
-                    board_p1_p2[y, x] = [board_p2[y, x], 1]
+                if self.get_state().get_current_turn().get_id() == 1:
+                    board_p1_p2[y, x] = [board_p1[y, x], 1]
+                elif self.get_state().get_current_turn().get_id() == 2:
+                    board_p1_p2[y, x] = [board_p2[y, x], 2]
 
         return board_p1_p2
 

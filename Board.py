@@ -126,10 +126,10 @@ class Board:
         # If so, add them to the unchecked_hexes array
         for i in range(self.board_size):
             if player.get_id() == 1:
-                if self.get_hex_by_x_y(0, i) == player.get_id(): # id 0 move left/right
+                if self.get_hex_by_x_y(0, i) == player.get_id(): # id 1 move left/right
                     unchecked_hexes.append([0, i])
             elif player.get_id() == 2:
-                if self.get_hex_by_x_y(i, 0) == player.get_id(): # id 1 move top/bottom
+                if self.get_hex_by_x_y(i, 0) == player.get_id(): # id 2 move top/bottom
                     unchecked_hexes.append([i, 0])
 
         while len(unchecked_hexes) > 0:
