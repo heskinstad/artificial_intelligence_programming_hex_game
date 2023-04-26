@@ -15,7 +15,7 @@ from State import State
 from Tree import Tree
 
 class Strategies:
-    def __init__(self, strategy, game_parameters, anet_parameters, topp_parameters, duel_extra_parameters, anets, path):
+    def __init__(self, strategy, game_parameters, anet_parameters, topp_parameters, duel_extra_parameters, anets, path, tete):
 
         self.board_size = game_parameters[0]
         self.visualize = game_parameters[1]
@@ -53,6 +53,10 @@ class Strategies:
             self.gen_to_file()
         elif strategy == "TRAIN":
             self.train_network_on_single_batch()
+        elif strategy == "GEN_THREAD":
+            self.gen_thread(tete)
+        elif strategy == "MERGE":
+            self.merge_data()
 
     # Set two players up against each other. Who's beginning switches after every game played
     def duel_2_players(self, episode_number_p1, episode_number_p2):
@@ -315,12 +319,12 @@ class Strategies:
 
             # Backup
             if episode_number % 100 == 0:
-                with open("bkp" + str(episode_number) + "episodes", 'wb') as f:
+                with open("bkp" + str(episode_number) + "episodes_new", 'wb') as f:
                     pickle.dump(RBUF, f)
 
             print("Episode " + str(episode_number) + " finished")
 
-        with open("finished_" + str(self.num_episodes) + "episodes", 'wb') as f:
+        with open("finished_" + str(self.num_episodes) + "episodes_new", 'wb') as f:
             pickle.dump(RBUF, f)
 
 
@@ -369,7 +373,7 @@ class Strategies:
         history = anet.train_model(model, self.num_epochs, self.batch_size, X_train, y_train, self.learning_rate)
 
         # Save ANET's current parameters for later use in tournament play
-        model.save_weights("tete_big1300.h5")
+        model.save_weights("tete_big1500_new.h5")
 
         plt.plot(history.history['accuracy'])
         plt.title('model accuracy')
@@ -384,3 +388,48 @@ class Strategies:
         plt.xlabel('epoch')
         plt.legend(['train', 'val'], loc='upper left')
         plt.show()
+
+
+    def gen_thread(self, tete):
+
+        player1 = Player(self.player1_id, "red")
+        player2 = Player(self.player2_id, "blue")
+
+        RBUF = []
+
+        # Play num_episodes number of games and train network after game
+        for episode_number in range(1, self.num_episodes + 1):
+
+            # Starting player switches every game. Initialize each tree with this in mind
+            if episode_number % 2 == 0:
+                tree = Tree(Node(State(Board(self.board_size), player1, player2, player1, player2), self.board_size**2))
+            else:
+                tree = Tree(Node(State(Board(self.board_size), player2, player1, player2, player1), self.board_size**2))
+
+            # Set the c value to the top node. This value will be copied to every generated node in the tree
+            tree.get_top_node().set_c(self.c)
+
+            # While not in a final state, run MCTS to generate children and corresponding data
+            tree.mcts_tree_default_until_end(self.rollouts_per_simulation, RBUF, self.visualize, self.min_pause_length, self.node_expansion)
+
+            # Backup
+            if episode_number % 100 == 0:
+                with open(str(tete) + "bkp" + str(episode_number) + "episodes_new", 'wb') as f:
+                    pickle.dump(RBUF, f)
+
+            print("Episode " + str(episode_number) + " finished")
+
+        with open(str(tete) + "finished_" + str(self.num_episodes) + "episodes_new", 'wb') as f:
+            pickle.dump(RBUF, f)
+
+
+    def merge_data(self):
+
+        RBUF = []
+
+        for i in range(1, 21):
+            with open(str(i) + "bkp100episodes_new", 'rb') as f:
+                RBUF.append(pickle.load(f))
+
+        with open("merged_" + str(self.num_episodes) + "episodes_new", 'wb') as f:
+            pickle.dump(RBUF, f)

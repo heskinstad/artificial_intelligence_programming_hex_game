@@ -1,10 +1,12 @@
+import multiprocessing
+
 from Strategies import Strategies
 import tensorflow as tf
 
 # Game parameters
 board_size = 7  # Size of board = board_size x board_size
 visualize = [False, False]  # First is printing to the console, second is to its own cool window
-rollouts_per_simulation = 1000  # Rollouts per simulation in the MCTS during training
+rollouts_per_simulation = 10  # Rollouts per simulation in the MCTS during training
 node_expansion = 1  # Determines how much the tree should expand for each "floor". Expands to max_number_of_nodes_left / node_expansion
 min_pause_length = 0.0  # Pause will be longer if time to run each episode > min_pause_length - 0.0006 for 7x7, 0.001 for 4x4
 c = 1.42  # The higher this value is, the more likely the players are to try less optimal nodes (more exploration)
@@ -17,7 +19,7 @@ num_epochs = 1000  # Number of epochs in training - an article stated 11 is a go
 batch_size = 100000  # Training batch size
 optimizer = "adam"
 loss = "categorical_crossentropy"
-num_episodes = 5000  # Number of episodes to generate data for
+num_episodes = 1500  # Number of episodes to generate data for
 learning_rate = 0.001  # Should be 0.001 for 4x4
 num_of_hidden_layers = 3
 num_of_neurons_per_layer = 100
@@ -42,19 +44,23 @@ duel_extra_parameters = [duel1, duel2]
 anets = [0, 50, 100, 150, 200, 250]  # Designate the anet models to compete in the TOPP_CUSTOM with the number of episodes they've been trained on
 
 # Strategies: TOPP (TOPP tournament), TOPP_CUSTOM (TOPP between pre-trained anet models) or DUEL (have two models play against each other)
-strategy = "TRAIN"
+strategy = "GEN_DATA"
 
-tete = Strategies(strategy, game_parameters, anet_parameters, topp_parameters, duel_extra_parameters, anets, "tete.h5")
+tete = Strategies(strategy, game_parameters, anet_parameters, topp_parameters, duel_extra_parameters, anets, "tete.h5", 20)
 
+'''
+def new_function(tete):
+    Strategies(strategy, game_parameters, anet_parameters, topp_parameters, duel_extra_parameters, anets, "tete.h5", tete)
 
-b = []
-b.append(1)
-for i in range(7*7):
-    b.append(0)
+def thread_function(n):
+    return new_function(multiprocessing.current_process().pid)
 
-b[4] = 1
-b[49] = 2
+def main(n):
+    with multiprocessing.Pool(processes=n) as pool:
+        results = pool.map(thread_function, range(n))
 
-col, row = tete.get_action(b)
+if __name__ == '__main__':
+    n = 20  # The number of processes to use
+    main(n)
 
-print([col, row])
+'''
