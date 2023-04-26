@@ -1,3 +1,4 @@
+from keras.losses import mean_squared_error
 from tensorflow import keras
 
 class ANET:
@@ -17,6 +18,7 @@ class ANET:
                 input_shape=input_shape,
                 activation='relu',
                 padding='same',
+                kernel_initializer="normal"
             )
         )
 
@@ -27,6 +29,7 @@ class ANET:
                 input_shape=input_shape,
                 activation='relu',
                 padding='same',
+                kernel_initializer="normal"
             )
         )
 
@@ -37,7 +40,8 @@ class ANET:
                 input_shape=input_shape,
                 activation='relu',
                 padding='same',
-                kernel_regularizer='l1'
+                kernel_initializer="normal"
+                #kernel_regularizer='l1'
             )
         )
 
@@ -72,7 +76,7 @@ class ANET:
             y_train,
             batch_size=batch_size,
             epochs=num_epochs,
-            verbose=0,
+            verbose=1,
             shuffle=True
         )
 
