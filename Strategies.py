@@ -327,7 +327,7 @@ class Strategies:
     def train_network_on_single_batch(self):
         # Each case (current node and children node probabilities) are stored at the end of each episode
         RBUF = []
-        with open("bkp1300episodes", 'rb') as f:
+        with open("bkp1300episodes_new", 'rb') as f:
             RBUF = pickle.load(f)
 
         # Randomly initialize parameters (weights and biases) of ANET

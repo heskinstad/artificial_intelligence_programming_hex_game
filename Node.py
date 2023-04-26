@@ -429,8 +429,8 @@ class Node:
 
     # 'Merge' the boards to a single array to make them compatible to be read by the anet
     def merge_boards_to_anet(self):
-        board_p1 = self.get_state().get_board().get_board_np_p1()
-        board_p2 = self.get_state().get_board().get_board_np_p2()
+        board_p1 = self.get_state().get_board().get_board_np()
+        board_p2 = self.get_state().get_board().get_board_np()
         board_size = self.get_state().get_board().get_board_size()
         board_p1_p2 = np.zeros(shape=(board_size, board_size, 2), dtype=int)
         for y in range(board_size):
