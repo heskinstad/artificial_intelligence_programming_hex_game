@@ -19,7 +19,7 @@ loss = "categorical_crossentropy"
 num_episodes = 250  # Number of episodes to generate data for
 learning_rate = 0.001  # Should be 0.001 for 4x4
 num_of_hidden_layers = 3
-num_of_neurons_per_layer = 100
+num_of_neurons_per_layer = 128
 
 anet_parameters = [save_interval, num_epochs, batch_size, optimizer, loss, num_episodes, learning_rate, num_of_hidden_layers, num_of_neurons_per_layer]
 
@@ -47,7 +47,7 @@ strategy = "None"
 
 
 
-path = "tete_big1300.h5"
+path = "tete_big3000_new.h5"
 
 
 # Import and initialize your own actor

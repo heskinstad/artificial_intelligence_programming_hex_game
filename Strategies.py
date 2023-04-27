@@ -15,7 +15,7 @@ from State import State
 from Tree import Tree
 
 class Strategies:
-    def __init__(self, strategy, game_parameters, anet_parameters, topp_parameters, duel_extra_parameters, anets, path, tete):
+    def __init__(self, strategy, game_parameters, anet_parameters, topp_parameters, duel_extra_parameters, anets, path, tete=None):
 
         self.board_size = game_parameters[0]
         self.visualize = game_parameters[1]
@@ -331,7 +331,7 @@ class Strategies:
     def train_network_on_single_batch(self):
         # Each case (current node and children node probabilities) are stored at the end of each episode
         RBUF = []
-        for i in range(1, 2):
+        for i in range(1, 21):
             with open(str(i) + "finished_150episodes_new", 'rb') as f:
                 tete = pickle.load(f)
                 for j in range(len(tete)):
@@ -347,7 +347,7 @@ class Strategies:
 
         print(len(RBUF))
 
-        minibatch = random.sample(RBUF, len(RBUF))
+        #minibatch = random.sample(RBUF, len(RBUF))
 
         for boards, probabilities in RBUF:
             # Append the merged Player1 and Player2 boards to X_train

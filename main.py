@@ -15,7 +15,7 @@ game_parameters = [board_size, visualize, rollouts_per_simulation, node_expansio
 
 # ANET parameters
 save_interval = 10  # Save for each n number of actual games/episodes
-num_epochs = 1000  # Number of epochs in training - an article stated 11 is a good starting point.
+num_epochs = 5500  # Number of epochs in training - an article stated 11 is a good starting point.
 batch_size = 100000  # Training batch size
 optimizer = "adam"
 loss = "categorical_crossentropy"
@@ -42,7 +42,7 @@ duel2 = 50
 duel_extra_parameters = [duel1, duel2]
 
 anets = [0, 50, 100, 150, 200, 250]  # Designate the anet models to compete in the TOPP_CUSTOM with the number of episodes they've been trained on
-
+print(tf.config.list_physical_devices('GPU'))
 # Strategies: TOPP (TOPP tournament), TOPP_CUSTOM (TOPP between pre-trained anet models) or DUEL (have two models play against each other)
 strategy = "TRAIN"
 
