@@ -331,8 +331,11 @@ class Strategies:
     def train_network_on_single_batch(self):
         # Each case (current node and children node probabilities) are stored at the end of each episode
         RBUF = []
-        with open("bkp1300episodes_new", 'rb') as f:
-            RBUF = pickle.load(f)
+        for i in range(1, 2):
+            with open(str(i) + "finished_150episodes_new", 'rb') as f:
+                tete = pickle.load(f)
+                for j in range(len(tete)):
+                    RBUF.append(tete[j])
 
         # Randomly initialize parameters (weights and biases) of ANET
         anet = ANET()
@@ -341,6 +344,8 @@ class Strategies:
         # Prepare the training data
         X_train = []
         y_train = []
+
+        print(len(RBUF))
 
         minibatch = random.sample(RBUF, len(RBUF))
 
@@ -373,7 +378,7 @@ class Strategies:
         history = anet.train_model(model, self.num_epochs, self.batch_size, X_train, y_train, self.learning_rate)
 
         # Save ANET's current parameters for later use in tournament play
-        model.save_weights("tete_big1500_new.h5")
+        model.save_weights("tete_big3000_new.h5")
 
         plt.plot(history.history['accuracy'])
         plt.title('model accuracy')
@@ -427,9 +432,12 @@ class Strategies:
 
         RBUF = []
 
-        for i in range(1, 21):
-            with open(str(i) + "bkp100episodes_new", 'rb') as f:
+        for i in range(1, 3):
+            with open(str(i) + "finished_150episodes_new", 'rb') as f:
+                #print(pickle.load(f))
                 RBUF.append(pickle.load(f))
 
-        with open("merged_" + str(self.num_episodes) + "episodes_new", 'wb') as f:
+        print(RBUF[0])
+
+        with open("merged_3000episodes_new", 'wb') as f:
             pickle.dump(RBUF, f)
