@@ -15,7 +15,7 @@ game_parameters = [board_size, visualize, rollouts_per_simulation, node_expansio
 
 # ANET parameters
 save_interval = 10  # Save for each n number of actual games/episodes
-num_epochs = 5500  # Number of epochs in training - an article stated 11 is a good starting point.
+num_epochs = 1820  # Number of epochs in training - an article stated 11 is a good starting point.
 batch_size = 100000  # Training batch size
 optimizer = "adam"
 loss = "categorical_crossentropy"

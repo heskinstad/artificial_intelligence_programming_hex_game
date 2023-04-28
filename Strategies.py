@@ -378,7 +378,7 @@ class Strategies:
         history = anet.train_model(model, self.num_epochs, self.batch_size, X_train, y_train, self.learning_rate)
 
         # Save ANET's current parameters for later use in tournament play
-        model.save_weights("tete_big3000_new.h5")
+        model.save_weights("tete_big3000_new_1820epochs.h5")
 
         plt.plot(history.history['accuracy'])
         plt.title('model accuracy')
