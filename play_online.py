@@ -47,7 +47,7 @@ strategy = "None"
 
 
 
-path = "tete_big3000_new.h5"
+path = "trained_big3000_new.h5"
 
 
 # Import and initialize your own actor
